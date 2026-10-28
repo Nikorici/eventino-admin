@@ -23,6 +23,7 @@ export const mockOrganizer: User = {
   is_email_confirmed: true,
   is_phone_number_confirmed: true,
   is_staff: MOCK_USER_IS_STAFF,
+  is_superuser: MOCK_USER_IS_STAFF,
   badge_type: 'verified',
   events_created_count: 6,
   followers_count: 2480,
@@ -65,7 +66,7 @@ export const mockLinkedOrganizers: User[] = [
 
 export const mockUsers: User[] = [mockOrganizer, ...mockLinkedOrganizers];
 
-const linkedNicknames: Record<number, string> = {
+export const linkedNicknames: Record<number, string> = {
   1001: 'Sunset Events',
   1002: 'Ethno Jazz',
   1003: 'Cluj Live',
@@ -77,6 +78,7 @@ export interface MockTicketType {
   price: number;
   quantity: number | null;
   sold: number;
+  extra?: Partial<TicketType>;
 }
 
 export interface MockEvent {
@@ -100,8 +102,10 @@ export interface MockEvent {
   participants: number;
   income: number;
   hasPresale: boolean;
+  freeTicketApproval?: boolean;
   description: string;
   ticketTypes: MockTicketType[];
+  detail?: Partial<EventDetail>;
 }
 
 export const mockEvents: MockEvent[] = [
@@ -125,6 +129,7 @@ export const mockEvents: MockEvent[] = [
     participants: 1795,
     income: 412500,
     hasPresale: true,
+    freeTicketApproval: true,
     description: 'Două zile de degustări cu peste 60 de vinării din Moldova, muzică live și gastronomie locală.',
     ticketTypes: [
       { id: 51, name: 'Acces o zi', price: 150, quantity: 1500, sold: 1120 },
@@ -365,6 +370,7 @@ function mockTicketTypes(event: MockEvent): TicketType[] {
     is_active: !event.isCancelled,
     is_archived: false,
     is_table: false,
+    ...ticketType.extra,
   }));
 }
 
@@ -417,17 +423,18 @@ export function mockEventDetail(event: MockEvent): EventDetail {
     commission_paid_by: 'organizer',
     max_tickets_per_user: 10,
     attendee_info_fields: [],
-    free_ticket_approval_enabled: false,
+    free_ticket_approval_enabled: event.freeTicketApproval ?? false,
     allow_self_service_refunds: false,
     seat_map: null,
     is_staff_member: false,
     staff_permissions: null,
     is_account_delegate: false,
     delegate_permissions: null,
+    ...event.detail,
   };
 }
 
-function linkedAccountOf(user: User): LinkedAccount {
+export function linkedAccountOf(user: User): LinkedAccount {
   return {
     id: user.id,
     email: user.email,

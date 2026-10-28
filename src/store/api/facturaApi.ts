@@ -9,6 +9,8 @@ const facturaEndpoints = {
 export const facturaDownloadEndpoint = {
   pdf: (orderId: number) => `/api/v1/tickets/download-factura/?order_id=${orderId}`,
   xml: (orderId: number) => `/api/v1/tickets/download-factura-xml/?order_id=${orderId}`,
+  sagaXml: (orderId: number) => `/api/v1/tickets/download-factura-saga-xml/?order_id=${orderId}`,
+  xlsx: (orderId: number) => `/api/v1/tickets/download-factura-xlsx/?order_id=${orderId}`,
 } as const;
 
 export const SERIAL_EDITABLE_EVENT_ID = 1471;

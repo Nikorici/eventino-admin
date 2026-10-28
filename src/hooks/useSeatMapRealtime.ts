@@ -3,7 +3,7 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import RNEventSource, { type MessageEvent } from 'react-native-sse';
 
-import { API_URL, eventEndpoint } from '@/lib/constants';
+import { API_URL, USE_MOCKS, eventEndpoint } from '@/lib/constants';
 import { DedupeWindow, parseSeatMapStreamEvent } from '@/lib/seating/stream';
 import { useLazyGetSeatStatusesQuery } from '@/store/api/seatingApi';
 import type { SeatStatusEvent, SeatStatusResponse } from '@/types/seating';
@@ -77,7 +77,7 @@ export function useSeatMapRealtime({
   }, [eventId, fetchStatuses]);
 
   useEffect(() => {
-    if (!enabled || !focused || eventId == null) return;
+    if (USE_MOCKS || !enabled || !focused || eventId == null) return;
 
     const url = `${API_URL}${eventEndpoint.seatStream(eventId)}`;
     let closed = false;

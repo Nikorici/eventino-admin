@@ -3,7 +3,7 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import RNEventSource from 'react-native-sse';
 
-import { API_URL } from '@/lib/constants';
+import { API_URL, USE_MOCKS } from '@/lib/constants';
 import { parsePresaleStreamMessage } from '@/lib/presale';
 import { presaleEndpoints, useLazyGetPresaleStreamTokenQuery, type PresaleStreamMessage } from '@/store/api/presaleApi';
 
@@ -43,7 +43,7 @@ export function usePresaleRealtime({ eventId, enabled, onMessage, onResync }: Pr
   );
 
   useEffect(() => {
-    if (!enabled || !focused || eventId == null) return;
+    if (USE_MOCKS || !enabled || !focused || eventId == null) return;
     const streamEventId = eventId;
     let closed = false;
     let source: RNEventSource | null = null;

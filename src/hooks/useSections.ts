@@ -19,7 +19,7 @@ export function useSections(tab: TabKey): {
   groups: SectionGroup[];
   isLoading: boolean;
   isError: boolean;
-  refetch: () => void;
+  refetch: () => Promise<unknown>;
 } {
   const user = useAppSelector((s) => s.auth.user);
   const selected = useSelectedEvent();
@@ -37,9 +37,9 @@ export function useSections(tab: TabKey): {
     groups,
     isLoading: eventScoped ? selected.isLoading : false,
     isError: eventScoped ? selected.isError : false,
-    refetch: () => {
-      if (eventScoped && selected.eventId != null) void selected.refetch();
-      else if (!user?.is_staff) void stickers.refetch();
+    refetch: async () => {
+      if (eventScoped && selected.eventId != null) await selected.refetch();
+      else if (!user?.is_staff) await stickers.refetch();
     },
   };
 }

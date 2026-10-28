@@ -190,7 +190,12 @@ function RevenueCard({
     <View className="w-[48%] rounded-[12px] border bg-white dark:bg-dark-surface p-4" style={{ borderColor: cardBorder }}>
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-2">
-          <AppText numberOfLines={1} className="font-gilroy-bold text-[20px] leading-[24px] text-primary">
+          <AppText
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.6}
+            className="font-gilroy-bold text-[20px] leading-[24px] text-primary"
+          >
             {primary ? `${currencySymbol(primary.code)} ${formatMoney(primary.amount)}${invoiceSuffix(primary.code)}` : '—'}
           </AppText>
           {rest.map((entry) => (
@@ -404,7 +409,7 @@ function seriesPath(values: number[], width: number, height: number, pad: number
   return `${line} L${last[0].toFixed(1)},${(height - pad).toFixed(1)} L${first[0].toFixed(1)},${(height - pad).toFixed(1)} Z`;
 }
 
-const AnalyticsChart = memo(function AnalyticsChart({
+export const AnalyticsChart = memo(function AnalyticsChart({
   eventId,
   currencies,
   lifecycle,

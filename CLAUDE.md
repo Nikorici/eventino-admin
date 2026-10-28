@@ -189,6 +189,8 @@ export const handlers: MockHandler[] = [
 - Data must be realistic (Moldova/Romania, MDL/RON/EUR, Romanian names) and cover varied states.
 - Unmatched requests return 404 and log `[mocks] No handler for ...` in the Metro/browser console.
 - Downloads (`lib/downloads.ts`) return a small placeholder file while mocks are on.
+- The SSE streams (`usePresaleRealtime`, `useSeatMapRealtime`) stay closed while mocks are on, so nothing reaches the
+  real API with a mock token.
 
 Shared fixtures live in `src/mocks/core.ts`:
 

@@ -33,6 +33,10 @@ export interface FreeTicketRequest {
   total_price?: number;
   date?: string | null;
   created_at?: string | null;
+  name?: string | null;
+  submission_date?: string | null;
+  coupon_code?: string | null;
+  tickets?: string[];
 }
 
 export interface ReleaseManualTicketBody {
@@ -148,11 +152,14 @@ export interface PendingOrderUser {
   first_name?: string | null;
   last_name?: string | null;
   email?: string | null;
+  name?: string | null;
+  profile_image?: string | null;
 }
 
 export interface PendingOrderTicket {
   ticket_type_name?: string | null;
   price?: string | null;
+  quantity?: number;
 }
 
 export interface PendingOrder {
@@ -166,6 +173,7 @@ export interface PendingOrder {
 
 export interface MarkInvoiceAsPaidResponse {
   message?: string;
+  factura_sent?: boolean;
 }
 
 export interface ScannedTicketTypeStats {
@@ -285,6 +293,7 @@ export const organizerApi = enhancedApi.injectEndpoints({
         method: 'POST',
         body: { page: params?.page ?? 1, page_size: params?.page_size ?? 1000 },
       }),
+      providesTags: ['Event'],
     }),
     getOrganizerGraph: builder.query<OrganizerGraphPoint[], { interval: GraphInterval; eventId?: number }>({
       query: ({ interval, eventId }) => ({

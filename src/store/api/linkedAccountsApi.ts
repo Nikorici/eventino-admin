@@ -1,4 +1,5 @@
 import { endpoints } from '@/lib/constants';
+import type { AppleSocialPayload } from '@/lib/social-auth';
 
 import { baseApi } from './baseApi';
 
@@ -58,6 +59,25 @@ export const linkedAccountsApi = baseApi
         }),
         invalidatesTags: ['LinkedAccounts'],
       }),
+      linkAccountWithGoogle: builder.mutation<LinkedAccount, { access_token: string; nickname?: string }>({
+        query: (body) => ({
+          url: `${endpoints.linkedAccounts}link-google/`,
+          method: 'POST',
+          body,
+        }),
+        invalidatesTags: ['LinkedAccounts'],
+      }),
+      linkAccountWithApple: builder.mutation<
+        LinkedAccount,
+        Omit<AppleSocialPayload, 'provider'> & { nickname?: string }
+      >({
+        query: (body) => ({
+          url: `${endpoints.linkedAccounts}link-apple/`,
+          method: 'POST',
+          body,
+        }),
+        invalidatesTags: ['LinkedAccounts'],
+      }),
     }),
     overrideExisting: false,
   });
@@ -67,4 +87,6 @@ export const {
   useSwitchAccountMutation,
   useUnlinkAccountMutation,
   useLinkAccountWithOtpMutation,
+  useLinkAccountWithGoogleMutation,
+  useLinkAccountWithAppleMutation,
 } = linkedAccountsApi;

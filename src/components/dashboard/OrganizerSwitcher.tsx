@@ -23,7 +23,8 @@ import {
   type LinkedAccount,
 } from '@/store/api/linkedAccountsApi';
 import type { User } from '@/types/api';
-import { AppText, GlassButton, PressableScale, Skeleton } from '@/components/ui';
+import { AppText, DashedAddButton, GlassButton, PressableScale, Skeleton } from '@/components/ui';
+import { AddOrganizerAccountModal } from '@/components/events/AddOrganizerAccountModal';
 import { UserAvatar, followUserName } from '@/components/social/UserRow';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 
@@ -119,6 +120,7 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
   const modalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['55%', '85%'], []);
   const [switchingId, setSwitchingId] = useState<number | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   useImperativeHandle(
     ref,
@@ -202,86 +204,98 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
   );
 
   return (
-    <BottomSheetModal
-      ref={modalRef}
-      index={0}
-      snapPoints={snapPoints}
-      backdropComponent={renderBackdrop}
-      handleIndicatorStyle={{ backgroundColor: colors.muted }}
-      backgroundStyle={{ backgroundColor: isDark ? colors.dark.surface : colors.surface }}
-    >
-      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
-        <View className="gap-5 px-5 pt-2">
-          <AppText className="font-gilroy-bold text-2xl">{t('Accounts')}</AppText>
+    <>
+      <BottomSheetModal
+        ref={modalRef}
+        index={0}
+        snapPoints={snapPoints}
+        backdropComponent={renderBackdrop}
+        handleIndicatorStyle={{ backgroundColor: colors.muted }}
+        backgroundStyle={{ backgroundColor: isDark ? colors.dark.surface : colors.surface }}
+      >
+        <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+          <View className="gap-5 px-5 pt-2">
+            <AppText className="font-gilroy-bold text-2xl">{t('Accounts')}</AppText>
 
-          <View className="gap-2">
-            <AppText className="font-gilroy-semibold text-[12px] uppercase tracking-wide text-muted">
-              {t('Active organizer')}
-            </AppText>
-            <View
-              className="flex-row items-center gap-3 rounded-2xl border bg-white px-3 py-3 dark:bg-dark-surface"
-              style={{ borderColor: cardBorder }}
-            >
-              <UserAvatar uri={user?.profile_image} name={activeName} size={44} />
-              <View className="flex-1">
-                <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
-                  {activeName}
-                </AppText>
-                {user?.email ? (
-                  <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
-                    {user.email}
-                  </AppText>
-                ) : null}
-              </View>
+            <View className="gap-2">
+              <AppText className="font-gilroy-semibold text-[12px] uppercase tracking-wide text-muted">
+                {t('Active organizer')}
+              </AppText>
               <View
-                className="h-6 w-6 items-center justify-center rounded-full"
-                style={{ backgroundColor: ACCENT_GREEN }}
+                className="flex-row items-center gap-3 rounded-2xl border bg-white px-3 py-3 dark:bg-dark-surface"
+                style={{ borderColor: cardBorder }}
               >
-                <Check size={14} color={colors.white} />
+                <UserAvatar uri={user?.profile_image} name={activeName} size={44} />
+                <View className="flex-1">
+                  <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+                    {activeName}
+                  </AppText>
+                  {user?.email ? (
+                    <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                      {user.email}
+                    </AppText>
+                  ) : null}
+                </View>
+                <View
+                  className="h-6 w-6 items-center justify-center rounded-full"
+                  style={{ backgroundColor: ACCENT_GREEN }}
+                >
+                  <Check size={14} color={colors.white} />
+                </View>
               </View>
             </View>
-          </View>
 
-          <View className="gap-2">
-            <AppText className="font-gilroy-semibold text-[12px] uppercase tracking-wide text-muted">
-              {t('Linked accounts')}
-            </AppText>
+            <View className="gap-2">
+              <AppText className="font-gilroy-semibold text-[12px] uppercase tracking-wide text-muted">
+                {t('Linked accounts')}
+              </AppText>
 
-            {accountsLoading ? (
-              <View className="gap-2">
-                <AccountRowSkeleton />
-                <AccountRowSkeleton />
-              </View>
-            ) : accountsError ? (
-              <View className="items-center gap-3 py-4">
-                <AppText className="font-gilroy-medium text-[14px] text-muted">{t('Something went wrong.')}</AppText>
-                <GlassButton label={t('Try again')} variant="ghost" onPress={() => refetchAccounts()} />
-              </View>
-            ) : !accounts || accounts.length === 0 ? (
-              <View className="items-center gap-2 py-6">
-                <Users size={28} color={colors.muted} />
-                <AppText className="font-gilroy-medium text-[14px] text-muted">
-                  {t('No linked organizers yet.')}
-                </AppText>
-              </View>
-            ) : (
-              <View className="gap-2">
-                {accounts.map((account) => (
-                  <AccountRow
-                    key={account.id}
-                    account={account}
-                    switching={switchingId === account.id}
-                    disabled={switchingId != null}
-                    onSwitch={handleSwitch}
-                    onUnlink={handleUnlink}
-                  />
-                ))}
-              </View>
-            )}
+              {accountsLoading ? (
+                <View className="gap-2">
+                  <AccountRowSkeleton />
+                  <AccountRowSkeleton />
+                </View>
+              ) : accountsError ? (
+                <View className="items-center gap-3 py-4">
+                  <AppText className="font-gilroy-medium text-[14px] text-muted">{t('Something went wrong.')}</AppText>
+                  <GlassButton label={t('Try again')} variant="ghost" onPress={() => refetchAccounts()} />
+                </View>
+              ) : !accounts || accounts.length === 0 ? (
+                <View className="items-center gap-2 py-6">
+                  <Users size={28} color={colors.muted} />
+                  <AppText className="font-gilroy-medium text-[14px] text-muted">
+                    {t('No linked organizers yet.')}
+                  </AppText>
+                </View>
+              ) : (
+                <View className="gap-2">
+                  {accounts.map((account) => (
+                    <AccountRow
+                      key={account.id}
+                      account={account}
+                      switching={switchingId === account.id}
+                      disabled={switchingId != null}
+                      onSwitch={handleSwitch}
+                      onUnlink={handleUnlink}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+
+            <DashedAddButton
+              label={t('Add organizer account')}
+              onPress={() => {
+                haptics.selection();
+                modalRef.current?.dismiss();
+                setAddOpen(true);
+              }}
+            />
           </View>
-        </View>
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+        </BottomSheetScrollView>
+      </BottomSheetModal>
+      <AddOrganizerAccountModal visible={addOpen} onClose={() => setAddOpen(false)} />
+    </>
   );
 });
 

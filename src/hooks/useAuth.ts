@@ -199,6 +199,7 @@ function extractError(error: unknown): string | undefined {
       const record = data as Record<string, unknown>;
       if (typeof record.detail === 'string') return record.detail;
       if (typeof record.message === 'string') return record.message;
+      if (typeof record.error === 'string') return record.error;
       const firstKey = Object.keys(record)[0];
       const value = firstKey ? record[firstKey] : undefined;
       if (Array.isArray(value) && typeof value[0] === 'string') return value[0];

@@ -1,4 +1,4 @@
-import type { Coordinates, EventType } from '@/types/api';
+import type { Coordinates, EventType, QuantityDiscountTier } from '@/types/api';
 
 export interface MultipartFile {
   uri: string;
@@ -28,6 +28,7 @@ export interface EventTicketTypeInput {
   show_remaining_tickets: boolean;
   is_table: boolean;
   event_day: string | null;
+  quantity_discounts?: QuantityDiscountTier[] | null;
 }
 
 export interface EventCouponInput {
@@ -101,6 +102,7 @@ export type EventMediaOrderEntry =
 
 export interface UpdateEventInput extends EventScalarInput {
   id: number;
+  company?: number;
   newPhotos: MultipartFile[];
   existingImageIds: number[];
   mediaOrder: EventMediaOrderEntry[];
@@ -147,6 +149,7 @@ export function buildCreateEventBody(input: CreateEventInput): NativeFormData {
 export function buildUpdateEventBody(input: UpdateEventInput): NativeFormData {
   const form = new NativeFormDataCtor();
   appendEventScalars(form, input, true);
+  if (input.company != null) form.append('company', String(input.company));
   if (input.coupons) form.append('coupons', JSON.stringify(input.coupons));
   form.append('replace_images', 'true');
   form.append('existing_image_ids', JSON.stringify(input.existingImageIds));

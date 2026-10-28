@@ -20,6 +20,11 @@ export interface Category {
   name: string;
 }
 
+export interface QuantityDiscountTier {
+  min_quantity: number;
+  percent: number;
+}
+
 export interface TicketType {
   id: number;
   name: string;
@@ -37,6 +42,7 @@ export interface TicketType {
   is_table?: boolean;
   comment?: string;
   event_day?: string | null;
+  quantity_discounts?: QuantityDiscountTier[] | null;
 }
 
 export interface EventImage {
@@ -242,6 +248,8 @@ export interface User {
   is_email_confirmed?: boolean;
   is_phone_number_confirmed?: boolean;
   is_staff?: boolean;
+  is_superuser?: boolean;
+  contract_signed?: boolean;
   badge_type?: string;
   events_created_count?: number;
   joined_events_count?: number;

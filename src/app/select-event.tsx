@@ -1,10 +1,10 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, LayoutDashboard, Plus, Search } from 'lucide-react-native';
 
+import { DashboardStatsSection } from '@/components/dashboard/DashboardStats';
 import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
 import { OrganizerEventCard, OrganizerEventCardSkeleton } from '@/components/events/OrganizerEventCard';
 import { AppText, EmptyState, GlassButton, GlassHeader, GlassInput, Screen } from '@/components/ui';
@@ -15,7 +15,12 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { combineDateTime } from '@/lib/eventStatus';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
-import { useGetOrganizerEventsQuery, type OrganizerEventListItem } from '@/store/api/organizerApi';
+import {
+  useGetOrganizerEventsQuery,
+  useGetOrganizerGraphQuery,
+  useGetOrganizerStatsQuery,
+  type OrganizerEventListItem,
+} from '@/store/api/organizerApi';
 import { colors } from '@/theme/colors';
 
 const keyExtractor = (item: OrganizerEventListItem) => String(item.id);
@@ -48,13 +53,15 @@ const ListHeader = memo(function ListHeader({
           {t('Here is the information about all your events')}
         </AppText>
       </View>
+      <AppText className="mt-1 font-gilroy-semibold text-[18px]">{t('Statistics')}</AppText>
+      <DashboardStatsSection />
       <GlassButton
         label={t('Create event')}
         variant="primary"
         onPress={navigate.createEvent}
         icon={<Plus size={18} color={plusColor} />}
       />
-      <AppText className="mt-1 font-gilroy-semibold text-[18px]">{t('Your events')}</AppText>
+      <AppText className="mt-1 font-gilroy-semibold text-[18px]">{t('List of Events')}</AppText>
       <GlassInput
         placeholder={t('Search events...')}
         value={search}
@@ -78,6 +85,8 @@ export default function SelectEventScreen() {
   const firstName = user?.first_name?.trim() || user?.organization_name?.trim() || '';
 
   const { data, isLoading, isError, refetch } = useGetOrganizerEventsQuery(undefined, { skip: !user });
+  const { refetch: refetchStats } = useGetOrganizerStatsQuery(undefined, { skip: !user });
+  const { refetch: refetchGraph } = useGetOrganizerGraphQuery({ interval: 'day', eventId: undefined }, { skip: !user });
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -88,19 +97,20 @@ export default function SelectEventScreen() {
   }, [data, search]);
 
   const onRefresh = useCallback(async () => {
+    if (!user) return;
     setRefreshing(true);
     try {
-      await refetch();
+      await Promise.all([refetch(), refetchStats(), refetchGraph()]);
     } finally {
       setRefreshing(false);
     }
-  }, [refetch]);
+  }, [user, refetch, refetchStats, refetchGraph]);
 
   const onSelect = useCallback(
     async (eventId: number) => {
       haptics.selection();
       await selectEvent(eventId);
-      navigate.dashboard();
+      navigate.dismissTo('dashboard');
     },
     [selectEvent],
   );
@@ -142,7 +152,7 @@ export default function SelectEventScreen() {
     <Screen edges={[]}>
       <GlassHeader
         title={t('Select an event')}
-        onBack={router.canGoBack() ? navigate.back : undefined}
+        onBack={navigate.canGoBack() ? navigate.back : undefined}
         right={<OrganizerSwitcher />}
       />
       <FlashList

@@ -59,8 +59,10 @@ const push = (key: RouteKey) => () => router.push(href(routes[key]));
 export const navigate = {
   to: (key: RouteKey) => router.push(href(routes[key])),
   replace: (key: RouteKey) => router.replace(href(routes[key])),
+  dismissTo: (key: RouteKey) => router.dismissTo(href(routes[key])),
   home: () => router.replace(href('/')),
   back: () => (router.canGoBack() ? router.back() : router.replace(href('/'))),
+  canGoBack: () => router.canGoBack(),
 
   login: push('login'),
   register: push('register'),

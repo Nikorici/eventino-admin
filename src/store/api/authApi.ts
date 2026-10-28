@@ -19,6 +19,14 @@ export interface SocialLoginResponse {
   code?: string;
 }
 
+export interface VerificationResponse {
+  status?: number;
+  message?: string;
+  data?: unknown;
+  errors?: Record<string, string[]>;
+  reset_token?: string;
+}
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     passwordLogin: builder.mutation<PasswordLoginResponse, { email: string; password: string }>({
@@ -39,22 +47,31 @@ export const authApi = baseApi.injectEndpoints({
     socialLogin: builder.mutation<SocialLoginResponse, SocialLoginPayload>({
       query: (body) => ({ url: endpoints.socialLogin, method: 'POST', body }),
     }),
-    register: builder.mutation<{ status?: number; message?: string }, FormData>({
+    register: builder.mutation<VerificationResponse, FormData>({
       query: (formData) => ({ url: endpoints.register, method: 'POST', body: formData }),
     }),
-    verifyEmail: builder.mutation<{ status?: number }, { email: string; otp_code: string }>({
+    verifyEmail: builder.mutation<VerificationResponse, { email: string; otp_code: string }>({
       query: (body) => ({ url: endpoints.verifyEmail, method: 'POST', body }),
+    }),
+    resendVerifyEmail: builder.mutation<VerificationResponse, { email: string }>({
+      query: (body) => ({ url: endpoints.resendVerifyEmail, method: 'POST', body }),
     }),
     fetchCurrentUser: builder.mutation<User, { email: string }>({
       query: (body) => ({ url: endpoints.userLogin, method: 'POST', body }),
     }),
     sendResetCode: builder.mutation<
-      { status?: number; message?: string },
+      VerificationResponse,
       { email: string; device: string; location: string; date: string }
     >({
       query: (body) => ({ url: endpoints.sendResetCode, method: 'POST', body }),
     }),
-    verifyResetCode: builder.mutation<{ status?: number; reset_token?: string }, { email: string; otp_code: string }>({
+    resendResetCode: builder.mutation<
+      VerificationResponse,
+      { email: string; device: string; location: string; date: string }
+    >({
+      query: (body) => ({ url: endpoints.resendResetCode, method: 'POST', body }),
+    }),
+    verifyResetCode: builder.mutation<VerificationResponse, { email: string; otp_code: string }>({
       query: (body) => ({ url: endpoints.verifyResetCode, method: 'POST', body }),
     }),
     resetPassword: builder.mutation<
@@ -81,8 +98,10 @@ export const {
   useSocialLoginMutation,
   useRegisterMutation,
   useVerifyEmailMutation,
+  useResendVerifyEmailMutation,
   useFetchCurrentUserMutation,
   useSendResetCodeMutation,
+  useResendResetCodeMutation,
   useVerifyResetCodeMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,

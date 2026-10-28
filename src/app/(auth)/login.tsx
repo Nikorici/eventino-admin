@@ -1,139 +1,26 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  ActivityIndicator,
-  TextInput,
-  View,
-} from 'react-native';
+import { useState } from 'react';
+import { View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
+import { extractApiError } from '@/lib/apiError';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
-import { isAppleAuthAvailable, signInWithApple, SocialAuthCancelled } from '@/lib/social-auth';
-import { useGoogleSignIn } from '@/hooks/useGoogleSignIn';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useResendOtpMutation, useSendOtpMutation } from '@/store/api/authApi';
-import {
-  AppText,
-  GlassButton,
-  GlassCard,
-  GlassInput,
-  PressableScale,
-  Screen,
-} from '@/components/ui';
-import { AppleIcon, GoogleIcon, Logo } from '@/components/brand';
+import { AppText, GlassButton, GlassCard, GlassInput, PressableScale, Screen } from '@/components/ui';
+import { Logo } from '@/components/brand';
+import { OTP_LENGTH, OtpBoxes } from '@/components/auth/OtpBoxes';
+import { SocialSignIn } from '@/components/auth/SocialSignIn';
 
 type LoginStep = 'email' | 'otp' | 'password';
-type SocialProvider = 'google' | 'apple';
 
 const MUTED = '#8a8d93';
-
-function OtpBoxes({
-  value,
-  onChange,
-  editable = true,
-  autoFocus,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  editable?: boolean;
-  autoFocus?: boolean;
-}) {
-  const inputRef = useRef<TextInput>(null);
-  return (
-    <View className="relative">
-      <View className="flex-row gap-2">
-        {Array.from({ length: 6 }).map((_, index) => {
-          const char = value[index] ?? '';
-          const focused = index === value.length;
-          return (
-            <View
-              key={index}
-              className={cn(
-                'h-[50px] flex-1 items-center justify-center rounded-[8px] border bg-app-surface dark:bg-dark-surface',
-                focused ? 'border-primary dark:border-white' : 'border-app-border dark:border-dark-border',
-              )}
-            >
-              <AppText className="font-gilroy-semibold text-[20px] text-primary dark:text-dark-text">
-                {char}
-              </AppText>
-            </View>
-          );
-        })}
-      </View>
-      <TextInput
-        ref={inputRef}
-        value={value}
-        onChangeText={(next) => onChange(next.replace(/[^0-9]/g, '').slice(0, 6))}
-        keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        autoComplete="one-time-code"
-        maxLength={6}
-        editable={editable}
-        autoFocus={autoFocus}
-        caretHidden
-        accessibilityLabel="Verification code"
-        className="absolute inset-0 opacity-0"
-      />
-    </View>
-  );
-}
-
-function ProviderButton({
-  label,
-  onPress,
-  loading,
-  disabled,
-  icon,
-  tone,
-}: {
-  label: string;
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-  icon: ReactNode;
-  tone: 'google' | 'apple';
-}) {
-  const isApple = tone === 'apple';
-  const isDisabled = loading || disabled;
-  return (
-    <PressableScale
-      onPress={() => {
-        if (isDisabled) return;
-        haptics.light();
-        onPress();
-      }}
-      disabled={isDisabled}
-      accessibilityLabel={label}
-      className={cn(
-        'h-12 w-full flex-row items-center justify-center gap-2.5 rounded-[10px] border',
-        isApple ? 'border-black bg-black' : 'border-app-border bg-white',
-        isDisabled && 'opacity-70',
-      )}
-    >
-      {loading ? (
-        <ActivityIndicator color={isApple ? '#ffffff' : '#2b3a44'} />
-      ) : (
-        <>
-          {icon}
-          <AppText
-            className={cn(
-              'font-gilroy-semibold text-base',
-              isApple ? 'text-white dark:text-white' : 'text-primary dark:text-primary',
-            )}
-          >
-            {label}
-          </AppText>
-        </>
-      )}
-    </PressableScale>
-  );
-}
 
 function TextLink({
   label,
@@ -142,14 +29,8 @@ function TextLink({
 }: {
   label: string;
   onPress: () => void;
-  tone?: 'muted' | 'accent' | 'strong';
+  tone?: 'muted' | 'strong';
 }) {
-  const toneClass =
-    tone === 'accent'
-      ? 'text-accent'
-      : tone === 'strong'
-        ? 'text-primary dark:text-dark-text'
-        : 'text-primary-light dark:text-dark-text/70';
   return (
     <PressableScale
       onPress={() => {
@@ -160,66 +41,54 @@ function TextLink({
       hitSlop={8}
       className="self-center py-1.5"
     >
-      <AppText className={cn('font-gilroy-semibold text-[13px]', toneClass)}>{label}</AppText>
+      <AppText
+        className={cn(
+          'font-gilroy-semibold text-[13px]',
+          tone === 'strong' ? 'text-primary dark:text-dark-text' : 'text-primary-light dark:text-dark-text/70',
+        )}
+      >
+        {label}
+      </AppText>
     </PressableScale>
-  );
-}
-
-function Divider({ label }: { label: string }) {
-  return (
-    <View className="flex-row items-center gap-3 py-1">
-      <View className="h-px flex-1 bg-app-border dark:bg-dark-border" />
-      <AppText className="font-gilroy-medium text-[11px] uppercase tracking-[2px] text-muted">{label}</AppText>
-      <View className="h-px flex-1 bg-app-border dark:bg-dark-border" />
-    </View>
   );
 }
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = useColorScheme() === 'dark';
 
-  const { loginWithPassword, loginWithOtp, loginWithSocial } = useAuth();
+  const { loginWithPassword, loginWithOtp } = useAuth();
   const toast = useToast();
-  const google = useGoogleSignIn();
 
   const [sendOtp, { isLoading: sendingOtp }] = useSendOtpMutation();
-  const [resendOtp] = useResendOtpMutation();
+  const [resendOtp, { isLoading: resendingOtp }] = useResendOtpMutation();
 
   const [step, setStep] = useState<LoginStep>('email');
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState('');
   const [password, setPassword] = useState('');
   const [userExists, setUserExists] = useState(true);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [socialProvider, setSocialProvider] = useState<SocialProvider | null>(null);
-  const [appleAvailable, setAppleAvailable] = useState(false);
+  const [socialPending, setSocialPending] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-    isAppleAuthAvailable()
-      .then((available) => {
-        if (active) setAppleAvailable(available);
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const busy = loading || sendingOtp || socialProvider !== null;
+  const busy = loading || sendingOtp || socialPending;
+  const isNewAccount = !userExists;
+  const canVerify = otpCode.length === OTP_LENGTH && (!isNewAccount || (firstName.trim().length > 0 && lastName.trim().length > 0));
 
   const goToStep = (next: LoginStep) => {
     setOtpCode('');
+    setOtpError('');
     setPassword('');
     setShowPassword(false);
     setStep(next);
   };
+
+  const onSignedIn = () => navigate.home();
 
   const onContinueWithEmail = async () => {
     const trimmed = email.trim();
@@ -229,45 +98,58 @@ export default function LoginScreen() {
     }
     try {
       const res = await sendOtp({ email: trimmed }).unwrap();
-      setUserExists(res.user_exists ?? true);
+      const exists = res.user_exists ?? true;
+      setUserExists(exists);
       setOtpCode('');
+      setOtpError('');
+      setFirstName('');
+      setLastName('');
       setStep('otp');
-    } catch {
-      toast(t('Could not send the code'), 'error');
+      toast(
+        exists ? t('Verification code sent to your email') : t('Account created! Verification code sent to your email'),
+        'success',
+      );
+    } catch (error) {
+      haptics.error();
+      toast(extractApiError(error) ?? t('Could not send the code'), 'error');
     }
   };
 
   const onVerifyOtp = async () => {
-    if (otpCode.length < 6) {
+    if (otpCode.length < OTP_LENGTH) {
       toast(t('Invalid code'), 'error');
       return;
     }
-    if (userExists === false && (!firstName.trim() || !lastName.trim())) {
+    if (isNewAccount && (!firstName.trim() || !lastName.trim())) {
       toast(t('Please enter your name'), 'error');
       return;
     }
     setLoading(true);
+    setOtpError('');
     const r = await loginWithOtp(
       email.trim(),
       otpCode.trim(),
-      userExists === false ? { first_name: firstName.trim(), last_name: lastName.trim() } : undefined,
+      isNewAccount ? { first_name: firstName.trim(), last_name: lastName.trim() } : undefined,
     );
     setLoading(false);
     if (r.ok) {
       haptics.success();
-      navigate.home();
+      toast(r.isNewAccount ? t('Account created successfully! Welcome!') : t('Login successful!'), 'success');
+      onSignedIn();
     } else {
-      toast(r.error || t('Invalid code'), 'error');
+      const message = r.error || t('Invalid code');
+      haptics.error();
+      setOtpError(message);
+      toast(message, 'error');
     }
   };
 
   const onResend = async () => {
-    haptics.selection();
     try {
       await resendOtp({ email: email.trim() }).unwrap();
       toast(t('Code sent'), 'success');
-    } catch {
-      toast(t('Could not send the code'), 'error');
+    } catch (error) {
+      toast(extractApiError(error) ?? t('Could not send the code'), 'error');
     }
   };
 
@@ -285,67 +167,22 @@ export default function LoginScreen() {
     setLoading(false);
     if (r.ok) {
       haptics.success();
-      navigate.home();
+      toast(t('Login successful!'), 'success');
+      onSignedIn();
     } else {
-      toast(r.error || t('Wrong password'), 'error');
+      haptics.error();
+      toast(t('Incorrect password, please try again'), 'error');
     }
   };
 
-  const onGoogle = async () => {
-    try {
-      setSocialProvider('google');
-      if (!google.available) {
-        toast(t('Google sign-in failed'), 'error');
-        return;
-      }
-      const payload = await google.signIn();
-      const r = await loginWithSocial(payload);
-      if (r.ok) {
-        haptics.success();
-        navigate.home();
-      } else {
-        toast(r.error || t('Login failed'), 'error');
-      }
-    } catch (e) {
-      if (!(e instanceof SocialAuthCancelled)) toast(t('Google sign-in failed'), 'error');
-    } finally {
-      setSocialProvider(null);
-    }
-  };
-
-  const onApple = async () => {
-    try {
-      setSocialProvider('apple');
-      const payload = await signInWithApple();
-      const r = await loginWithSocial(payload);
-      if (r.ok) {
-        haptics.success();
-        navigate.home();
-      } else if (r.appleEmailRequired) {
-        toast(t('Please provide your email'), 'error');
-      } else {
-        toast(r.error || t('Login failed'), 'error');
-      }
-    } catch (e) {
-      if (!(e instanceof SocialAuthCancelled)) toast(t('Apple sign-in failed'), 'error');
-    } finally {
-      setSocialProvider(null);
-    }
-  };
-
-  const title =
-    step === 'otp'
-      ? t('Enter your code')
-      : step === 'password'
-        ? t('Welcome back')
-        : t("Let's sign in");
+  const title = step === 'otp' ? t('Enter your code') : step === 'password' ? t('Welcome back') : t("Let's sign in");
 
   const subtitle =
     step === 'otp'
       ? `${t('We sent a 6-digit code to')} ${email.trim()}`
       : step === 'password'
         ? t('Welcome back, enter your password')
-        : t('Log in or create an account to get your tickets');
+        : t('Welcome back. You’ve been missed');
 
   return (
     <Screen edges={[]}>
@@ -395,6 +232,9 @@ export default function LoginScreen() {
                     onSubmitEditing={onContinueWithEmail}
                     leftIcon={<Mail size={18} color={MUTED} />}
                   />
+                  <AppText className="text-center font-gilroy-medium text-[13px] leading-[19px] text-muted">
+                    {t("Don't have an account? We'll create one for you automatically!")}
+                  </AppText>
                   <GlassButton
                     label={t('Continue with email')}
                     onPress={onContinueWithEmail}
@@ -413,9 +253,11 @@ export default function LoginScreen() {
 
               {step === 'otp' ? (
                 <View className="gap-4">
-                  <OtpBoxes value={otpCode} onChange={setOtpCode} editable={!loading} autoFocus />
-                  {userExists === false ? (
+                  {isNewAccount ? (
                     <View className="gap-3.5">
+                      <AppText className="font-gilroy-semibold text-[14px] text-primary dark:text-dark-text">
+                        {t("You're creating a new account. Tell us your name:")}
+                      </AppText>
                       <GlassInput
                         label={t('First name')}
                         value={firstName}
@@ -440,14 +282,25 @@ export default function LoginScreen() {
                       />
                     </View>
                   ) : null}
-                  <GlassButton
-                    label={t('Verify')}
-                    onPress={onVerifyOtp}
-                    loading={loading}
-                    disabled={busy}
+                  <OtpBoxes
+                    value={otpCode}
+                    onChange={(next) => {
+                      setOtpCode(next);
+                      if (otpError) setOtpError('');
+                    }}
+                    editable={!loading}
+                    autoFocus={!isNewAccount}
+                    error={otpError}
                   />
+                  <GlassButton label={t('Verify')} onPress={onVerifyOtp} loading={loading} disabled={busy || !canVerify} />
                   <View className="flex-row items-center justify-center gap-5">
-                    <TextLink label={t('Resend code')} onPress={onResend} tone="strong" />
+                    <TextLink
+                      label={t('Resend code')}
+                      onPress={() => {
+                        if (!resendingOtp) void onResend();
+                      }}
+                      tone="strong"
+                    />
                     <View className="h-3 w-px bg-app-border dark:bg-dark-border" />
                     <TextLink label={t('Use a different email')} onPress={() => goToStep('email')} />
                   </View>
@@ -492,27 +345,14 @@ export default function LoginScreen() {
                         accessibilityLabel={showPassword ? t('Hide password') : t('Show password')}
                         hitSlop={8}
                       >
-                        {showPassword ? (
-                          <EyeOff size={18} color={MUTED} />
-                        ) : (
-                          <Eye size={18} color={MUTED} />
-                        )}
+                        {showPassword ? <EyeOff size={18} color={MUTED} /> : <Eye size={18} color={MUTED} />}
                       </PressableScale>
                     }
                   />
                   <View className="flex-row justify-end">
-                    <TextLink
-                      label={t('Forgot your password?')}
-                      onPress={navigate.forgotPassword}
-                      tone="strong"
-                    />
+                    <TextLink label={t('Forgot your password?')} onPress={navigate.forgotPassword} tone="strong" />
                   </View>
-                  <GlassButton
-                    label={t('Log In')}
-                    onPress={onPasswordLogin}
-                    loading={loading}
-                    disabled={busy}
-                  />
+                  <GlassButton label={t('Log In')} onPress={onPasswordLogin} loading={loading} disabled={busy} />
                   <GlassButton
                     variant="secondary"
                     label={t('Use a code instead')}
@@ -523,40 +363,14 @@ export default function LoginScreen() {
               ) : null}
 
               {step !== 'otp' ? (
-                <>
-                  <Divider label={t('or')} />
-                  <View className="gap-3">
-                    {google.available ? (
-                      <ProviderButton
-                        tone="google"
-                        label={t('Log In With Google')}
-                        onPress={onGoogle}
-                        loading={socialProvider === 'google'}
-                        disabled={busy}
-                        icon={<GoogleIcon size={20} />}
-                      />
-                    ) : null}
-                    {appleAvailable ? (
-                      <ProviderButton
-                        tone="apple"
-                        label={t('Log In With Apple')}
-                        onPress={onApple}
-                        loading={socialProvider === 'apple'}
-                        disabled={busy}
-                        icon={<AppleIcon size={20} color="#ffffff" />}
-                      />
-                    ) : null}
-                  </View>
-                </>
+                <SocialSignIn mode="login" disabled={busy} onPendingChange={setSocialPending} onSignedIn={onSignedIn} />
               ) : null}
             </View>
           </GlassCard>
 
           {step !== 'otp' ? (
             <View className="mt-6 flex-row items-center justify-center gap-1.5">
-              <AppText className="font-gilroy-medium text-[13px] text-muted">
-                {t("Don't have an account?")}
-              </AppText>
+              <AppText className="font-gilroy-medium text-[13px] text-muted">{t("Don't have an account?")}</AppText>
               <TextLink label={t('Sign Up')} onPress={navigate.register} tone="strong" />
             </View>
           ) : null}

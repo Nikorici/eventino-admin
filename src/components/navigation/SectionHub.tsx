@@ -41,7 +41,7 @@ export function SectionHub({ tab, title, header }: { tab: TabKey; title: string;
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      refetch();
+      await refetch();
     } finally {
       setRefreshing(false);
     }
@@ -66,7 +66,7 @@ export function SectionHub({ tab, title, header }: { tab: TabKey; title: string;
             title={t('Something went wrong.')}
             message={t('Please try again.')}
             actionLabel={t('Try again')}
-            onAction={refetch}
+            onAction={() => void refetch()}
           />
         ) : groups.length === 0 ? (
           <EmptyState icon={ShieldCheck} title={t("You don't have access to this page.")} />
