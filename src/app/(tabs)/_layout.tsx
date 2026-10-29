@@ -1,6 +1,6 @@
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/native-tabs';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 

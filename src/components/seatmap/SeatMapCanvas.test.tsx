@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 
 import { buildSeatIndexFromResponse } from '@/lib/seating/seatIndex';
@@ -29,9 +30,9 @@ async function fireTap(testId: string, x: number, y: number) {
   await flush();
 }
 
-function renderCanvas(onSeatPress = jest.fn(), selected = new Set<number>(), container = CONTAINER) {
+async function renderCanvas(onSeatPress = jest.fn(), selected = new Set<number>(), container = CONTAINER) {
   const index = buildSeatIndexFromResponse(fixtureSeatMap);
-  render(
+  await render(
     <SeatMapCanvas
       index={index}
       layout={fixtureSeatMap.layout}
@@ -41,10 +42,9 @@ function renderCanvas(onSeatPress = jest.fn(), selected = new Set<number>(), con
       language="en"
       onSeatPress={onSeatPress}
     />,
+    { wrapper: GestureHandlerRootView },
   );
-  act(() => {
-    fireEvent(screen.getByTestId('seat-map-canvas'), 'layout', { nativeEvent: { layout: container } });
-  });
+  await fireEvent(screen.getByTestId('seat-map-canvas'), 'layout', { nativeEvent: { layout: container } });
   return { onSeatPress, index };
 }
 
@@ -59,9 +59,9 @@ describe('SeatMapCanvas', () => {
     jest.restoreAllMocks();
   });
 
-  it('shows a skeleton until the container is measured, then the zoom controls', () => {
+  it('shows a skeleton until the container is measured, then the zoom controls', async () => {
     const index = buildSeatIndexFromResponse(fixtureSeatMap);
-    render(
+    await render(
       <SeatMapCanvas
         index={index}
         layout={fixtureSeatMap.layout}
@@ -71,18 +71,17 @@ describe('SeatMapCanvas', () => {
         language="en"
         onSeatPress={jest.fn()}
       />,
+      { wrapper: GestureHandlerRootView },
     );
     expect(screen.queryByLabelText('Zoom in')).toBeNull();
-    act(() => {
-      fireEvent(screen.getByTestId('seat-map-canvas'), 'layout', { nativeEvent: { layout: CONTAINER } });
-    });
+    await fireEvent(screen.getByTestId('seat-map-canvas'), 'layout', { nativeEvent: { layout: CONTAINER } });
     expect(screen.getByLabelText('Zoom in')).toBeTruthy();
     expect(screen.getByLabelText('Seat map')).toBeTruthy();
   });
 
   it('zooms to the tapped section while below the section tier', async () => {
     const zoomSpy = jest.spyOn(viewport, 'sectionZoom');
-    const { onSeatPress, index } = renderCanvas();
+    const { onSeatPress, index } = await renderCanvas();
     const point = screenPoint(200, 100, fit);
     await fireTap('seat-map-tap', point.x, point.y);
     expect(zoomSpy).toHaveBeenCalledTimes(1);
@@ -93,7 +92,7 @@ describe('SeatMapCanvas', () => {
   it('ignores taps outside every section outline while below the section tier', async () => {
     const zoomSpy = jest.spyOn(viewport, 'sectionZoom');
     const smallContainer = { width: 200, height: 200 };
-    const { onSeatPress } = renderCanvas(jest.fn(), new Set(), smallContainer);
+    const { onSeatPress } = await renderCanvas(jest.fn(), new Set(), smallContainer);
     const smallFit = viewport.fitTransform(fixtureSeatMap.layout.canvas, smallContainer, 16);
     const whitespaceNearSeat = screenPoint(-20, 50, smallFit);
     await fireTap('seat-map-tap', whitespaceNearSeat.x, whitespaceNearSeat.y);
@@ -106,7 +105,7 @@ describe('SeatMapCanvas', () => {
   it('selects a seat straight from the fitted view when seats are legible without a section tier', async () => {
     const largeContainer = { width: 500, height: 500 };
     const zoomSpy = jest.spyOn(viewport, 'sectionZoom');
-    const { onSeatPress } = renderCanvas(jest.fn(), new Set(), largeContainer);
+    const { onSeatPress } = await renderCanvas(jest.fn(), new Set(), largeContainer);
     const largeFit = viewport.fitTransform(fixtureSeatMap.layout.canvas, largeContainer, 16);
     expect(viewport.needsSectionTier(largeFit.scale, fixtureSeatMap.layout.seat_radius)).toBe(false);
     const seat = screenPoint(50, 50, largeFit);
@@ -117,7 +116,7 @@ describe('SeatMapCanvas', () => {
   });
 
   it('selects the tapped seat once zoomed past the section tier', async () => {
-    const { onSeatPress } = renderCanvas();
+    const { onSeatPress } = await renderCanvas();
     const seat = screenPoint(50, 50, fit);
     await fireTap('seat-map-double-tap', seat.x, seat.y);
     const limits = viewport.scaleLimits(fit.scale, fixtureSeatMap.layout.seat_radius);
@@ -130,7 +129,7 @@ describe('SeatMapCanvas', () => {
   });
 
   it('ignores taps on seats that cannot be selected', async () => {
-    const { onSeatPress } = renderCanvas();
+    const { onSeatPress } = await renderCanvas();
     const focal = screenPoint(90, 50, fit);
     await fireTap('seat-map-double-tap', focal.x, focal.y);
     const limits = viewport.scaleLimits(fit.scale, fixtureSeatMap.layout.seat_radius);
@@ -141,7 +140,7 @@ describe('SeatMapCanvas', () => {
   });
 
   it('lets a selected seat be tapped again to deselect it', async () => {
-    const { onSeatPress } = renderCanvas(jest.fn(), new Set([104]));
+    const { onSeatPress } = await renderCanvas(jest.fn(), new Set([104]));
     const focal = screenPoint(50, 90, fit);
     await fireTap('seat-map-double-tap', focal.x, focal.y);
     const limits = viewport.scaleLimits(fit.scale, fixtureSeatMap.layout.seat_radius);

@@ -11,8 +11,8 @@ Jira ticket (project **EA**).
 
 | Concern | Choice |
 |---------|--------|
-| Runtime | Expo SDK 57 (RN 0.86, React 19.2, TypeScript 6). Runs in **Expo Go** |
-| Navigation | Expo Router 57 (file-based, under `src/app/`), `NativeTabs` on iOS/Android, JS `Tabs` fallback on web |
+| Runtime | Expo SDK 58 (RN 0.88, React 19.3, TypeScript 6). Runs in **Expo Go** |
+| Navigation | Expo Router 58 (file-based, under `src/app/`), `NativeTabs` (`expo-router/native-tabs`) on iOS/Android, JS `Tabs` fallback on web |
 | Styling | NativeWind 4 (Tailwind 3.4, `darkMode: 'class'`) — `tailwind.config.js` |
 | State / data | Redux Toolkit + RTK Query (`src/store`) |
 | Auth tokens | `expo-secure-store` on device, `localStorage` (via AsyncStorage) on web |
@@ -28,7 +28,7 @@ Do the same. No chart library.
 
 ```bash
 cd ~/eventino-admin
-npx expo start            # scan the QR with Expo Go (SDK 57) on the phone
+npx expo start            # scan the QR with Expo Go (SDK 58) on the phone
 npx expo start --web      # fastest review loop in a browser
 npx tsc --noEmit          # typecheck (must stay clean)
 npx expo lint             # lint (0 errors; React Compiler rules are warnings)

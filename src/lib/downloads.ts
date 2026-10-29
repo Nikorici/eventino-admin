@@ -21,7 +21,7 @@ async function writeResponseToFile(response: Response, filename: string): Promis
   const bytes = new Uint8Array(await response.arrayBuffer());
   const file = new File(Paths.cache, filename);
   file.create({ overwrite: true, intermediates: true });
-  file.write(bytes);
+  await file.write(bytes);
   return file.uri;
 }
 

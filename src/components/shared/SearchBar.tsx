@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { TextInput, View } from 'react-native';
+import { TextInput, View, type TextInputInstance } from 'react-native';
 import { Search, SlidersHorizontal } from 'lucide-react-native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -20,7 +20,7 @@ export interface SearchBarProps {
   className?: string;
 }
 
-export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBar(
+export const SearchBar = forwardRef<TextInputInstance, SearchBarProps>(function SearchBar(
   { value, onChangeText, onPress, onSubmit, onFilterPress, editable = true, autoFocus, placeholder = 'Search events', className },
   ref,
 ) {
