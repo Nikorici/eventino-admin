@@ -186,7 +186,7 @@ export default function ForgotPasswordScreen() {
       const result = await loginWithPassword(email, newPassword);
       haptics.success();
       toast(t('Password changed successfully!'), 'success');
-      if (result.ok) navigate.home();
+      if (result.ok) navigate.replace('home');
       else navigate.replace('login');
     } catch (error) {
       haptics.error();

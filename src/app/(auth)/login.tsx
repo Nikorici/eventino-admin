@@ -88,7 +88,7 @@ export default function LoginScreen() {
     setStep(next);
   };
 
-  const onSignedIn = () => navigate.home();
+  const onSignedIn = () => navigate.replace('home');
 
   const onContinueWithEmail = async () => {
     const trimmed = email.trim();

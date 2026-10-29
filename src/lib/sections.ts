@@ -3,6 +3,7 @@ import {
   Armchair,
   BarChart3,
   Building2,
+  ChartColumn,
   ChartNoAxesColumnIncreasing,
   ClipboardList,
   CreditCard,
@@ -347,6 +348,15 @@ export const sections: SectionGroup[] = [
     tab: 'more',
     eventScoped: false,
     items: [
+      {
+        key: 'all-events-statistics',
+        label: 'All events statistics',
+        icon: ChartColumn,
+        route: 'home',
+        ticket: 'EA-44',
+        webPath: '/dashboard',
+        visible: always,
+      },
       {
         key: 'event-list',
         label: 'List of Events',

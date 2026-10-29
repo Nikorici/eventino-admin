@@ -7,19 +7,20 @@ Source of truth for the sections: `~/eventino-frontend/components/SideBar/Sideba
 
 ```
 launch ─► gate (src/app/index.tsx)
-           ├─ no session ───────────► /login ── OTP | password | Google | Apple ──► gate
+           ├─ no session ───────────► /login ── OTP | password | Google | Apple ──► /home
            │                            ├─ /register
            │                            └─ /forgot-password
-           ├─ no selected event ────► /select-event ── tap an event ──► /dashboard
-           │   (or the stored event belongs to another organizer)
-           └─ session + event ──────► (tabs)
-                                        Dashboard │ Sales │ Analytics │ Manage │ More
+           └─ session ──────────────► /home (all-events statistics)
+                                        ├─ "Current event" row (when one is selected) ──► (tabs)
+                                        └─ "Select an event" ──► /select-event ── tap an event ──► (tabs)
+                                                                   back ──► /home
+           (tabs)  Dashboard │ Sales │ Analytics │ Manage │ More   (no selected event → /home)
 ```
 
 - The selected event (`eventId` + the organizer id it was picked under) is persisted (AsyncStorage → `localStorage` on
-  web). Switching organizer account invalidates it, so the gate sends the user back to `/select-event`.
+  web). Switching organizer account invalidates it, so the tabs guard sends the user back to `/home`.
 - The Dashboard header title is the selected event name; tapping it opens `/select-event`. The Sales, Analytics and
-  Manage hubs show the same event in a bar at the top, also tappable. More → Events → List of Events goes there too.
+  Manage hubs show the same event in a bar at the top, also tappable. More → Events → List of Events goes there too; More → Events → All events statistics opens `/home`.
 - `/create-event` is a modal over everything (from `/select-event`).
 - Every tab is its own Stack, so screens pushed from a hub keep the tab bar.
 
@@ -34,7 +35,8 @@ screen agent flips its row to designed when it replaces the stub. Light/dark cap
 | `/login` | email OTP (+ new-account name step), password, Google, Apple | EA-3 | designed |
 | `/register` | person / organization sign-up + email verification | EA-3 | designed |
 | `/forgot-password` | email → code → new password | EA-3 | designed |
-| `/select-event` | organizer stats + event list + organizer switcher | EA-4 | designed |
+| `/home` | all-events statistics (period + currency sheets), current event, "Select an event" | EA-44 | designed |
+| `/select-event` | compact event list (search, create, current event check) + organizer switcher | EA-4 | designed |
 | `/create-event` | event form (modal) | EA-6 | designed |
 
 ## Tabs
@@ -83,6 +85,7 @@ items stay hidden until the selected event has loaded, exactly like the web.
 |---|---|---|---|---|---|---|
 | (account card) | — avatar, switch account, log out | TopNavBar menu | always | `/more` | EA-35 | designed |
 | (untitled) | Overview | `/dashboard` | always | `/more/overview` | EA-25 | stub |
+| Events | All events statistics (the web dashboard's stats block) | `/dashboard` | always | `/home` | EA-44 | designed |
 | Events | List of Events | `/dashboard/events` | always | `/select-event` | EA-4 | designed |
 | Events | Admin Events | `/dashboard/admin-events` (+ `[id]/accounting`, `/dashboard/events-md`, `/dashboard/events-ro`) | `user.is_staff` | `/more/admin-events` | EA-26 | stub |
 | Tickets | Fiscalizare Bilete | `/dashboard/fiscalizare-bilete` | always | `/more/fiscalizare` | EA-27 | stub |

@@ -25,7 +25,7 @@ export function AccountCard() {
   const onLogout = async () => {
     haptics.medium();
     await logout();
-    navigate.home();
+    navigate.gate();
   };
 
   return (

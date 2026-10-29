@@ -104,7 +104,7 @@ export default function TabsLayout() {
 
   if (isBootstrapping || !restored) return <Screen>{null}</Screen>;
   if (!isAuthenticated) return <Redirect href={href(routes.login)} />;
-  if (selectedEventId == null) return <Redirect href={href(routes.selectEvent)} />;
+  if (selectedEventId == null) return <Redirect href={href(routes.home)} />;
 
   return Platform.OS === 'web' ? <WebTabsLayout /> : <NativeTabsLayout />;
 }

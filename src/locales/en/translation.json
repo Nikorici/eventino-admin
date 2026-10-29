@@ -4043,5 +4043,17 @@
   "Server error": "Server error",
   "Please try again later.": "Please try again later.",
   "Request failed": "Request failed",
-  "Network error. Check your internet connection and try again.": "Network error. Check your internet connection and try again."
+  "Network error. Check your internet connection and try again.": "Network error. Check your internet connection and try again.",
+  "sum without invoices": "sum without invoices",
+  "See detailed statistics": "See detailed statistics",
+  "Current event": "Current event",
+  "Moldovan Leu": "Moldovan Leu",
+  "US Dollar": "US Dollar",
+  "Euro": "Euro",
+  "Romanian Leu": "Romanian Leu",
+  "All events statistics": "All events statistics",
+  "({{percent}}% of all tickets)": "({{percent}}% of all tickets)",
+  "{{count}} events": "{{count}} events",
+  "{{count}} events_one": "{{count}} event",
+  "{{count}} tickets_one": "{{count}} ticket"
 }

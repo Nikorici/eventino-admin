@@ -8,6 +8,7 @@ export const routes = {
   login: '/login',
   register: '/register',
   forgotPassword: '/forgot-password',
+  home: '/home',
   selectEvent: '/select-event',
   createEvent: '/create-event',
 
@@ -60,13 +61,14 @@ export const navigate = {
   to: (key: RouteKey) => router.push(href(routes[key])),
   replace: (key: RouteKey) => router.replace(href(routes[key])),
   dismissTo: (key: RouteKey) => router.dismissTo(href(routes[key])),
-  home: () => router.replace(href('/')),
+  gate: () => router.replace(href('/')),
   back: () => (router.canGoBack() ? router.back() : router.replace(href('/'))),
   canGoBack: () => router.canGoBack(),
 
   login: push('login'),
   register: push('register'),
   forgotPassword: push('forgotPassword'),
+  home: push('home'),
   selectEvent: push('selectEvent'),
   createEvent: push('createEvent'),
 

@@ -14,7 +14,7 @@ export default function NotFoundScreen() {
       </View>
       <AppText className="text-center font-gilroy-semibold text-lg">{t('This screen does not exist.')}</AppText>
       <View className="w-48">
-        <GlassButton label={t('Go home')} onPress={navigate.home} />
+        <GlassButton label={t('Go home')} onPress={navigate.gate} />
       </View>
     </Screen>
   );

@@ -4118,5 +4118,19 @@
   "Server error": "Ошибка сервера",
   "Please try again later.": "Пожалуйста, попробуйте позже.",
   "Request failed": "Запрос не выполнен",
-  "Network error. Check your internet connection and try again.": "Ошибка сети. Проверьте подключение к интернету и попробуйте снова."
+  "Network error. Check your internet connection and try again.": "Ошибка сети. Проверьте подключение к интернету и попробуйте снова.",
+  "sum without invoices": "сумма без счетов",
+  "See detailed statistics": "Подробная статистика",
+  "Current event": "Текущее мероприятие",
+  "Moldovan Leu": "Молдавский лей",
+  "US Dollar": "Доллар США",
+  "Euro": "Евро",
+  "Romanian Leu": "Румынский лей",
+  "All events statistics": "Статистика всех мероприятий",
+  "({{percent}}% of all tickets)": "({{percent}}% от всех билетов)",
+  "{{count}} events": "{{count}} мероприятий",
+  "{{count}} events_one": "{{count}} мероприятие",
+  "{{count}} events_few": "{{count}} мероприятия",
+  "{{count}} tickets_one": "{{count}} билет",
+  "{{count}} tickets_few": "{{count}} билета"
 }

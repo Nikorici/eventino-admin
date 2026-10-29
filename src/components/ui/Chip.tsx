@@ -11,10 +11,11 @@ export interface ChipProps {
   selected?: boolean;
   onPress?: () => void;
   icon?: ReactNode;
+  trailing?: ReactNode;
   className?: string;
 }
 
-export function Chip({ label, selected, onPress, icon, className }: ChipProps) {
+export function Chip({ label, selected, onPress, icon, trailing, className }: ChipProps) {
   return (
     <PressableScale
       onPress={() => {
@@ -39,6 +40,7 @@ export function Chip({ label, selected, onPress, icon, className }: ChipProps) {
       >
         {label}
       </AppText>
+      {trailing}
     </PressableScale>
   );
 }

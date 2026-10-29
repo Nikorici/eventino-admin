@@ -1,5 +1,6 @@
 import { handlers as auth } from './auth';
 import { handlers as selectEvent } from './select-event';
+import { handlers as home } from './home';
 import { handlers as dashboard } from './dashboard';
 import { handlers as eventForm } from './event-form';
 import { handlers as ticketScanners } from './ticket-scanners';
@@ -37,6 +38,7 @@ import { matchHandler, MockError, type MockHandler, type MockMethod } from './mo
 export const mockHandlers: MockHandler[] = [
   ...auth,
   ...selectEvent,
+  ...home,
   ...dashboard,
   ...eventForm,
   ...ticketScanners,

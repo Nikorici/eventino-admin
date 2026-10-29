@@ -63,7 +63,8 @@ EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=
 src/
   app/
     _layout.tsx              providers, fonts, splash, i18n, theme, auth + selected-event bootstrap, root Stack
-    index.tsx                gate: no session → /login, no event → /select-event, else /dashboard
+    index.tsx                gate: no session → /login, else /home
+    home.tsx                 all-events statistics + current event + "Select an event"         EA-44
     (auth)/                  login · register · forgot-password                          EA-3
     select-event.tsx         pick the event to manage (+ organizer switcher)             EA-4
     create-event.tsx         modal                                                       EA-6
@@ -115,7 +116,10 @@ src/
 - Login is **email OTP or password** (`/api/login/`, `send_otp_login`/`verify_otp_login`), **not** `/api/token/`.
 - Organizer event list: `POST /api/v1/statistics/event-list/`; stats: `POST /api/v1/statistics/get-recent-stats/`
   (see `store/api/organizerApi.ts`). Event detail is fetched by **numeric id**: `GET /api/v1/events/:id/`.
-- Money is per-currency; never convert or sum across currencies.
+- Money is per-currency; never convert or sum across currencies, EXCEPT the `/home` totals, which follow the web
+  `CurrencySelector` (`components/MainDashBoard/NumericStats.js` + `CurencyContext.js`): one `event_currencies` entry →
+  locked to it; more → every currency converted with BNM rates (MDL base, rate/nominal) and summed in the picked
+  currency (`lib/currency.ts`, rates from `bnm.md` via `store/api/currencyApi.ts`).
 - i18n keys are the **full English sentence** (natural-language keys), single `translation` namespace. Never dotted
   keys. Reuse the exact web/eventino-mobile key whenever the same text exists (so ro/ru already exist); a new key goes
   into all three locale files.
@@ -218,6 +222,7 @@ Core already answers: every auth endpoint (login/OTP/register/verify/reset/chang
 | Route | File | Ticket |
 |---|---|---|
 | `/login`, `/register`, `/forgot-password` | `src/app/(auth)/*.tsx` | EA-3 |
+| `/home` | `src/app/home.tsx` | EA-44 |
 | `/select-event` | `src/app/select-event.tsx` | EA-4 |
 | `/dashboard` | `src/app/(tabs)/dashboard/index.tsx` | EA-5 |
 | `/create-event` (modal), `/manage/edit-event` | `src/app/create-event.tsx`, `src/app/(tabs)/manage/edit-event.tsx` | EA-6 |

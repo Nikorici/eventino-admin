@@ -4042,5 +4042,19 @@
   "Server error": "Eroare de server",
   "Please try again later.": "Vă rugăm să încercați mai târziu.",
   "Request failed": "Cererea a eșuat",
-  "Network error. Check your internet connection and try again.": "Eroare de rețea. Verificați conexiunea la internet și încercați din nou."
+  "Network error. Check your internet connection and try again.": "Eroare de rețea. Verificați conexiunea la internet și încercați din nou.",
+  "sum without invoices": "suma fără facturi",
+  "See detailed statistics": "Vezi statisticile detaliate",
+  "Current event": "Evenimentul curent",
+  "Moldovan Leu": "Leu moldovenesc",
+  "US Dollar": "Dolar american",
+  "Euro": "Euro",
+  "Romanian Leu": "Leu românesc",
+  "All events statistics": "Statisticile tuturor evenimentelor",
+  "({{percent}}% of all tickets)": "({{percent}}% din toate biletele)",
+  "{{count}} events": "{{count}} de evenimente",
+  "{{count}} events_one": "{{count}} eveniment",
+  "{{count}} events_few": "{{count}} evenimente",
+  "{{count}} tickets_one": "{{count}} bilet",
+  "{{count}} tickets_few": "{{count}} bilete"
 }

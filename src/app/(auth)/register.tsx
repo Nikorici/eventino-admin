@@ -222,7 +222,7 @@ export default function RegisterScreen() {
       if (result.ok) {
         haptics.success();
         toast(t('Account created successfully!'), 'success');
-        navigate.home();
+        navigate.replace('home');
       } else {
         navigate.replace('login');
       }
@@ -420,7 +420,7 @@ export default function RegisterScreen() {
                   mode="register"
                   disabled={busy}
                   onPendingChange={setSocialPending}
-                  onSignedIn={() => navigate.home()}
+                  onSignedIn={() => navigate.replace('home')}
                 />
               </View>
             </GlassCard>

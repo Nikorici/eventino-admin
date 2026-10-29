@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   userCountry: 'userCountry',
   themePreference: 'themePreference',
   selectedEvent: 'selectedEvent',
+  defaultCurrency: 'defaultCurrency',
 } as const;
 
 export const endpoints = {

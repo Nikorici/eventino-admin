@@ -12,8 +12,9 @@ import type { MockMethod } from '@/mocks/mock';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_URL,
-  prepareHeaders: async (headers) => {
-    if (!headers.has('Authorization')) {
+  prepareHeaders: async (headers, { arg }) => {
+    const url = typeof arg === 'string' ? arg : arg.url;
+    if (!headers.has('Authorization') && !/^https?:\/\//.test(url)) {
       const token = await getAccessToken();
       if (token) headers.set('Authorization', `${AUTH_SCHEME} ${token}`);
     }
