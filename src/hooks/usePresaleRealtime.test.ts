@@ -88,27 +88,27 @@ describe('usePresaleRealtime', () => {
   }
 
   it('opens the stream with a token and forwards parsed messages', async () => {
-    const { result } = render();
+    const { result } = await render();
     await flush();
     expect(MockedEventSource).toHaveBeenCalledWith(expect.stringContaining('/api/v1/presale/events/9/organizer/stream/?token=tok1'), {
       pollingInterval: 0,
     });
     const source = sourceAt(0);
-    act(() => source.dispatch('open', { type: 'open' }));
+    await act(() => source.dispatch('open', { type: 'open' }));
     expect(result.current).toBe('live');
-    act(() => source.dispatch('message', message('{"type":"notifications"}')));
-    act(() => source.dispatch('message', message('not json')));
+    await act(() => source.dispatch('message', message('{"type":"notifications"}')));
+    await act(() => source.dispatch('message', message('not json')));
     expect(onMessage).toHaveBeenCalledTimes(1);
     expect(onMessage).toHaveBeenCalledWith({ type: 'notifications' });
     expect(onResync).not.toHaveBeenCalled();
   });
 
   it('reconnects after an error with a new token and resyncs on reopen', async () => {
-    const { result } = render();
+    const { result } = await render();
     await flush();
     const first = sourceAt(0);
-    act(() => first.dispatch('open', { type: 'open' }));
-    act(() => first.dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 502 }));
+    await act(() => first.dispatch('open', { type: 'open' }));
+    await act(() => first.dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 502 }));
     expect(first.close).toHaveBeenCalled();
     expect(result.current).toBe('reconnecting');
     await act(async () => {
@@ -116,13 +116,13 @@ describe('usePresaleRealtime', () => {
     });
     await flush();
     expect(MockedEventSource).toHaveBeenLastCalledWith(expect.stringContaining('token=tok2'), { pollingInterval: 0 });
-    act(() => sourceAt(1).dispatch('open', { type: 'open' }));
+    await act(() => sourceAt(1).dispatch('open', { type: 'open' }));
     expect(onResync).toHaveBeenCalledTimes(1);
   });
 
   it('retries when the stream token cannot be fetched', async () => {
     mockFetchToken.mockImplementationOnce(() => ({ unwrap: () => Promise.reject(new Error('403')) }));
-    render();
+    await render();
     await flush();
     expect(MockedEventSource).not.toHaveBeenCalled();
     await act(async () => {
@@ -159,9 +159,9 @@ describe('usePresaleRealtime', () => {
 
     it('does not open a stream when backgrounded while the token is pending', async () => {
       const release = holdNextToken();
-      render();
+      await render();
       await flush();
-      act(() => changeHandler('background'));
+      await act(() => changeHandler('background'));
       release();
       await flush();
       expect(MockedEventSource).not.toHaveBeenCalled();
@@ -169,9 +169,9 @@ describe('usePresaleRealtime', () => {
 
     it('does not open a second stream when active fires while the token is pending', async () => {
       const release = holdNextToken();
-      render();
+      await render();
       await flush();
-      act(() => changeHandler('active'));
+      await act(() => changeHandler('active'));
       await flush();
       release();
       await flush();
@@ -180,45 +180,45 @@ describe('usePresaleRealtime', () => {
     });
 
     it('reconnects with a fresh token after background then active and resyncs', async () => {
-      render();
+      await render();
       await flush();
-      act(() => sourceAt(0).dispatch('open', { type: 'open' }));
+      await act(() => sourceAt(0).dispatch('open', { type: 'open' }));
       const first = sourceAt(0);
-      act(() => changeHandler('background'));
+      await act(() => changeHandler('background'));
       expect(first.close).toHaveBeenCalled();
-      act(() => changeHandler('active'));
+      await act(() => changeHandler('active'));
       await flush();
       expect(MockedEventSource).toHaveBeenCalledTimes(2);
       expect(MockedEventSource).toHaveBeenLastCalledWith(expect.stringContaining('token=tok2'), { pollingInterval: 0 });
-      act(() => sourceAt(1).dispatch('open', { type: 'open' }));
+      await act(() => sourceAt(1).dispatch('open', { type: 'open' }));
       expect(onResync).toHaveBeenCalledTimes(1);
     });
   });
 
   it('resyncs when the stream reopens after focus is lost and regained', async () => {
-    const { result, rerender } = renderHook(
+    const { result, rerender } = await renderHook(
       ({ enabled }: { enabled: boolean }) => usePresaleRealtime({ eventId: 9, enabled, onMessage, onResync }),
       { initialProps: { enabled: true } },
     );
     await flush();
     const first = sourceAt(0);
-    act(() => first.dispatch('open', { type: 'open' }));
+    await act(() => first.dispatch('open', { type: 'open' }));
     expect(result.current).toBe('live');
     expect(onResync).not.toHaveBeenCalled();
-    rerender({ enabled: false });
+    await rerender({ enabled: false });
     expect(first.close).toHaveBeenCalled();
     expect(result.current).toBe('connecting');
-    rerender({ enabled: true });
+    await rerender({ enabled: true });
     await flush();
-    act(() => sourceAt(1).dispatch('open', { type: 'open' }));
+    await act(() => sourceAt(1).dispatch('open', { type: 'open' }));
     expect(onResync).toHaveBeenCalledTimes(1);
   });
 
   it('closes the stream on unmount', async () => {
-    const { unmount } = render();
+    const { unmount } = await render();
     await flush();
     const source = sourceAt(0);
-    unmount();
+    await unmount();
     expect(source.close).toHaveBeenCalled();
   });
 

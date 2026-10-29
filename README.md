@@ -1,7 +1,7 @@
 # Eventino Admin
 
 The Eventino organizer dashboard (`eventino-frontend` → `pages/dashboard/**`, `pages/create-event.js`) as a phone app.
-Expo SDK 57, runs in **Expo Go**. Screens run on mock data until the real API is wired
+Expo SDK 58, runs in **Expo Go**. Screens run on mock data until the real API is wired
 (`EXPO_PUBLIC_USE_MOCKS=true`).
 
 Agent and code conventions: `CLAUDE.md`. Information architecture and per-route status: `docs/STRUCTURE.md`.
@@ -9,7 +9,7 @@ Screenshots of every designed route, light and dark: `docs/screenshots/gallery/`
 
 ## Run it on your phone (Expo Go)
 
-1. Install **Expo Go** from the App Store / Play Store. It must be the build for **SDK 57** (the current store version).
+1. Install **Expo Go** from the App Store / Play Store. It must be the build for **SDK 58** (the current store version).
 2. Phone and laptop on the same Wi-Fi.
 3. In a terminal:
 

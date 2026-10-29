@@ -1,5 +1,5 @@
 import { forwardRef, type ReactNode } from 'react';
-import { TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 
 import { cn } from '@/lib/cn';
 
@@ -13,7 +13,7 @@ export interface GlassInputProps extends TextInputProps {
   containerClassName?: string;
 }
 
-export const GlassInput = forwardRef<TextInput, GlassInputProps>(function GlassInput(
+export const GlassInput = forwardRef<TextInputInstance, GlassInputProps>(function GlassInput(
   { label, error, leftIcon, rightIcon, containerClassName, className, ...props },
   ref,
 ) {

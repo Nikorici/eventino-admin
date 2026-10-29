@@ -99,53 +99,53 @@ describe('useSeatMapRealtime', () => {
     );
   }
 
-  it('opens the stream without polling and forwards status events once', () => {
-    render();
+  it('opens the stream without polling and forwards status events once', async () => {
+    await render();
     expect(MockedEventSource).toHaveBeenCalledTimes(1);
     expect(MockedEventSource).toHaveBeenCalledWith(expect.stringContaining('/api/v1/events/5/seats/stream/'), {
       pollingInterval: REALTIME_LIBRARY_RECONNECT_MS,
     });
     const source = sourceAt(0);
-    act(() => source.dispatch('open', { type: 'open' }));
+    await act(() => source.dispatch('open', { type: 'open' }));
     expect(mockFetchStatuses).not.toHaveBeenCalled();
-    act(() => source.dispatch('message', statusMessage('d1')));
-    act(() => source.dispatch('message', statusMessage('d1')));
+    await act(() => source.dispatch('message', statusMessage('d1')));
+    await act(() => source.dispatch('message', statusMessage('d1')));
     expect(onSeatStatus).toHaveBeenCalledTimes(1);
     expect(onSeatStatus).toHaveBeenCalledWith(expect.objectContaining({ type: 'SEAT_STATUS', changes: [{ seat_id: 7, status: 'reserved' }] }));
   });
 
   it('resyncs when the library reopens the same stream after a clean server end', async () => {
-    render();
+    await render();
     const source = sourceAt(0);
-    act(() => source.dispatch('open', { type: 'open' }));
+    await act(() => source.dispatch('open', { type: 'open' }));
     expect(mockFetchStatuses).not.toHaveBeenCalled();
-    act(() => source.dispatch('open', { type: 'open' }));
+    await act(() => source.dispatch('open', { type: 'open' }));
     await flush();
     expect(mockFetchStatuses).toHaveBeenCalledTimes(1);
     expect(onStatusSnapshot).toHaveBeenCalledWith(snapshot);
     expect(MockedEventSource).toHaveBeenCalledTimes(1);
   });
 
-  it('closes a failed source again on the next tick so the library cannot reopen it', () => {
-    render();
+  it('closes a failed source again on the next tick so the library cannot reopen it', async () => {
+    await render();
     const first = sourceAt(0);
-    act(() => first.dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 503 }));
+    await act(() => first.dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 503 }));
     expect(first.close).toHaveBeenCalledTimes(1);
-    act(() => jest.advanceTimersByTime(0));
+    await act(() => jest.advanceTimersByTime(0));
     expect(first.close).toHaveBeenCalledTimes(2);
   });
 
   it('reconnects with backoff after an error and resyncs statuses on the next open', async () => {
-    render(2);
+    await render(2);
     const first = sourceAt(0);
-    act(() => first.dispatch('open', { type: 'open' }));
-    act(() => first.dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 0 }));
+    await act(() => first.dispatch('open', { type: 'open' }));
+    await act(() => first.dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 0 }));
     expect(first.close).toHaveBeenCalledTimes(1);
     expect(MockedEventSource).toHaveBeenCalledTimes(1);
-    act(() => jest.advanceTimersByTime(backoffDelayMs(1)));
+    await act(() => jest.advanceTimersByTime(backoffDelayMs(1)));
     expect(MockedEventSource).toHaveBeenCalledTimes(2);
     const second = sourceAt(1);
-    act(() => second.dispatch('open', { type: 'open' }));
+    await act(() => second.dispatch('open', { type: 'open' }));
     await flush();
     expect(mockFetchStatuses).toHaveBeenCalledTimes(1);
     expect(mockFetchStatuses).toHaveBeenCalledWith(5);
@@ -154,42 +154,42 @@ describe('useSeatMapRealtime', () => {
   });
 
   it('falls back to polling after three failed opens and stops on open', async () => {
-    render();
-    const fail = (index: number) => {
-      act(() => sourceAt(index).dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 0 }));
+    await render();
+    const fail = async (index: number) => {
+      await act(() => sourceAt(index).dispatch('error', { type: 'error', message: 'down', xhrState: 4, xhrStatus: 0 }));
     };
-    fail(0);
-    act(() => jest.advanceTimersByTime(backoffDelayMs(1)));
-    fail(1);
-    act(() => jest.advanceTimersByTime(backoffDelayMs(2)));
+    await fail(0);
+    await act(() => jest.advanceTimersByTime(backoffDelayMs(1)));
+    await fail(1);
+    await act(() => jest.advanceTimersByTime(backoffDelayMs(2)));
     expect(mockFetchStatuses).not.toHaveBeenCalled();
-    fail(2);
+    await fail(2);
     await flush();
     expect(mockFetchStatuses).toHaveBeenCalledTimes(1);
-    act(() => jest.advanceTimersByTime(REALTIME_POLL_INTERVAL_MS));
+    await act(() => jest.advanceTimersByTime(REALTIME_POLL_INTERVAL_MS));
     await flush();
     expect(mockFetchStatuses).toHaveBeenCalledTimes(2);
-    act(() => jest.advanceTimersByTime(backoffDelayMs(3)));
+    await act(() => jest.advanceTimersByTime(backoffDelayMs(3)));
     const reconnected = sourceAt(3);
-    act(() => reconnected.dispatch('open', { type: 'open' }));
+    await act(() => reconnected.dispatch('open', { type: 'open' }));
     await flush();
     const callsAfterOpen = mockFetchStatuses.mock.calls.length;
-    act(() => jest.advanceTimersByTime(REALTIME_POLL_INTERVAL_MS * 2));
+    await act(() => jest.advanceTimersByTime(REALTIME_POLL_INTERVAL_MS * 2));
     await flush();
     expect(mockFetchStatuses).toHaveBeenCalledTimes(callsAfterOpen);
   });
 
-  it('closes the stream on unmount and does not reconnect', () => {
-    const { unmount } = render();
+  it('closes the stream on unmount and does not reconnect', async () => {
+    const { unmount } = await render();
     const source = sourceAt(0);
-    unmount();
+    await unmount();
     expect(source.close).toHaveBeenCalledTimes(1);
-    act(() => jest.advanceTimersByTime(60000));
+    await act(() => jest.advanceTimersByTime(60000));
     expect(MockedEventSource).toHaveBeenCalledTimes(1);
   });
 
-  it('does not connect while disabled', () => {
-    renderHook(() =>
+  it('does not connect while disabled', async () => {
+    await renderHook(() =>
       useSeatMapRealtime({ eventId: 5, enabled: false, configVersion: 3, onSeatStatus, onStatusSnapshot, onConfigVersion }),
     );
     expect(MockedEventSource).not.toHaveBeenCalled();
