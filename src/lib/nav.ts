@@ -22,6 +22,8 @@ export const routes = {
   presale: '/sales/presale',
   scanStatistics: '/sales/scan-statistics',
   merch: '/sales/merch',
+  merchOrders: '/sales/merch/orders',
+  merchSettings: '/sales/merch/settings',
 
   analytics: '/analytics',
   trafficSources: '/analytics/traffic-sources',
@@ -44,6 +46,8 @@ export const routes = {
   adminEvents: '/more/admin-events',
   fiscalizare: '/more/fiscalizare',
   labelPrinters: '/more/label-printers',
+  labelPrinterSettings: '/more/label-printer-settings',
+  labelLayout: '/more/label-layout',
   stickers: '/more/stickers',
   smartbill: '/more/smartbill',
   team: '/more/team',
@@ -82,6 +86,11 @@ export const navigate = {
   presale: push('presale'),
   scanStatistics: push('scanStatistics'),
   merch: push('merch'),
+  merchOrders: push('merchOrders'),
+  merchSettings: push('merchSettings'),
+  merchProduct: (productId: number) =>
+    router.push(href('/sales/merch/products/[pid]', { pid: String(productId) })),
+  merchOrder: (orderId: number) => router.push(href('/sales/merch/orders/[oid]', { oid: String(orderId) })),
 
   analytics: push('analytics'),
   trafficSources: push('trafficSources'),
@@ -104,6 +113,10 @@ export const navigate = {
   adminEvents: push('adminEvents'),
   fiscalizare: push('fiscalizare'),
   labelPrinters: push('labelPrinters'),
+  labelPrinterSettings: (printerUuid: string) =>
+    router.push(href(routes.labelPrinterSettings, { uuid: printerUuid })),
+  labelLayout: (templateId?: number) =>
+    router.push(href(routes.labelLayout, templateId ? { id: String(templateId) } : undefined)),
   stickers: push('stickers'),
   smartbill: push('smartbill'),
   team: push('team'),

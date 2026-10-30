@@ -4055,5 +4055,13 @@
   "({{percent}}% of all tickets)": "({{percent}}% of all tickets)",
   "{{count}} events": "{{count}} events",
   "{{count}} events_one": "{{count}} event",
-  "{{count}} tickets_one": "{{count}} ticket"
+  "{{count}} tickets_one": "{{count}} ticket",
+  "Charged once per order, regardless of item quantity.": "Charged once per order, regardless of item quantity.",
+  "Configure your event's merch storefront": "Configure your event's merch storefront",
+  "Embed": "Embed",
+  "Paste this onto any HTML page on your website.": "Paste this onto any HTML page on your website.",
+  "Shown at the top of your storefront.": "Shown at the top of your storefront.",
+  "Storefront": "Storefront",
+  "Unable to create product": "Unable to create product",
+  "e.g. 35.00": "e.g. 35.00"
 }

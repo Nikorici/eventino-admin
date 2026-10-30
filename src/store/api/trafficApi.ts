@@ -7,6 +7,7 @@ const trafficEndpoints = {
 
 export interface OrgTrafficReferrerStat {
   referrer: string;
+  embedded_on?: string | null;
   total_clicks: number;
   percentage: number;
 }

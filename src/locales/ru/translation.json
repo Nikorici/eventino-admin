@@ -4132,5 +4132,13 @@
   "{{count}} events_one": "{{count}} мероприятие",
   "{{count}} events_few": "{{count}} мероприятия",
   "{{count}} tickets_one": "{{count}} билет",
-  "{{count}} tickets_few": "{{count}} билета"
+  "{{count}} tickets_few": "{{count}} билета",
+  "Charged once per order, regardless of item quantity.": "Взимается один раз за заказ, независимо от количества товаров.",
+  "Configure your event's merch storefront": "Настройте магазин мерча вашего события",
+  "Embed": "Встраивание",
+  "Paste this onto any HTML page on your website.": "Вставьте этот код на любую HTML-страницу вашего сайта.",
+  "Shown at the top of your storefront.": "Отображается вверху магазина.",
+  "Storefront": "Витрина",
+  "Unable to create product": "Не удалось создать товар",
+  "e.g. 35.00": "напр. 35.00"
 }

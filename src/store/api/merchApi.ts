@@ -10,6 +10,9 @@ const merchEndpoints = {
   ordersByEvent: (eventId: number) => `/api/v1/merch/events/${eventId}/orders/`,
   orderFulfillment: (orderId: number) => `/api/v1/merch/orders/${orderId}/fulfillment/`,
   orderRefund: (orderId: number) => `/api/v1/merch/orders/${orderId}/refund/`,
+  order: (orderId: number) => `/api/v1/merch/orders/${orderId}/`,
+  imagesBase: '/api/v1/merch/images/',
+  image: (imageId: number) => `/api/v1/merch/images/${imageId}/`,
 } as const;
 
 export const MERCH_CURRENCIES = ['MDL', 'USD', 'EUR', 'RON'] as const;
@@ -119,6 +122,28 @@ export interface MerchOrder {
   payment_method: string;
   created_at: string;
   items: MerchOrderItem[];
+  invoice_serial?: string | null;
+}
+
+export interface MerchOrdersByStatusArgs {
+  eventId: number;
+  status: '' | MerchPaymentStatus;
+}
+
+export interface UpdateMerchImageBody {
+  imageId: number;
+  productId: number;
+  is_main: boolean;
+}
+
+export interface DeleteMerchImageBody {
+  imageId: number;
+  productId: number;
+}
+
+export interface UploadMerchImageBody {
+  productId: number;
+  form: FormData;
 }
 
 export type MerchSettingsPatch = Partial<MerchSettings>;
@@ -267,6 +292,41 @@ export const merchApi = baseApi
         }),
         invalidatesTags: ['MerchOrders'],
       }),
+      getMerchOrder: builder.query<MerchOrder, number>({
+        query: (orderId) => merchEndpoints.order(orderId),
+        providesTags: ['MerchOrders'],
+      }),
+      getMerchOrdersByStatus: builder.query<MerchOrder[], MerchOrdersByStatusArgs>({
+        query: ({ eventId, status }) => ({
+          url: merchEndpoints.ordersByEvent(eventId),
+          params: status ? { status } : undefined,
+        }),
+        transformResponse: toOrderList,
+        providesTags: ['MerchOrders'],
+      }),
+      uploadMerchImage: builder.mutation<MerchProductImage, UploadMerchImageBody>({
+        query: ({ form }) => ({
+          url: merchEndpoints.imagesBase,
+          method: 'POST',
+          body: form,
+        }),
+        invalidatesTags: (_result, _error, { productId }) => ['MerchProducts', { type: 'MerchProduct', id: productId }],
+      }),
+      updateMerchImage: builder.mutation<MerchProductImage, UpdateMerchImageBody>({
+        query: ({ imageId, is_main }) => ({
+          url: merchEndpoints.image(imageId),
+          method: 'PATCH',
+          body: { is_main },
+        }),
+        invalidatesTags: (_result, _error, { productId }) => ['MerchProducts', { type: 'MerchProduct', id: productId }],
+      }),
+      deleteMerchImage: builder.mutation<void, DeleteMerchImageBody>({
+        query: ({ imageId }) => ({
+          url: merchEndpoints.image(imageId),
+          method: 'DELETE',
+        }),
+        invalidatesTags: (_result, _error, { productId }) => ['MerchProducts', { type: 'MerchProduct', id: productId }],
+      }),
     }),
     overrideExisting: false,
   });
@@ -285,4 +345,9 @@ export const {
   useGetMerchOrdersQuery,
   useUpdateMerchFulfillmentMutation,
   useRefundMerchOrderMutation,
+  useGetMerchOrderQuery,
+  useGetMerchOrdersByStatusQuery,
+  useUploadMerchImageMutation,
+  useUpdateMerchImageMutation,
+  useDeleteMerchImageMutation,
 } = merchApi;

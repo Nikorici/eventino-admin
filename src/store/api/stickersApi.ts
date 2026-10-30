@@ -3,6 +3,7 @@ import { baseApi } from './baseApi';
 export const stickerEndpoints = {
   scanned: '/api/v1/tickets/scanned/',
   generate: '/api/v1/tickets/generate-sticker/',
+  networkingProfile: (userId: number) => `/api/v1/networking/profiles/${userId}/`,
 } as const;
 
 export type StickerSize = '58x80' | '50x30';
@@ -19,6 +20,7 @@ export interface ScannedTicket {
   event_id: number;
   event_title: string;
   scan_date: string;
+  user_id?: number | null;
 }
 
 export interface ScannedTicketsPage {
@@ -57,8 +59,11 @@ export const stickersApi = baseApi
         forceRefetch: ({ currentArg, previousArg }) => currentArg !== previousArg,
         providesTags: ['ScannedTickets'],
       }),
+      getStickerNetworkingProfile: builder.query<{ id?: number; company?: string | null } | null, number>({
+        query: (userId) => stickerEndpoints.networkingProfile(userId),
+      }),
     }),
     overrideExisting: false,
   });
 
-export const { useGetScannedTicketsQuery } = stickersApi;
+export const { useGetScannedTicketsQuery, useLazyGetStickerNetworkingProfileQuery } = stickersApi;

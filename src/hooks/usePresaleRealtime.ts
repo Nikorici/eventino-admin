@@ -27,7 +27,7 @@ export function usePresaleRealtime({ eventId, enabled, onMessage, onResync }: Pr
   const [fetchStreamToken] = useLazyGetPresaleStreamTokenQuery();
   const callbacksRef = useRef({ onMessage, onResync });
   const [focused, setFocused] = useState(false);
-  const [status, setStatus] = useState<PresaleStreamStatus>('connecting');
+  const [status, setStatus] = useState<PresaleStreamStatus>(USE_MOCKS ? 'live' : 'connecting');
   const connectedOnceRef = useRef(false);
   const connectedEventIdRef = useRef(eventId);
 

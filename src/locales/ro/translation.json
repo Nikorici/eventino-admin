@@ -4056,5 +4056,13 @@
   "{{count}} events_one": "{{count}} eveniment",
   "{{count}} events_few": "{{count}} evenimente",
   "{{count}} tickets_one": "{{count}} bilet",
-  "{{count}} tickets_few": "{{count}} bilete"
+  "{{count}} tickets_few": "{{count}} bilete",
+  "Charged once per order, regardless of item quantity.": "Se percepe o singură dată pe comandă, indiferent de numărul de produse.",
+  "Configure your event's merch storefront": "Configurează magazinul de merch al evenimentului",
+  "Embed": "Încorporare",
+  "Paste this onto any HTML page on your website.": "Lipește acest cod în orice pagină HTML a site-ului tău.",
+  "Shown at the top of your storefront.": "Afișat în partea de sus a magazinului.",
+  "Storefront": "Magazin",
+  "Unable to create product": "Produsul nu a putut fi creat",
+  "e.g. 35.00": "ex. 35.00"
 }
