@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import { Check, Pencil, PenTool, Search, Shield, Trash2, UploadCloud, UserPlus } from 'lucide-react-native';
 
+import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -274,8 +275,8 @@ export default function TeamScreen() {
       await addDelegate({ delegate: selectedUser.id, ...newPermissions }).unwrap();
       toast(`${delegateUserLabel(selectedUser)} ${t('added to your team')}`, 'success');
       setAddOpen(false);
-    } catch {
-      toast(t('Failed to add delegate'), 'error');
+    } catch (error) {
+      toast(extractApiError(error) ?? t('Failed to add delegate'), 'error');
     }
   }, [selectedUser, newPermissions, addDelegate, toast, t]);
 

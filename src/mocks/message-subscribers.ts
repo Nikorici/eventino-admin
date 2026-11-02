@@ -8,22 +8,22 @@ import type {
 } from '@/store/api/messageSubscribersApi';
 
 import { eventsOf, findMockEvent, mockLinkedOrganizers, mockOrganizer, mockUsers, type MockEvent } from './core';
-import { bodyOf, isoDate, mock, mockError, paginate, type MockHandler } from './mock';
+import { bodyOf, isoDate, mock, mockError, type MockHandler } from './mock';
 
 const clujLive = mockLinkedOrganizers[1];
 
-const followerFixtures: { id: number; first_name: string; last_name: string; email: string; events: number[]; organization?: string }[] = [
-  { id: 2110, first_name: 'Ana', last_name: 'Popescu', email: 'ana.popescu@gmail.com', events: [4101, 4102, 4105] },
-  { id: 2101, first_name: 'Ion', last_name: 'Rusu', email: 'ion.rusu@gmail.com', events: [4101] },
-  { id: 2102, first_name: 'Maria', last_name: 'Ciobanu', email: 'maria.ciobanu@gmail.com', events: [4101, 4102, 4103, 4105] },
-  { id: clujLive.id, first_name: '', last_name: '', email: clujLive.email, events: [4102, 4103], organization: 'Cluj Live Events SRL' },
-  { id: 2103, first_name: 'Andrei', last_name: 'Lungu', email: 'andrei.lungu@gmail.com', events: [4101, 4103] },
-  { id: 2104, first_name: 'Elena', last_name: 'Cojocaru', email: 'elena.cojocaru@gmail.com', events: [4106] },
-  { id: 2105, first_name: 'Victor', last_name: 'Munteanu', email: 'victor.munteanu@gmail.com', events: [4101, 4102, 4103, 4105, 4106] },
-  { id: 2106, first_name: 'Cristina', last_name: 'Botnaru', email: 'cristina.botnaru@gmail.com', events: [4102, 4106] },
-  { id: 2109, first_name: 'Mihai', last_name: 'Ceban', email: 'mihai.ceban@gmail.com', events: [4105] },
-  { id: 2113, first_name: 'Irina', last_name: 'Bivol', email: 'irina.bivol@gmail.com', events: [4101, 4102, 4103] },
-  { id: 2111, first_name: 'Sergiu', last_name: 'Țurcanu', email: 'sergiu.turcanu@gmail.com', events: [4102] },
+const followerFixtures: { id: number; first_name: string; last_name: string; events: number[]; organization?: string }[] = [
+  { id: 2110, first_name: 'Ana', last_name: 'Popescu', events: [4101, 4102, 4105] },
+  { id: 2101, first_name: 'Ion', last_name: 'Rusu', events: [4101] },
+  { id: 2102, first_name: 'Maria', last_name: 'Ciobanu', events: [4101, 4102, 4103, 4105] },
+  { id: clujLive.id, first_name: '', last_name: '', events: [4102, 4103], organization: 'Cluj Live Events SRL' },
+  { id: 2103, first_name: 'Andrei', last_name: 'Lungu', events: [4101, 4103] },
+  { id: 2104, first_name: 'Elena', last_name: 'Cojocaru', events: [4106] },
+  { id: 2105, first_name: 'Victor', last_name: 'Munteanu', events: [4101, 4102, 4103, 4105, 4106] },
+  { id: 2106, first_name: 'Cristina', last_name: 'Botnaru', events: [4102, 4106] },
+  { id: 2109, first_name: 'Mihai', last_name: 'Ceban', events: [4105] },
+  { id: 2113, first_name: 'Irina', last_name: 'Bivol', events: [4101, 4102, 4103] },
+  { id: 2111, first_name: 'Sergiu', last_name: 'Țurcanu', events: [4102] },
 ];
 
 const eventCategories: Record<number, string> = {
@@ -43,7 +43,6 @@ function followersOf(userId: number) {
     id: follower.id,
     first_name: follower.first_name,
     last_name: follower.last_name,
-    email: follower.email,
     profile_image: null,
     is_organization: Boolean(follower.organization),
     organization_name: follower.organization ?? null,
@@ -183,7 +182,7 @@ for (const user of mockUsers) {
 }
 
 export const handlers: MockHandler[] = [
-  mock('GET', '/api/v1/users/scheduled_emails/', ({ query }) => paginate(scheduledEmails, query, 50)),
+  mock('GET', '/api/v1/users/scheduled_emails/', () => ({ results: scheduledEmails })),
   mock('POST', '/api/v1/users/schedule_email/', (request) => {
     const body = bodyOf<ScheduleGroupEmailBody>(request);
     const recipients = body.recipients ?? [];

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   Pressable,
   RefreshControl,
@@ -36,6 +35,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useToast } from "@/hooks/useToast";
 import { extractClientErrorMessage } from "@/lib/apiError";
 import { CARD_BORDER } from "@/components/dashboard/DashboardStats";
+import { confirmAction } from "@/components/dashboard/dashboardParts";
 import {
   useAddEventScannerMutation,
   useGetEventScannersQuery,
@@ -577,20 +577,16 @@ export default function TicketScannersScreen() {
   const onRemove = useCallback(
     (scanner: EventScanner) => {
       haptics.medium();
-      Alert.alert(
-        t("Remove scanner"),
-        t("Are you sure you want to remove this scanner?"),
-        [
-          { text: t("Cancel"), style: "cancel" },
-          {
-            text: t("Remove"),
-            style: "destructive",
-            onPress: () => {
-              void confirmRemove(scanner);
-            },
-          },
-        ],
-      );
+      confirmAction({
+        title: t("Remove scanner"),
+        message: t("Are you sure you want to remove this scanner?"),
+        confirmLabel: t("Remove"),
+        cancelLabel: t("Cancel"),
+        destructive: true,
+        onConfirm: () => {
+          void confirmRemove(scanner);
+        },
+      });
     },
     [t, confirmRemove],
   );

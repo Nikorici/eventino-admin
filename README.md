@@ -1,8 +1,8 @@
 # Eventino Admin
 
 The Eventino organizer dashboard (`eventino-frontend` → `pages/dashboard/**`, `pages/create-event.js`) as a phone app.
-Expo SDK 58, runs in **Expo Go**. Screens run on mock data until the real API is wired
-(`EXPO_PUBLIC_USE_MOCKS=true`).
+Expo SDK 58, runs in **Expo Go**. It talks to the real Eventino API; a mock layer (`EXPO_PUBLIC_USE_MOCKS=true`) is
+there for UI work without a backend.
 
 Agent and code conventions: `CLAUDE.md`. Information architecture and per-route status: `docs/STRUCTURE.md`.
 Screenshots of every designed route, light and dark: `docs/screenshots/gallery/`.
@@ -16,12 +16,12 @@ Screenshots of every designed route, light and dark: `docs/screenshots/gallery/`
 ```bash
 cd ~/eventino-admin
 npm install
-cp -n .env.example .env     # only the first time; it sets EXPO_PUBLIC_USE_MOCKS=true
+cp -n .env.example .env     # only the first time; set EXPO_PUBLIC_USE_MOCKS=true for the mock login below
 npx expo start
 ```
 
 4. Scan the QR code: iPhone with the Camera app, Android from inside Expo Go ("Scan QR code").
-5. Sign in with the mock login:
+5. Sign in with your organizer account. With mocks on, the mock login works like this:
    - type **any email**, tap **Continue with email**;
    - type **any 6-digit code** and tap **Verify** (`000000` is the one code that fails, to show the invalid-code error);
    - an email that is not a fixture account also asks for a first and last name, like the real "new account" step;
@@ -51,5 +51,6 @@ npx jest                  # unit tests
 
 ## Real API
 
-Set `EXPO_PUBLIC_USE_MOCKS=false` in `.env` and restart with `npx expo start -c`. Requests then go to
-`EXPO_PUBLIC_API_URL` (`https://api.eventino.co`) with the same endpoints the web uses.
+The default (`EXPO_PUBLIC_USE_MOCKS=false` or unset). Requests go to `EXPO_PUBLIC_API_URL` (`https://api.eventino.co`)
+with the same endpoints the web uses. After changing `.env`, restart with `npx expo start -c`. Things only a phone can
+check: `docs/DEVICE_CHECKLIST.md`.

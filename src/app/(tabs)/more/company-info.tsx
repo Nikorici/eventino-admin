@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
+import { extractApiError } from '@/lib/apiError';
 import { navigate } from '@/lib/nav';
 import {
   useGetCompanyProfileQuery,
@@ -28,8 +29,8 @@ function CompanyForm({ userId, profile }: { userId: number; profile: CompanyProf
     try {
       await updateCompany({ userId, company: { company_name: companyName, company_cui: companyCui } }).unwrap();
       toast(t('Company information updated successfully!'), 'success');
-    } catch {
-      toast(t('Failed to update company information. Please try again.'), 'error');
+    } catch (error) {
+      toast(extractApiError(error) ?? t('Failed to update company information. Please try again.'), 'error');
     }
   };
 

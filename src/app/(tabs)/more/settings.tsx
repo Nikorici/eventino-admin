@@ -63,6 +63,10 @@ function deletionKey(userId: number): string {
   return `${STORAGE_KEYS.scheduledDeletionDate}:${userId}`;
 }
 
+function mailPermissionKey(userId: number): string {
+  return `se_m_p:${userId}`;
+}
+
 function SectionLabel({ children }: { children: string }) {
   return (
     <AppText className="px-1 pb-1 font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted dark:text-dark-muted">
@@ -185,6 +189,8 @@ export default function SettingsScreen() {
     if (profileId == null) return;
     let active = true;
     void (async () => {
+      const storedMail = await cache.get<boolean>(mailPermissionKey(profileId));
+      if (active && typeof storedMail === 'boolean') setMailPermission(storedMail);
       const stored = await cache.get<string>(deletionKey(profileId));
       if (!active) return;
       if (stored) {
@@ -225,12 +231,17 @@ export default function SettingsScreen() {
       setMailPermission(next);
       try {
         await patchUser('send_mail_permission', next ? 'true' : 'false');
+        if (profileId != null) void cache.set(mailPermissionKey(profileId), next);
+        toast(
+          next ? t('Email notifications activated successfully!') : t('Email notifications deactivated successfully!'),
+          'success',
+        );
       } catch {
         setMailPermission(!next);
         toast(t('Please try again.'), 'error');
       }
     },
-    [patchUser, toast, t],
+    [patchUser, profileId, toast, t],
   );
 
   const onScheduleDeletion = useCallback(() => {

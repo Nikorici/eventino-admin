@@ -41,7 +41,7 @@ npx expo export --platform ios --output-dir /tmp/export-ios   # full JS bundle s
 
 ```
 EXPO_PUBLIC_API_URL=https://api.eventino.co
-EXPO_PUBLIC_USE_MOCKS=true
+EXPO_PUBLIC_USE_MOCKS=false   # true = mock layer, for UI work without a backend
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=
@@ -128,9 +128,10 @@ src/
 
 ## Mock layer
 
+Mocks are opt-in for UI work: the app talks to the real API by default (`EXPO_PUBLIC_USE_MOCKS` missing or `false`).
 `EXPO_PUBLIC_USE_MOCKS=true` swaps the RTK Query base query (`store/api/baseApi.ts`) for `resolveMock` in
-`src/mocks/index.ts`. Endpoints, hooks and screens stay exactly as they will be against the real API; turning mocks
-off is the whole wiring step.
+`src/mocks/index.ts`. Endpoints, hooks and screens are the same either way, so every request/response shape change
+must update the matching mock handler to keep the mock mirroring the real backend.
 
 How a feature adds data:
 
