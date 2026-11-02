@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Building2, Search, UserRound, X } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
@@ -15,7 +14,7 @@ import {
   type CompanySummary,
   type OrganizationResult,
 } from '@/store/api/usersApi';
-import { AppText, Chip, EmptyState, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, Chip, EmptyState, GlassInput, KeyboardPadding, PressableScale, ToastHost } from '@/components/ui';
 import { FormAddButton } from './FormAddButton';
 import { UserAvatar, followUserName } from '@/components/social/UserRow';
 
@@ -74,7 +73,7 @@ function OwnerOrganizationPicker({ selected, onSelect }: OwnerOrganizationPicker
       />
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <KeyboardPadding>
           <View className="flex-1 justify-end">
             <Pressable
               accessibilityRole="button"
@@ -150,7 +149,7 @@ function OwnerOrganizationPicker({ selected, onSelect }: OwnerOrganizationPicker
               )}
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardPadding>
         <ToastHost />
       </Modal>
     </View>

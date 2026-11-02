@@ -9,6 +9,7 @@ export { GlassHeader } from './GlassHeader';
 export { GlassInput } from './GlassInput';
 export { GlassSurface } from './GlassSurface';
 export { KeyboardAwareListScroll } from './KeyboardAwareListScroll';
+export { KeyboardPadding } from './KeyboardPadding';
 export { PressableScale } from './PressableScale';
 export { Screen } from './Screen';
 export { SegmentedControl } from './SegmentedControl';

@@ -60,7 +60,7 @@ import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useToast } from '@/hooks/useToast';
-import { useFloatingBarOffset, useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useAppSelector } from '@/store/hooks';
 import {
   useGetCategoriesQuery,
@@ -1438,7 +1438,6 @@ export function EventForm({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const padding = useScreenPadding({ tabBar: !stickySubmit });
-  const floatingBarBottom = useFloatingBarOffset();
   const [submitBarHeight, setSubmitBarHeight] = useState(0);
   const isDark = useColorScheme() === 'dark';
   const toast = useToast();
@@ -1766,7 +1765,7 @@ export function EventForm({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingTop: padding.top,
-          paddingBottom: stickySubmit ? insets.bottom + 160 : padding.bottom + 72,
+          paddingBottom: stickySubmit ? insets.bottom + 160 : padding.bottom,
           paddingHorizontal: 20,
         }}
       >
@@ -2166,6 +2165,7 @@ export function EventForm({
           </FormSection>
         )}
 
+        {stickySubmit ? null : <View className="mt-6">{submitButton}</View>}
       </KeyboardAwareScrollView>
 
       {stickySubmit ? (
@@ -2174,17 +2174,7 @@ export function EventForm({
             {submitButton}
           </GlassSurface>
         </View>
-      ) : (
-        <View
-          className="absolute left-5 right-5"
-          style={{ bottom: floatingBarBottom }}
-          onLayout={(event) => setSubmitBarHeight(event.nativeEvent.layout.height)}
-        >
-          <View className="rounded-[12px]" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-            {submitButton}
-          </View>
-        </View>
-      )}
+      ) : null}
 
       <PaymentSetupSheet kind={paymentSetup} onClose={() => setPaymentSetup(null)} onContractSigned={() => setContractSigned(true)} />
     </View>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { CreditCard, X } from 'lucide-react-native';
@@ -13,7 +13,7 @@ import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useToast } from '@/hooks/useToast';
 import { useGetStripeConnectUrlMutation, useSignContractMutation, type SignContractInput } from '@/store/api/eventFormApi';
-import { AppText, GlassButton, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, GlassButton, GlassInput, KeyboardPadding, PressableScale, ToastHost } from '@/components/ui';
 
 import type { PaymentSetupKind } from './eventFormRules';
 import { sheetBottomPad } from '@/hooks/useScreenPadding';
@@ -184,7 +184,7 @@ export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSe
 
   return (
     <Modal visible={kind != null} transparent animationType="fade" onRequestClose={close} statusBarTranslucent navigationBarTranslucent>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardPadding>
         <View className="flex-1 justify-end" style={{ paddingTop: insets.top + 8 }}>
           <Pressable
             accessibilityRole="button"
@@ -245,7 +245,7 @@ export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSe
             ) : null}
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardPadding>
       <ToastHost />
     </Modal>
   );

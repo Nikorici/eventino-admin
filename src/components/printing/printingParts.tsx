@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, View, useWindowDimensions } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, TriangleAlert, type LucideIcon } from 'lucide-react-native';
 
-import { AppText, GlassButton, GlassInput, PressableScale, SlideUp } from '@/components/ui';
+import { AppText, GlassButton, GlassInput, KeyboardPadding, PressableScale, SlideUp } from '@/components/ui';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
@@ -366,7 +366,7 @@ export function PromptSheet({
   const hasInput = initialValue !== undefined;
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardPadding>
         <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
           <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
           <SlideUp>
@@ -406,7 +406,7 @@ export function PromptSheet({
           </View>
           </SlideUp>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardPadding>
     </Modal>
   );
 }

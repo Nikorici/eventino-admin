@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, RefreshControl, ScrollView, Switch, TextInput, useWindowDimensions, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import {
   GlassButton,
   GlassHeader,
   GlassInput,
+  KeyboardPadding,
   PressableScale,
   Screen,
   SegmentedControl,
@@ -158,7 +159,7 @@ function EventPickerSheet({
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardPadding>
         <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
           <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
           <SlideUp>
@@ -213,7 +214,7 @@ function EventPickerSheet({
             </View>
           </SlideUp>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardPadding>
       <ToastHost />
     </Modal>
   );

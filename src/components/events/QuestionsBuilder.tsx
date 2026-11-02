@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { ChevronDown, ChevronUp, ListChecks, Pencil, Plus, Trash2, X } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
@@ -9,7 +8,7 @@ import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { QuestionType } from '@/types/api';
-import { AppText, Chip, DashedAddButton, GlassButton, GlassInput, PressableScale } from '@/components/ui';
+import { AppText, Chip, DashedAddButton, GlassButton, GlassInput, KeyboardPadding, PressableScale } from '@/components/ui';
 
 export interface EventFormQuestion {
   id?: number | string;
@@ -227,7 +226,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
       />
 
       <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
-        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <KeyboardPadding>
           <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
             <Pressable onPress={(event) => event.stopPropagation()} className="max-h-[85%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
               <View className="mb-2 flex-row items-center justify-between px-5">
@@ -318,7 +317,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
               </ScrollView>
             </Pressable>
           </Pressable>
-        </KeyboardAvoidingView>
+        </KeyboardPadding>
       </Modal>
     </View>
   );

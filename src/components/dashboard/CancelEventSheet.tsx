@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, X } from 'lucide-react-native';
@@ -13,7 +13,7 @@ import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { useCancelEventMutation, useGetEventBuyersQuery, type EventBuyer } from '@/store/api/organizerApi';
-import { AppText, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, GlassInput, KeyboardPadding, PressableScale, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { sheetBottomPad } from '@/hooks/useScreenPadding';
 
@@ -62,7 +62,7 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardPadding>
         <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
           <Pressable className="flex-1" onPress={isLoading ? undefined : onClose} accessibilityLabel={t('Close')} />
           <View className="max-h-full rounded-t-[24px] bg-app-bg pt-4 dark:bg-dark-bg">
@@ -184,7 +184,7 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
             </View>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardPadding>
       <ToastHost />
     </Modal>
   );

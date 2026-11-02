@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Switch, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { X } from 'lucide-react-native';
 
-import { AppText, GlassInput, PressableScale, SegmentedControl, Skeleton, SlideUp, ToastHost } from '@/components/ui';
+import { AppText, GlassInput, KeyboardPadding, PressableScale, SegmentedControl, Skeleton, SlideUp, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
@@ -358,7 +358,7 @@ export function SheetModal({
   const bottomPad = sheetBottomPad(insets.bottom);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardPadding>
         <View className="flex-1 justify-end" style={{ paddingTop: insets.top + 8 }}>
           <Pressable
             accessibilityRole="button"
@@ -398,7 +398,7 @@ export function SheetModal({
           </View>
           </SlideUp>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardPadding>
       <ToastHost />
     </Modal>
   );

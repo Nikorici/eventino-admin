@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Image } from 'expo-image';
 import { Search, UserRound, X } from 'lucide-react-native';
 
@@ -10,7 +9,7 @@ import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLazyGetOrganizationsQuery, type OrganizationResult } from '@/store/api/usersApi';
-import { AppText, EmptyState, GlassInput, PressableScale, Skeleton } from '@/components/ui';
+import { AppText, EmptyState, GlassInput, KeyboardPadding, PressableScale, Skeleton } from '@/components/ui';
 import { FormAddButton } from '@/components/eventForm/FormAddButton';
 
 export interface SelectedOrganizer {
@@ -145,7 +144,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
       <FormAddButton label={t('Add Organizer')} onPress={openModal} />
 
       <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
-        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <KeyboardPadding>
           <View className="flex-1 justify-end">
             <Pressable
               accessibilityRole="button"
@@ -216,7 +215,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
               />
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardPadding>
       </Modal>
     </View>
   );

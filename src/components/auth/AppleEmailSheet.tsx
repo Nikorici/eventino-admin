@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react-native';
 
-import { AppText, GlassButton, GlassInput, ToastHost } from '@/components/ui';
+import { AppText, GlassButton, GlassInput, KeyboardPadding, ToastHost } from '@/components/ui';
 import { AppleIcon } from '@/components/brand';
 import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -45,7 +45,7 @@ export function AppleEmailSheet({ loading, error, onSubmit, onCancel }: AppleEma
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={loading ? undefined : onCancel} statusBarTranslucent navigationBarTranslucent>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardPadding>
         <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
           <Pressable className="flex-1" onPress={loading ? undefined : onCancel} accessibilityLabel={t('Close')} />
           <View className="max-h-full rounded-t-[24px] bg-app-bg pt-5 dark:bg-dark-bg">
@@ -98,7 +98,7 @@ export function AppleEmailSheet({ loading, error, onSubmit, onCancel }: AppleEma
             </View>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardPadding>
       <ToastHost />
     </Modal>
   );
