@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Check, Mail, Minus, Plus, X } from 'lucide-react-native';
 
-import { AppText, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, GlassInput, PressableScale } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { SheetModal } from '@/components/merch/merchParts';
 import { ReleaseSeatPicker } from '@/components/seatmap/ReleaseSeatPicker';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -68,7 +68,6 @@ export function ReleaseTicketSheet({
 }: ReleaseTicketSheetProps) {
   const { t } = useTranslation();
   const toast = useToast();
-  const { height: windowHeight } = useWindowDimensions();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const submitTint = useThemeColor(colors.white, colors.primary);
   const [firstName, setFirstName] = useState('');
@@ -194,224 +193,208 @@ export function ReleaseTicketSheet({
   }, [firstName, lastName, email, phone, rows, seated, venues, eventId, release, toast, t, onClose, sortedTypes]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/40">
-        <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <KeyboardAvoidingView behavior="padding">
-          <View className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg" style={{ maxHeight: windowHeight * 0.88 }}>
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px]">{t('Release Ticket Manually')}</AppText>
-              <Pressable
-                onPress={onClose}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
+    <SheetModal
+      visible={visible}
+      onClose={onClose}
+      title={t('Release Ticket Manually')}
+      footer={
+        <PressableScale
+          onPress={() => void onSubmit()}
+          disabled={isLoading}
+          accessibilityLabel={t('Release Ticket')}
+          className="h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white"
+        >
+          {isLoading ? (
+            <ActivityIndicator color={submitTint} />
+          ) : (
+            <>
+              <Mail size={18} color={submitTint} />
+              <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Release Ticket')}</AppText>
+            </>
+          )}
+        </PressableScale>
+      }
+    >
+      <View className="gap-3">
+        <InfoNote
+          text={t(
+            'Complete the form to release a ticket to a specific attendee. An email with ticket information will be sent automatically.',
+          )}
+        />
+        {seated ? (
+          <InfoNote
+            text={t(
+              'This event uses a seat map, so pick the exact seats for every ticket. The seat is printed on the ticket and included in the email.',
+            )}
+          />
+        ) : null}
+        {hasZones ? (
+          <InfoNote
+            text={t(
+              'This event has a seating map, so every ticket must be released into a zone. The zone is printed on the ticket and included in the email so the attendee knows where to go.',
+            )}
+          />
+        ) : null}
 
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-              <View className="gap-3">
-                <InfoNote
-                  text={t(
-                    'Complete the form to release a ticket to a specific attendee. An email with ticket information will be sent automatically.',
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <GlassInput
+              label={`${t('First Name')}*`}
+              placeholder={t('Enter first name')}
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+            />
+          </View>
+          <View className="flex-1">
+            <GlassInput
+              label={`${t('Last Name')}*`}
+              placeholder={t('Enter last name')}
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize="words"
+            />
+          </View>
+        </View>
+        <GlassInput
+          label={`${t('Email')}*`}
+          placeholder={t('Enter email')}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <GlassInput
+          label={`${t('Phone Number')} (${t('optional')})`}
+          placeholder={t('Enter phone number')}
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+          autoComplete="tel"
+        />
+
+        <AppText className="mt-1 font-gilroy-semibold text-[14px]">{`${t('Ticket Type')}*`}</AppText>
+        {sortedTypes.length === 0 ? (
+          <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No ticket types available')}</AppText>
+        ) : (
+          <View className="flex-row flex-wrap gap-2">
+            {sortedTypes.map((type) => {
+              const active = rows.some((row) => row.ticketTypeId === type.id);
+              const price = priceOf(type);
+              const label = price > 0 ? `${type.name} (${price} ${currency})` : `${type.name} ${t('(Free)')}`;
+              return (
+                <PressableScale
+                  key={type.id}
+                  onPress={() => toggleTicketType(type.id)}
+                  accessibilityLabel={label}
+                  className={cn(
+                    'h-10 flex-row items-center justify-center gap-1.5 rounded-full border px-4',
+                    active
+                      ? 'border-primary bg-primary dark:border-white dark:bg-white'
+                      : 'border-app-border bg-white dark:border-dark-border dark:bg-dark-surface',
                   )}
-                />
-                {seated ? (
-                  <InfoNote
-                    text={t(
-                      'This event uses a seat map, so pick the exact seats for every ticket. The seat is printed on the ticket and included in the email.',
+                >
+                  {active ? <Check size={14} color={submitTint} /> : null}
+                  <AppText
+                    className={cn(
+                      'font-gilroy-medium text-[13px]',
+                      active ? 'text-white dark:text-primary' : 'text-primary dark:text-dark-text',
                     )}
-                  />
-                ) : null}
-                {hasZones ? (
-                  <InfoNote
-                    text={t(
-                      'This event has a seating map, so every ticket must be released into a zone. The zone is printed on the ticket and included in the email so the attendee knows where to go.',
-                    )}
-                  />
-                ) : null}
+                  >
+                    {label}
+                  </AppText>
+                </PressableScale>
+              );
+            })}
+          </View>
+        )}
 
-                <View className="flex-row gap-3">
-                  <View className="flex-1">
-                    <GlassInput
-                      label={`${t('First Name')}*`}
-                      placeholder={t('Enter first name')}
-                      value={firstName}
-                      onChangeText={setFirstName}
-                      autoCapitalize="words"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <GlassInput
-                      label={`${t('Last Name')}*`}
-                      placeholder={t('Enter last name')}
-                      value={lastName}
-                      onChangeText={setLastName}
-                      autoCapitalize="words"
-                    />
-                  </View>
-                </View>
-                <GlassInput
-                  label={`${t('Email')}*`}
-                  placeholder={t('Enter email')}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                <GlassInput
-                  label={`${t('Phone Number')} (${t('optional')})`}
-                  placeholder={t('Enter phone number')}
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
-                />
-
-                <AppText className="mt-1 font-gilroy-semibold text-[14px]">{`${t('Ticket Type')}*`}</AppText>
-                {sortedTypes.length === 0 ? (
-                  <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No ticket types available')}</AppText>
-                ) : (
+        {rows.map((row) => {
+          const type = sortedTypes.find((item) => item.id === row.ticketTypeId);
+          if (!type) return null;
+          const zones = seated ? [] : zonesForTicketType(venues, row.ticketTypeId);
+          return (
+            <View key={row.ticketTypeId} className="gap-3 rounded-[14px] border p-3" style={{ borderColor: cardBorder }}>
+              <View className="flex-row items-center justify-between gap-3">
+                <AppText className="flex-1 font-gilroy-semibold text-[14px]" numberOfLines={1}>
+                  {type.name}
+                </AppText>
+                <PressableScale
+                  onPress={() => toggleTicketType(type.id)}
+                  accessibilityLabel={t('Remove')}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
+                >
+                  <X size={16} color={colors.muted} />
+                </PressableScale>
+              </View>
+              <View className="flex-row items-center gap-4">
+                <AppText className="flex-1 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('Quantity')}</AppText>
+                <PressableScale
+                  onPress={() => changeRowQuantity(type.id, -1)}
+                  accessibilityLabel={t('Decrease')}
+                  className="h-11 w-11 items-center justify-center rounded-full border"
+                  style={{ borderColor: cardBorder }}
+                >
+                  <Minus size={18} color={colors.muted} />
+                </PressableScale>
+                <AppText className="w-10 text-center font-gilroy-bold text-[18px]">{row.quantity}</AppText>
+                <PressableScale
+                  onPress={() => changeRowQuantity(type.id, 1)}
+                  accessibilityLabel={t('Increase')}
+                  className="h-11 w-11 items-center justify-center rounded-full border"
+                  style={{ borderColor: cardBorder }}
+                >
+                  <Plus size={18} color={colors.muted} />
+                </PressableScale>
+              </View>
+              {zones.length > 0 ? (
+                <View className="gap-2">
+                  <AppText className="font-gilroy-semibold text-[13px]">{`${t('Zone')}*`}</AppText>
                   <View className="flex-row flex-wrap gap-2">
-                    {sortedTypes.map((type) => {
-                      const active = rows.some((row) => row.ticketTypeId === type.id);
-                      const price = priceOf(type);
-                      const label = price > 0 ? `${type.name} (${price} ${currency})` : `${type.name} ${t('(Free)')}`;
+                    {zones.map((zone) => {
+                      const active = row.zoneId === zone.zone_id;
                       return (
                         <PressableScale
-                          key={type.id}
-                          onPress={() => toggleTicketType(type.id)}
-                          accessibilityLabel={label}
+                          key={zone.zone_id}
+                          onPress={() => setRowZone(type.id, zone.zone_id)}
+                          disabled={zone.is_full}
+                          accessibilityLabel={zoneLabel(zone)}
                           className={cn(
-                            'h-10 flex-row items-center justify-center gap-1.5 rounded-full border px-4',
+                            'h-9 flex-row items-center justify-center rounded-full border px-3',
                             active
                               ? 'border-primary bg-primary dark:border-white dark:bg-white'
                               : 'border-app-border bg-white dark:border-dark-border dark:bg-dark-surface',
+                            zone.is_full && 'opacity-40',
                           )}
                         >
-                          {active ? <Check size={14} color={submitTint} /> : null}
                           <AppText
                             className={cn(
-                              'font-gilroy-medium text-[13px]',
+                              'font-gilroy-medium text-[12px]',
                               active ? 'text-white dark:text-primary' : 'text-primary dark:text-dark-text',
                             )}
                           >
-                            {label}
+                            {zoneLabel(zone)}
                           </AppText>
                         </PressableScale>
                       );
                     })}
                   </View>
-                )}
-
-                {rows.map((row) => {
-                  const type = sortedTypes.find((item) => item.id === row.ticketTypeId);
-                  if (!type) return null;
-                  const zones = seated ? [] : zonesForTicketType(venues, row.ticketTypeId);
-                  return (
-                    <View key={row.ticketTypeId} className="gap-3 rounded-[14px] border p-3" style={{ borderColor: cardBorder }}>
-                      <View className="flex-row items-center justify-between gap-3">
-                        <AppText className="flex-1 font-gilroy-semibold text-[14px]" numberOfLines={1}>
-                          {type.name}
-                        </AppText>
-                        <PressableScale
-                          onPress={() => toggleTicketType(type.id)}
-                          accessibilityLabel={t('Remove')}
-                          className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-                        >
-                          <X size={16} color={colors.muted} />
-                        </PressableScale>
-                      </View>
-                      <View className="flex-row items-center gap-4">
-                        <AppText className="flex-1 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('Quantity')}</AppText>
-                        <PressableScale
-                          onPress={() => changeRowQuantity(type.id, -1)}
-                          accessibilityLabel={t('Decrease')}
-                          className="h-11 w-11 items-center justify-center rounded-full border"
-                          style={{ borderColor: cardBorder }}
-                        >
-                          <Minus size={18} color={colors.muted} />
-                        </PressableScale>
-                        <AppText className="w-10 text-center font-gilroy-bold text-[18px]">{row.quantity}</AppText>
-                        <PressableScale
-                          onPress={() => changeRowQuantity(type.id, 1)}
-                          accessibilityLabel={t('Increase')}
-                          className="h-11 w-11 items-center justify-center rounded-full border"
-                          style={{ borderColor: cardBorder }}
-                        >
-                          <Plus size={18} color={colors.muted} />
-                        </PressableScale>
-                      </View>
-                      {zones.length > 0 ? (
-                        <View className="gap-2">
-                          <AppText className="font-gilroy-semibold text-[13px]">{`${t('Zone')}*`}</AppText>
-                          <View className="flex-row flex-wrap gap-2">
-                            {zones.map((zone) => {
-                              const active = row.zoneId === zone.zone_id;
-                              return (
-                                <PressableScale
-                                  key={zone.zone_id}
-                                  onPress={() => setRowZone(type.id, zone.zone_id)}
-                                  disabled={zone.is_full}
-                                  accessibilityLabel={zoneLabel(zone)}
-                                  className={cn(
-                                    'h-9 flex-row items-center justify-center rounded-full border px-3',
-                                    active
-                                      ? 'border-primary bg-primary dark:border-white dark:bg-white'
-                                      : 'border-app-border bg-white dark:border-dark-border dark:bg-dark-surface',
-                                    zone.is_full && 'opacity-40',
-                                  )}
-                                >
-                                  <AppText
-                                    className={cn(
-                                      'font-gilroy-medium text-[12px]',
-                                      active ? 'text-white dark:text-primary' : 'text-primary dark:text-dark-text',
-                                    )}
-                                  >
-                                    {zoneLabel(zone)}
-                                  </AppText>
-                                </PressableScale>
-                              );
-                            })}
-                          </View>
-                        </View>
-                      ) : null}
-                      {seated ? (
-                        <ReleaseSeatPicker
-                          eventId={eventId}
-                          ticketTypeId={type.id}
-                          quantity={row.quantity}
-                          value={row.seatIds}
-                          currency={currency}
-                          onChange={(seatIds) => setRowSeats(type.id, seatIds)}
-                        />
-                      ) : null}
-                    </View>
-                  );
-                })}
-              </View>
-            </ScrollView>
-
-            <PressableScale
-              onPress={() => void onSubmit()}
-              disabled={isLoading}
-              accessibilityLabel={t('Release Ticket')}
-              className="mt-5 h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white"
-            >
-              {isLoading ? (
-                <ActivityIndicator color={submitTint} />
-              ) : (
-                <>
-                  <Mail size={18} color={submitTint} />
-                  <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Release Ticket')}</AppText>
-                </>
-              )}
-            </PressableScale>
-          </View>
-        </KeyboardAvoidingView>
+                </View>
+              ) : null}
+              {seated ? (
+                <ReleaseSeatPicker
+                  eventId={eventId}
+                  ticketTypeId={type.id}
+                  quantity={row.quantity}
+                  value={row.seatIds}
+                  currency={currency}
+                  onChange={(seatIds) => setRowSeats(type.id, seatIds)}
+                />
+              ) : null}
+            </View>
+          );
+        })}
       </View>
-      <ToastHost />
-    </Modal>
+    </SheetModal>
   );
 }

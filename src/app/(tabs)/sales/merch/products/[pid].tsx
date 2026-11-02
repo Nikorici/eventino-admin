@@ -19,7 +19,7 @@ import {
   money,
 } from '@/components/merch/merchParts';
 import { ProductInfoForm, type ProductInfoValues } from '@/components/merch/ProductInfoForm';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { extractClientErrorMessage } from '@/lib/apiError';
@@ -406,7 +406,7 @@ function ImagesSection({ product }: { product: MerchProductDetail }) {
 export default function MerchProductScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { pid } = useLocalSearchParams<{ pid: string }>();
   const productId = Number(pid);
   const { eventId } = useSelectedEvent();
@@ -488,13 +488,14 @@ export default function MerchProductScreen() {
         bottomOffset={24}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

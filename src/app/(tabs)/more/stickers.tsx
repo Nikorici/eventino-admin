@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import * as WebBrowser from 'expo-web-browser';
 import RNEventSource from 'react-native-sse';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { Lock, Printer, Sticker, X } from 'lucide-react-native';
+import { Lock, Printer, Sticker } from 'lucide-react-native';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { SheetModal } from '@/components/merch/merchParts';
 import { ToggleRow } from '@/components/printing/printingParts';
 import {
   AppText,
@@ -21,9 +21,8 @@ import {
   Screen,
   SegmentedControl,
   Skeleton,
-  ToastHost,
 } from '@/components/ui';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { API_URL, USE_MOCKS } from '@/lib/constants';
@@ -180,34 +179,6 @@ function TicketCardSkeleton() {
   );
 }
 
-function StickerSheet({ visible, title, onClose, children }: { visible: boolean; title: string; onClose: () => void; children: ReactNode }) {
-  const { t } = useTranslation();
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
-          <Pressable className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg" onPress={(event) => event.stopPropagation()}>
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText numberOfLines={1} className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
-                {title}
-              </AppText>
-              <Pressable
-                onPress={onClose}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
-            {children}
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-      <ToastHost />
-    </Modal>
-  );
-}
-
 function DefaultHint({ value }: { value: string | null | undefined }) {
   const { t } = useTranslation();
   if (!value) return null;
@@ -273,69 +244,77 @@ function StickerConfigForm({ ticket, onClose }: { ticket: ScannedTicket; onClose
   }, [generating, name, ticket, hideCompany, company, companyEdited, size, showTicketType, toast, t, onClose, fetchProfile]);
 
   return (
-    <View className="gap-4">
-      <View className="gap-1.5">
-        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Name')}</AppText>
-        <GlassInput placeholder={t('Attendee name')} value={name} onChangeText={setName} autoCapitalize="words" />
-        <DefaultHint value={ticket.attendee_name} />
-      </View>
-
-      <View className="rounded-[12px] border bg-white px-4 py-2.5 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-        <ToggleRow label={t('Show ticket type')} value={showTicketType} onChange={setShowTicketType} />
-      </View>
-
-      {!hideCompany ? (
+    <SheetModal
+      visible
+      title={t('Print sticker')}
+      onClose={onClose}
+      footer={
+        <PressableScale
+          onPress={() => {
+            void onSubmit();
+          }}
+          disabled={generating}
+          accessibilityLabel={t('Print sticker')}
+          className={cn(
+            'h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white',
+            generating && 'opacity-60',
+          )}
+        >
+          {generating ? (
+            <ActivityIndicator color={submitTint} />
+          ) : (
+            <>
+              <Printer size={18} color={submitTint} />
+              <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Print sticker')}</AppText>
+            </>
+          )}
+        </PressableScale>
+      }
+    >
+      <View className="gap-4">
         <View className="gap-1.5">
-          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Company')}</AppText>
-          <GlassInput
-            placeholder={t('Company name (optional)')}
-            value={company}
-            onChangeText={(value) => {
-              setCompanyEdited(true);
-              setCompany(value);
-            }}
-            autoCapitalize="words"
-          />
-          <DefaultHint value={ticket.company} />
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Name')}</AppText>
+          <GlassInput placeholder={t('Attendee name')} value={name} onChangeText={setName} autoCapitalize="words" />
+          <DefaultHint value={ticket.attendee_name} />
         </View>
-      ) : null}
 
-      <View className="gap-1.5">
-        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Sticker size')}</AppText>
-        <SegmentedControl<StickerSize>
-          value={size}
-          onChange={setSize}
-          options={STICKER_SIZES.map((value) => ({ value, label: SIZE_LABELS[value] }))}
-        />
+        <View className="rounded-[12px] border bg-white px-4 py-2.5 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
+          <ToggleRow label={t('Show ticket type')} value={showTicketType} onChange={setShowTicketType} />
+        </View>
+
+        {!hideCompany ? (
+          <View className="gap-1.5">
+            <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Company')}</AppText>
+            <GlassInput
+              placeholder={t('Company name (optional)')}
+              value={company}
+              onChangeText={(value) => {
+                setCompanyEdited(true);
+                setCompany(value);
+              }}
+              autoCapitalize="words"
+            />
+            <DefaultHint value={ticket.company} />
+          </View>
+        ) : null}
+
+        <View className="gap-1.5">
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Sticker size')}</AppText>
+          <SegmentedControl<StickerSize>
+            value={size}
+            onChange={setSize}
+            options={STICKER_SIZES.map((value) => ({ value, label: SIZE_LABELS[value] }))}
+          />
+        </View>
       </View>
-
-      <PressableScale
-        onPress={() => {
-          void onSubmit();
-        }}
-        disabled={generating}
-        accessibilityLabel={t('Print sticker')}
-        className={cn(
-          'mt-1 h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white',
-          generating && 'opacity-60',
-        )}
-      >
-        {generating ? (
-          <ActivityIndicator color={submitTint} />
-        ) : (
-          <>
-            <Printer size={18} color={submitTint} />
-            <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Print sticker')}</AppText>
-          </>
-        )}
-      </PressableScale>
-    </View>
+    </SheetModal>
   );
 }
 
 export default function StickersScreen() {
   const { t } = useTranslation();
   const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const spinnerColor = useThemeColor('#2b3a44', '#f9f9f9');
   const userId = useAppSelector((state) => state.auth.user?.id);
 
@@ -410,7 +389,8 @@ export default function StickersScreen() {
         }
         onEndReached={onEndReached}
         onEndReachedThreshold={0.4}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -418,14 +398,12 @@ export default function StickersScreen() {
             onRefresh={onRefresh}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       />
 
-      <StickerSheet visible={activeTicket != null} title={t('Print sticker')} onClose={() => setActiveTicket(null)}>
-        {activeTicket ? <StickerConfigForm key={activeTicket.uuid} ticket={activeTicket} onClose={() => setActiveTicket(null)} /> : null}
-      </StickerSheet>
+      {activeTicket ? <StickerConfigForm key={activeTicket.uuid} ticket={activeTicket} onClose={() => setActiveTicket(null)} /> : null}
     </Screen>
   );
 }

@@ -1,4 +1,4 @@
-import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Clock, Pencil, Trash2, X } from 'lucide-react-native';
@@ -14,7 +14,7 @@ import {
   useGetScheduledEmailsQuery,
   type ScheduledEmail,
 } from '@/store/api/messageSubscribersApi';
-import { AppText, EmptyState, PressableScale, Skeleton, ToastHost } from '@/components/ui';
+import { AppText, EmptyState, PressableScale, Skeleton, SlideUp, ToastHost } from '@/components/ui';
 import { confirmAction } from '@/components/dashboard/dashboardParts';
 
 export interface ScheduledEmailsSheetProps {
@@ -101,6 +101,7 @@ function ScheduledEmailRow({
 export function ScheduledEmailsSheet({ onClose, onEdit, onScheduleNew }: ScheduledEmailsSheetProps) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
+  const { height: windowHeight } = useWindowDimensions();
   const { data, isLoading, isError, refetch } = useGetScheduledEmailsQuery(undefined, { refetchOnMountOrArgChange: true });
   const [deleteScheduledEmail, { isLoading: deleting }] = useDeleteScheduledEmailMutation();
   const scheduledEmails = data ?? [];
@@ -128,10 +129,11 @@ export function ScheduledEmailsSheet({ onClose, onEdit, onScheduleNew }: Schedul
   };
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/40">
         <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <View className="h-[70%] rounded-t-[24px] bg-app-bg px-5 pb-8 pt-4 dark:bg-dark-bg">
+        <SlideUp>
+        <View className="rounded-t-[24px] bg-app-bg px-5 pb-8 pt-4 dark:bg-dark-bg" style={{ height: windowHeight * 0.7 }}>
           <View className="mb-4 flex-row items-center justify-between">
             <AppText className="font-gilroy-bold text-[20px] leading-[26px]">{t('Scheduled Emails')}</AppText>
             <Pressable
@@ -180,6 +182,7 @@ export function ScheduledEmailsSheet({ onClose, onEdit, onScheduleNew }: Schedul
             </ScrollView>
           )}
         </View>
+        </SlideUp>
       </View>
       <ToastHost />
     </Modal>

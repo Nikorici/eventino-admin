@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, Ban, ClipboardList } from 'lucide-react-native';
 
@@ -21,7 +22,7 @@ import {
 import { QuestionSheet } from '@/components/formManagement/QuestionSheet';
 import { ResponsesTab } from '@/components/formManagement/ResponsesTab';
 import { StatisticsSkeleton, StatisticsTab, TilesSkeleton } from '@/components/formManagement/StatisticsTab';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
 import { haptics } from '@/lib/haptics';
@@ -57,7 +58,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 export default function FormManagementScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } =
     useSelectedEvent();
   const cancelled = event?.is_cancelled === true;
@@ -205,16 +206,18 @@ export default function FormManagementScreen() {
   return (
     <Screen edges={[]}>
       <GlassHeader title={t('Form Management')} onBack={navigate.back} />
-      <ScrollView
+      <KeyboardAwareScrollView
+        bottomOffset={24}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >
@@ -224,7 +227,7 @@ export default function FormManagementScreen() {
           </AppText>
           {renderBody()}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {sheet ? (
         <QuestionSheet

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, X } from 'lucide-react-native';
 
@@ -191,7 +191,6 @@ export function QuestionSheet({
   onSave: (question: FormQuestion) => void;
 }) {
   const { t } = useTranslation();
-  const { height } = useWindowDimensions();
   const mutedIcon = useThemeColor(colors.muted, colors.dark.textSecondary);
   const [draft, setDraft] = useState<FormQuestion>(initial);
   const [newOption, setNewOption] = useState('');
@@ -259,13 +258,22 @@ export function QuestionSheet({
   };
 
   return (
-    <SheetModal visible onClose={onClose} title={isEditing ? t('Edit Question') : t('Add Question')}>
-      <ScrollView
-        style={{ maxHeight: height * 0.72 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ gap: 16, paddingBottom: 4 }}
-      >
+    <SheetModal
+      visible
+      onClose={onClose}
+      title={isEditing ? t('Edit Question') : t('Add Question')}
+      footer={
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <FormButton size="lg" label={t('Cancel')} onPress={onClose} />
+          </View>
+          <View className="flex-1">
+            <FormButton primary size="lg" label={isEditing ? t('Update Question') : t('Add Question')} onPress={submit} />
+          </View>
+        </View>
+      }
+    >
+      <View className="gap-4 pb-1">
         <View className="gap-1.5">
           <FieldLabel label={t('Question Text')} required />
           <GlassInput
@@ -430,15 +438,6 @@ export function QuestionSheet({
             )}
           </View>
         ) : null}
-      </ScrollView>
-
-      <View className="mt-5 flex-row gap-3">
-        <View className="flex-1">
-          <FormButton size="lg" label={t('Cancel')} onPress={onClose} />
-        </View>
-        <View className="flex-1">
-          <FormButton primary size="lg" label={isEditing ? t('Update Question') : t('Add Question')} onPress={submit} />
-        </View>
       </View>
     </SheetModal>
   );

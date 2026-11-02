@@ -9,7 +9,7 @@ import { AppText, EmptyState, GlassHeader, PressableScale, Screen, SegmentedCont
 import { confirmAction } from '@/components/dashboard/dashboardParts';
 import { TicketTypeCard, TicketTypeCardSkeleton } from '@/components/ticket-types/TicketTypeCard';
 import { TicketTypeSheet } from '@/components/ticket-types/TicketTypeSheet';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -34,7 +34,7 @@ const ItemSeparator = () => <View className="h-2.5" />;
 export default function TicketTypesScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const headerIconTint = useThemeColor(colors.primary, colors.dark.text);
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } =
     useSelectedEvent();
@@ -228,14 +228,15 @@ export default function TicketTypesScreen() {
           </View>
         }
         ListEmptyComponent={renderEmpty()}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       />

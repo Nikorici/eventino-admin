@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Mail, ShieldCheck, Tag, X } from 'lucide-react-native';
+import { Mail, ShieldCheck, Tag } from 'lucide-react-native';
 
 import { ProviderButton } from '@/components/auth/SocialSignIn';
 import { AppleIcon, GoogleIcon } from '@/components/brand';
-import { AppText, GlassButton, GlassInput, ToastHost } from '@/components/ui';
+import { AppText, GlassButton, GlassInput } from '@/components/ui';
+import { SheetModal } from '@/components/merch/merchParts';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoogleSignIn } from '@/hooks/useGoogleSignIn';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -153,120 +154,110 @@ export function AddOrganizerAccountModal({ visible, onClose }: { visible: boolea
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={close}>
-          <Pressable
-            className="gap-4 rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View className="flex-row items-start justify-between gap-3">
-              <View className="flex-1 gap-1">
-                <AppText className="font-gilroy-bold text-[20px]">{t('Link another organizer')}</AppText>
-                <AppText className="font-gilroy-medium text-[13px] text-muted">
-                  {t('Sign in with another organizer account to manage them from one place.')}
-                </AppText>
-              </View>
-              <Pressable
-                onPress={close}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
+    <SheetModal
+      visible={visible}
+      onClose={close}
+      title={t('Link another organizer')}
+      footer={
+        mode === 'otp' ? (
+          codeSent ? (
+            <GlassButton
+              label={t('Link account')}
+              onPress={() => void onLink()}
+              loading={linking}
+              disabled={linking || code.length !== 6}
+            />
+          ) : (
+            <GlassButton label={t('Send code')} onPress={() => void onSendCode()} loading={sending} disabled={sending} />
+          )
+        ) : undefined
+      }
+    >
+      <View className="gap-4">
+        <AppText className="font-gilroy-medium text-[13px] text-muted">
+          {t('Sign in with another organizer account to manage them from one place.')}
+        </AppText>
 
+        <GlassInput
+          label={t('Nickname')}
+          value={nickname}
+          onChangeText={setNickname}
+          placeholder={t('Optional label (e.g. Work, Agency)')}
+          autoCorrect={false}
+          leftIcon={<Tag size={18} color={iconColor} />}
+        />
+
+        {mode === 'choose' ? (
+          <View className="gap-3">
+            <ProviderButton
+              tone="google"
+              label={t('Continue with Google')}
+              onPress={() => void onGoogle()}
+              loading={provider === 'google'}
+              disabled={busy}
+              icon={<GoogleIcon size={20} />}
+            />
+            <ProviderButton
+              tone="apple"
+              label={t('Continue with Apple')}
+              onPress={() => void onApple()}
+              loading={provider === 'apple'}
+              disabled={busy}
+              icon={<AppleIcon size={20} color="#ffffff" />}
+            />
+            <GlassButton
+              variant="secondary"
+              label={t('Continue with email code')}
+              onPress={() => setMode('otp')}
+              disabled={busy}
+              icon={<Mail size={18} color={iconColor} />}
+            />
+          </View>
+        ) : (
+          <View className="gap-3">
             <GlassInput
-              label={t('Nickname')}
-              value={nickname}
-              onChangeText={setNickname}
-              placeholder={t('Optional label (e.g. Work, Agency)')}
+              label={t('Email')}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="name@domain.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
               autoCorrect={false}
-              leftIcon={<Tag size={18} color={iconColor} />}
+              autoComplete="email"
+              textContentType="emailAddress"
+              editable={!codeSent && !sending}
+              error={emailError || undefined}
+              onSubmitEditing={() => void onSendCode()}
+              leftIcon={<Mail size={18} color={iconColor} />}
             />
 
-            {mode === 'choose' ? (
-              <View className="gap-3">
-                <ProviderButton
-                  tone="google"
-                  label={t('Continue with Google')}
-                  onPress={() => void onGoogle()}
-                  loading={provider === 'google'}
-                  disabled={busy}
-                  icon={<GoogleIcon size={20} />}
-                />
-                <ProviderButton
-                  tone="apple"
-                  label={t('Continue with Apple')}
-                  onPress={() => void onApple()}
-                  loading={provider === 'apple'}
-                  disabled={busy}
-                  icon={<AppleIcon size={20} color="#ffffff" />}
-                />
-                <GlassButton
-                  variant="secondary"
-                  label={t('Continue with email code')}
-                  onPress={() => setMode('otp')}
-                  disabled={busy}
-                  icon={<Mail size={18} color={iconColor} />}
-                />
-              </View>
-            ) : (
-              <View className="gap-3">
+            {codeSent ? (
+              <>
+                <AppText className="font-gilroy-medium text-[13px] text-muted">
+                  {`${t('We sent a 6-digit code to')} ${email.trim()}`}
+                </AppText>
                 <GlassInput
-                  label={t('Email')}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="name@domain.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  autoComplete="email"
-                  textContentType="emailAddress"
-                  editable={!codeSent && !sending}
-                  error={emailError || undefined}
-                  onSubmitEditing={() => void onSendCode()}
-                  leftIcon={<Mail size={18} color={iconColor} />}
+                  label={t('Verification code')}
+                  value={code}
+                  onChangeText={(next) => setCode(next.replace(/[^0-9]/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  keyboardType="number-pad"
+                  textContentType="oneTimeCode"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  editable={!linking}
+                  error={codeError || undefined}
+                  onSubmitEditing={() => void onLink()}
+                  leftIcon={<ShieldCheck size={18} color={iconColor} />}
                 />
+                <GlassButton variant="secondary" label={t('Change email')} onPress={changeEmail} disabled={linking} />
+              </>
+            ) : null}
 
-                {codeSent ? (
-                  <>
-                    <AppText className="font-gilroy-medium text-[13px] text-muted">
-                      {`${t('We sent a 6-digit code to')} ${email.trim()}`}
-                    </AppText>
-                    <GlassInput
-                      label={t('Verification code')}
-                      value={code}
-                      onChangeText={(next) => setCode(next.replace(/[^0-9]/g, '').slice(0, 6))}
-                      placeholder="000000"
-                      keyboardType="number-pad"
-                      textContentType="oneTimeCode"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      editable={!linking}
-                      error={codeError || undefined}
-                      onSubmitEditing={() => void onLink()}
-                      leftIcon={<ShieldCheck size={18} color={iconColor} />}
-                    />
-                    <GlassButton
-                      label={t('Link account')}
-                      onPress={() => void onLink()}
-                      loading={linking}
-                      disabled={linking || code.length !== 6}
-                    />
-                    <GlassButton variant="secondary" label={t('Change email')} onPress={changeEmail} disabled={linking} />
-                  </>
-                ) : (
-                  <GlassButton label={t('Send code')} onPress={() => void onSendCode()} loading={sending} disabled={sending} />
-                )}
-
-                <GlassButton variant="ghost" label={t('Back')} onPress={() => setMode('choose')} disabled={sending || linking} />
-              </View>
-            )}
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-      <ToastHost />
-    </Modal>
+            <GlassButton variant="ghost" label={t('Back')} onPress={() => setMode('choose')} disabled={sending || linking} />
+          </View>
+        )}
+      </View>
+    </SheetModal>
   );
 }

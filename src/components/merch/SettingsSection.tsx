@@ -5,24 +5,13 @@ import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { Check, Copy, Store } from 'lucide-react-native';
 
-import { AppText, Chip, EmptyState, GlassHeader, GlassInput, Screen, Skeleton } from '@/components/ui';
-import {
-  MerchNav,
-  MultilineInput,
-  PRICE_PATTERN,
-  PrimaryButton,
-  SecondaryButton,
-  SectionLabel,
-  ToggleRow,
-  useCardBorder,
-} from '@/components/merch/merchParts';
+import { AppText, Chip, EmptyState, GlassInput, Skeleton } from '@/components/ui';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
+import { extractClientErrorMessage } from '@/lib/apiError';
 import { haptics } from '@/lib/haptics';
-import { navigate } from '@/lib/nav';
 import {
   MERCH_CURRENCIES,
   useGetMerchSettingsQuery,
@@ -30,6 +19,16 @@ import {
   type MerchSettings,
 } from '@/store/api/merchApi';
 import { colors } from '@/theme/colors';
+
+import {
+  MultilineInput,
+  PRICE_PATTERN,
+  PrimaryButton,
+  SecondaryButton,
+  SectionLabel,
+  ToggleRow,
+  useCardBorder,
+} from './merchParts';
 
 function embedSnippet(slug: string): string {
   return (
@@ -161,7 +160,7 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
   );
 }
 
-export default function MerchSettingsScreen() {
+export function SettingsSection() {
   const { t } = useTranslation();
   const padding = useScreenPadding();
   const { eventId, data: event, refetch: refetchEvent } = useSelectedEvent();
@@ -203,30 +202,21 @@ export default function MerchSettingsScreen() {
   };
 
   return (
-    <Screen edges={[]}>
-      <GlassHeader title={t('Merch Store')} onBack={navigate.back} />
-      <KeyboardAwareScrollView
-        bottomOffset={24}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => void onRefresh()}
-            tintColor={colors.muted}
-            progressViewOffset={padding.top}
-          />
-        }
-      >
-        <View className="gap-4">
-          <MerchNav active="settings" />
-          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
-            {t("Configure your event's merch storefront")}
-          </AppText>
-          {renderBody()}
-        </View>
-      </KeyboardAwareScrollView>
-    </Screen>
+    <KeyboardAwareScrollView
+      bottomOffset={24}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingTop: 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={colors.muted} />
+      }
+    >
+      <View className="gap-4">
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
+          {t("Configure your event's merch storefront")}
+        </AppText>
+        {renderBody()}
+      </View>
+    </KeyboardAwareScrollView>
   );
 }

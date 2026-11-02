@@ -6,7 +6,7 @@ import { GlassInput } from '@/components/ui';
 import { useToast } from '@/hooks/useToast';
 import type { MerchProductPatch } from '@/store/api/merchApi';
 
-import { MultilineInput, PRICE_PATTERN, PrimaryButton, ToggleRow } from './merchParts';
+import { MultilineInput, PRICE_PATTERN, PrimaryButton, SheetModal, ToggleRow } from './merchParts';
 
 export interface ProductInfoValues {
   name: string;
@@ -30,10 +30,12 @@ export function ProductInfoForm({
   initial,
   saving,
   onSubmit,
+  sheet,
 }: {
   initial?: MerchProductPatch;
   saving: boolean;
   onSubmit: (values: ProductInfoValues) => void;
+  sheet?: { title: string; onClose: () => void };
 }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -58,7 +60,7 @@ export function ProductInfoForm({
     onSubmit(values);
   };
 
-  return (
+  const fields = (
     <View className="gap-4">
       <GlassInput
         label={t('Name')}
@@ -98,9 +100,22 @@ export function ProductInfoForm({
         value={form.is_active}
         onValueChange={(next) => update('is_active', next)}
       />
-      <View className="mt-1">
-        <PrimaryButton label={t('Save')} onPress={submit} loading={saving} />
-      </View>
+    </View>
+  );
+  const saveButton = <PrimaryButton label={t('Save')} onPress={submit} loading={saving} />;
+
+  if (sheet) {
+    return (
+      <SheetModal visible title={sheet.title} onClose={sheet.onClose} footer={saveButton}>
+        {fields}
+      </SheetModal>
+    );
+  }
+
+  return (
+    <View className="gap-4">
+      {fields}
+      <View className="mt-1">{saveButton}</View>
     </View>
   );
 }

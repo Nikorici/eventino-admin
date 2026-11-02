@@ -10,7 +10,7 @@ import {
   View,
   type TextInputProps,
 } from 'react-native';
-import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -60,7 +60,7 @@ import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useToast } from '@/hooks/useToast';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useFloatingBarOffset, useScreenPadding } from '@/hooks/useScreenPadding';
 import { useAppSelector } from '@/store/hooks';
 import {
   useGetCategoriesQuery,
@@ -629,8 +629,8 @@ function ToggleRow({ label, description, value, onValueChange, icon, disabled }:
           ) : null}
         </View>
       </View>
-      <View className={cn('h-[26px] w-[44px] justify-center rounded-full p-[3px]', value ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
-        <View className={cn('h-5 w-5 rounded-full bg-white dark:bg-dark-bg', value && 'self-end')} />
+      <View className={cn('h-[26px] w-[44px] justify-center overflow-hidden rounded-full p-[3px]', value ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
+        <View className={cn('aspect-square h-full rounded-full bg-white dark:bg-dark-bg', value && 'self-end')} />
       </View>
     </PressableScale>
   );
@@ -824,8 +824,9 @@ function CurrencyPill({ currency, onSelect }: CurrencyPillProps) {
       </PressableScale>
 
       <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
-        <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
-          <Pressable onPress={(event) => event.stopPropagation()} className="rounded-t-[20px] bg-app-bg pb-9 pt-3 dark:bg-dark-surface">
+        <View className="flex-1 justify-end">
+          <Pressable onPress={() => setModalOpen(false)} style={StyleSheet.absoluteFill} className="bg-black/40" />
+          <View className="rounded-t-[20px] bg-app-bg pb-9 pt-3 dark:bg-dark-surface">
             <View className="mb-2 flex-row items-center justify-between px-5">
               <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Currency')}</AppText>
               <PressableScale
@@ -862,8 +863,8 @@ function CurrencyPill({ currency, onSelect }: CurrencyPillProps) {
                 );
               })}
             </View>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
         <ToastHost />
       </Modal>
     </>
@@ -1249,8 +1250,9 @@ function CategorySelect({ value, onChange, categories, loading }: CategorySelect
       </PressableScale>
 
       <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
-        <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
-          <Pressable onPress={(event) => event.stopPropagation()} className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
+        <View className="flex-1 justify-end">
+          <Pressable onPress={() => setModalOpen(false)} style={StyleSheet.absoluteFill} className="bg-black/40" />
+          <View className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
             <View className="mb-2 flex-row items-center justify-between px-5">
               <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Category')}</AppText>
               <PressableScale
@@ -1303,8 +1305,8 @@ function CategorySelect({ value, onChange, categories, loading }: CategorySelect
                 );
               }}
             />
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
         <ToastHost />
       </Modal>
     </>
@@ -1436,6 +1438,7 @@ export function EventForm({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const padding = useScreenPadding({ tabBar: !stickySubmit });
+  const floatingBarBottom = useFloatingBarOffset();
   const [submitBarHeight, setSubmitBarHeight] = useState(0);
   const isDark = useColorScheme() === 'dark';
   const toast = useToast();
@@ -2167,23 +2170,19 @@ export function EventForm({
 
       {stickySubmit ? (
         <View className="absolute bottom-0 left-0 right-0" onLayout={(event) => setSubmitBarHeight(event.nativeEvent.layout.height)}>
-          <KeyboardStickyView offset={{ opened: insets.bottom }}>
-            <GlassSurface elevation="high" className="rounded-b-none border-b-0 px-5 pt-4" style={{ paddingBottom: insets.bottom + 12 }}>
-              {submitButton}
-            </GlassSurface>
-          </KeyboardStickyView>
+          <GlassSurface elevation="high" className="rounded-b-none border-b-0 px-5 pt-4" style={{ paddingBottom: insets.bottom + 12 }}>
+            {submitButton}
+          </GlassSurface>
         </View>
       ) : (
         <View
           className="absolute left-5 right-5"
-          style={{ bottom: padding.bottom - 12 }}
+          style={{ bottom: floatingBarBottom }}
           onLayout={(event) => setSubmitBarHeight(event.nativeEvent.layout.height)}
         >
-          <KeyboardStickyView offset={{ opened: padding.bottom - 24 }}>
-            <View className="rounded-[12px]" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-              {submitButton}
-            </View>
-          </KeyboardStickyView>
+          <View className="rounded-[12px]" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+            {submitButton}
+          </View>
         </View>
       )}
 

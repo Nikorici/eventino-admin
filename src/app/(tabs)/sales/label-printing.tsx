@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { Lock, Printer as PrinterIcon } from 'lucide-react-native';
 
@@ -18,7 +19,7 @@ import {
   unavailablePrinterLabel,
 } from '@/components/printing/printingLogic';
 import { ErrorText, FieldBlock, Notice, SectionHeading, SelectField } from '@/components/printing/printingParts';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEventId } from '@/hooks/useSelectedEvent';
 import { extractApiError } from '@/lib/apiError';
 import { navigate } from '@/lib/nav';
@@ -58,7 +59,7 @@ const isDenied = (error: unknown) =>
 
 export default function LabelPrintingScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const eventId = useSelectedEventId();
   const skip = eventId == null;
   const settingsQuery = useGetEventPrintSettingsQuery(eventId ?? 0, { skip });
@@ -232,13 +233,15 @@ export default function LabelPrintingScreen() {
   return (
     <Screen edges={[]}>
       <GlassHeader title={t('Label Printing')} onBack={navigate.back} />
-      <ScrollView
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />}
       >
         {body()}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

@@ -21,7 +21,7 @@ export interface SegmentedControlProps<T extends string> {
 
 export function SegmentedControl<T extends string>({ options, value, onChange, className, compact }: SegmentedControlProps<T>) {
   return (
-    <View className={cn('h-11 flex-row rounded-full border border-app-border bg-white/70 p-1 dark:border-dark-border dark:bg-white/10', className)}>
+    <View className={cn('h-11 flex-row overflow-hidden rounded-full border border-app-border bg-white/70 p-1 dark:border-dark-border dark:bg-white/10', className)}>
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -33,7 +33,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, c
                 onChange(option.value);
               }}
               accessibilityLabel={option.label}
-              className={cn('h-[34px] w-full items-center justify-center rounded-full', active && 'bg-primary dark:bg-white')}
+              className={cn('h-full w-full items-center justify-center rounded-full', active && 'bg-primary dark:bg-white')}
             >
               <AppText
                 numberOfLines={1}

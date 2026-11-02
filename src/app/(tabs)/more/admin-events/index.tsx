@@ -37,7 +37,7 @@ import {
 } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -512,6 +512,7 @@ export default function AdminEventsScreen() {
   const { t } = useTranslation();
   const toast = useToast();
   const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { isAuthenticated, user } = useAuth();
   const selectEvent = useSelectEvent();
   const spinnerColor = useThemeColor(colors.primary, colors.dark.text);
@@ -705,14 +706,15 @@ export default function AdminEventsScreen() {
         onEndReachedThreshold={0.5}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, FlatList, Modal, Pressable, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Building2, Search, UserRound, X } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
@@ -73,73 +74,83 @@ function OwnerOrganizationPicker({ selected, onSelect }: OwnerOrganizationPicker
       />
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable onPress={() => setOpen(false)} className="flex-1 justify-end bg-black/40">
-          <Pressable onPress={(event) => event.stopPropagation()} className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
-            <View className="mb-2 flex-row items-center justify-between px-5">
-              <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Select Organizer')}</AppText>
-              <PressableScale
-                onPress={() => setOpen(false)}
-                accessibilityLabel={t('Done')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/10"
-              >
-                <X size={17} color={mutedIcon} />
-              </PressableScale>
-            </View>
-            <View className="px-5 pb-3">
-              <GlassInput
-                placeholder={t('Search users or organizations...')}
-                value={search}
-                onChangeText={setSearch}
-                autoCapitalize="none"
-                leftIcon={<Search size={16} color={mutedIcon} />}
-              />
-            </View>
-            {isFetching && results.length === 0 ? (
-              <ActivityIndicator className="mt-8" color={mutedIcon} />
-            ) : (
-              <FlatList
-                data={results}
-                keyExtractor={(item) => String(item.id)}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 8 }}
-                ListEmptyComponent={<EmptyState icon={UserRound} title={t('No users found')} />}
-                renderItem={({ item }) => {
-                  const active = selected?.id === item.id;
-                  return (
-                    <View className="flex-row items-center gap-3 rounded-[12px] border border-app-border bg-app-surface px-3 py-2.5 dark:border-dark-border dark:bg-dark-bg">
-                      <UserAvatar uri={item.profile_image} name={followUserName(item)} size={40} />
-                      <View className="flex-1">
-                        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
-                          {followUserName(item)}
-                        </AppText>
-                        {item.is_organization ? (
-                          <View className="mt-1 flex-row items-center gap-1">
-                            <Building2 size={12} color={mutedIcon} />
-                            <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('Organization')}</AppText>
-                          </View>
-                        ) : null}
+        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+          <View className="flex-1 justify-end">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('Close')}
+              onPress={() => setOpen(false)}
+              style={StyleSheet.absoluteFill}
+              className="bg-black/40"
+            />
+            <View className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
+              <View className="mb-2 flex-row items-center justify-between px-5">
+                <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Select Organizer')}</AppText>
+                <PressableScale
+                  onPress={() => setOpen(false)}
+                  accessibilityLabel={t('Done')}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/10"
+                >
+                  <X size={17} color={mutedIcon} />
+                </PressableScale>
+              </View>
+              <View className="px-5 pb-3">
+                <GlassInput
+                  placeholder={t('Search users or organizations...')}
+                  value={search}
+                  onChangeText={setSearch}
+                  autoCapitalize="none"
+                  leftIcon={<Search size={16} color={mutedIcon} />}
+                />
+              </View>
+              {isFetching && results.length === 0 ? (
+                <ActivityIndicator className="mt-8" color={mutedIcon} />
+              ) : (
+                <FlatList
+                  data={results}
+                  keyExtractor={(item) => String(item.id)}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                  contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 8 }}
+                  ListEmptyComponent={<EmptyState icon={UserRound} title={t('No users found')} />}
+                  renderItem={({ item }) => {
+                    const active = selected?.id === item.id;
+                    return (
+                      <View className="flex-row items-center gap-3 rounded-[12px] border border-app-border bg-app-surface px-3 py-2.5 dark:border-dark-border dark:bg-dark-bg">
+                        <UserAvatar uri={item.profile_image} name={followUserName(item)} size={40} />
+                        <View className="flex-1">
+                          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
+                            {followUserName(item)}
+                          </AppText>
+                          {item.is_organization ? (
+                            <View className="mt-1 flex-row items-center gap-1">
+                              <Building2 size={12} color={mutedIcon} />
+                              <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('Organization')}</AppText>
+                            </View>
+                          ) : null}
+                        </View>
+                        <PressableScale
+                          onPress={() => {
+                            haptics.selection();
+                            onSelect(item);
+                            setOpen(false);
+                          }}
+                          disabled={active}
+                          accessibilityLabel={active ? t('Selected') : t('Select')}
+                          className={cn('h-8 justify-center rounded-full px-3.5', active ? 'bg-black/[0.06] dark:bg-white/10' : 'bg-primary dark:bg-white')}
+                        >
+                          <AppText className={cn('font-gilroy-semibold text-[13px]', active ? 'text-muted' : 'text-white dark:text-dark-bg')}>
+                            {active ? t('Selected') : t('Select')}
+                          </AppText>
+                        </PressableScale>
                       </View>
-                      <PressableScale
-                        onPress={() => {
-                          haptics.selection();
-                          onSelect(item);
-                          setOpen(false);
-                        }}
-                        disabled={active}
-                        accessibilityLabel={active ? t('Selected') : t('Select')}
-                        className={cn('h-8 justify-center rounded-full px-3.5', active ? 'bg-black/[0.06] dark:bg-white/10' : 'bg-primary dark:bg-white')}
-                      >
-                        <AppText className={cn('font-gilroy-semibold text-[13px]', active ? 'text-muted' : 'text-white dark:text-dark-bg')}>
-                          {active ? t('Selected') : t('Select')}
-                        </AppText>
-                      </PressableScale>
-                    </View>
-                  );
-                }}
-              />
-            )}
-          </Pressable>
-        </Pressable>
+                    );
+                  }}
+                />
+              )}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
         <ToastHost />
       </Modal>
     </View>

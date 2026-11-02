@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, RefreshControl, ScrollView, Switch, TextInput, useWindowDimensions, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { useTranslation } from 'react-i18next';
 import { Building2, Check, ChevronDown, Download, FileText, Lock, Receipt, ScrollText, Search, type LucideIcon } from 'lucide-react-native';
@@ -18,10 +19,11 @@ import {
   Screen,
   SegmentedControl,
   Skeleton,
+  SlideUp,
   ToastHost,
 } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
@@ -142,6 +144,7 @@ function EventPickerSheet({
 }) {
   const { t } = useTranslation();
   const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const checkColor = useThemeColor(colors.primary, colors.dark.text);
 
@@ -154,56 +157,63 @@ function EventPickerSheet({
   }, [events, query]);
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/40">
-        <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <View className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-bg" style={{ maxHeight: height * 0.72 }}>
-          <View className="mb-2 h-1 w-10 self-center rounded-full bg-black/15 dark:bg-white/20" />
-          <AppText className="px-5 pb-2 font-gilroy-bold text-[18px] leading-[24px]">{t('Select an event')}</AppText>
-          <View className="mx-5 mb-2 h-11 flex-row items-center gap-2 rounded-[10px] border border-app-border bg-app-surface px-3 dark:border-dark-border dark:bg-dark-surface">
-            <Search size={17} color={colors.muted} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder={t('Search events by name or country')}
-              placeholderTextColor={colors.muted}
-              autoCapitalize="none"
-              autoCorrect={false}
-              accessibilityLabel={t('Search events by name or country')}
-              textAlignVertical="center"
-              style={{ includeFontPadding: false }}
-              className="h-11 flex-1 font-gilroy text-[16px] text-primary dark:text-dark-text"
-            />
-          </View>
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-            {filtered.length === 0 ? (
-              <AppText className="px-5 py-6 font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">{t('No events found')}</AppText>
-            ) : (
-              filtered.map((event) => (
-                <PressableScale
-                  key={event.id}
-                  onPress={() => {
-                    haptics.selection();
-                    onSelect(event);
-                  }}
-                  accessibilityLabel={eventLabel(event)}
-                  className="w-full flex-row items-center justify-between px-5 py-3"
-                >
-                  <View className="flex-1 pr-3">
-                    <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
-                      {eventLabel(event)}
-                    </AppText>
-                    <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
-                      {eventMeta(event, lang)}
-                    </AppText>
-                  </View>
-                  {event.id === selectedId ? <Check size={18} color={checkColor} /> : <View className="h-[18px] w-[18px]" />}
-                </PressableScale>
-              ))
-            )}
-          </ScrollView>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
+          <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
+          <SlideUp>
+            <View
+              className="shrink rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-bg"
+              style={{ maxHeight: height * 0.72, paddingBottom: Math.max(insets.bottom, 32) }}
+            >
+              <View className="mb-2 h-1 w-10 self-center rounded-full bg-black/15 dark:bg-white/20" />
+              <AppText className="px-5 pb-2 font-gilroy-bold text-[18px] leading-[24px]">{t('Select an event')}</AppText>
+              <View className="mx-5 mb-2 h-11 flex-row items-center gap-2 rounded-[10px] border border-app-border bg-app-surface px-3 dark:border-dark-border dark:bg-dark-surface">
+                <Search size={17} color={colors.muted} />
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder={t('Search events by name or country')}
+                  placeholderTextColor={colors.muted}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  accessibilityLabel={t('Search events by name or country')}
+                  textAlignVertical="center"
+                  style={{ includeFontPadding: false }}
+                  className="h-11 flex-1 font-gilroy text-[16px] text-primary dark:text-dark-text"
+                />
+              </View>
+              <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
+                {filtered.length === 0 ? (
+                  <AppText className="px-5 py-6 font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">{t('No events found')}</AppText>
+                ) : (
+                  filtered.map((event) => (
+                    <PressableScale
+                      key={event.id}
+                      onPress={() => {
+                        haptics.selection();
+                        onSelect(event);
+                      }}
+                      accessibilityLabel={eventLabel(event)}
+                      className="w-full flex-row items-center justify-between px-5 py-3"
+                    >
+                      <View className="flex-1 pr-3">
+                        <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+                          {eventLabel(event)}
+                        </AppText>
+                        <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                          {eventMeta(event, lang)}
+                        </AppText>
+                      </View>
+                      {event.id === selectedId ? <Check size={18} color={checkColor} /> : <View className="h-[18px] w-[18px]" />}
+                    </PressableScale>
+                  ))
+                )}
+              </ScrollView>
+            </View>
+          </SlideUp>
         </View>
-      </View>
+      </KeyboardAvoidingView>
       <ToastHost />
     </Modal>
   );
@@ -220,7 +230,6 @@ function QuantitySheet({
 }) {
   const { t } = useTranslation();
   const toast = useToast();
-  const { height } = useWindowDimensions();
   const [updateTicketType] = useUpdateManageTicketTypeMutation();
   const [values, setValues] = useState<Record<number, string>>(() =>
     Object.fromEntries(prompt.ticketTypes.map((ticketType) => [ticketType.id, ''])),
@@ -254,40 +263,40 @@ function QuantitySheet({
   };
 
   return (
-    <SheetModal visible onClose={onClose} title={t('Fill in the number of tickets')}>
+    <SheetModal
+      visible
+      onClose={onClose}
+      title={t('Fill in the number of tickets')}
+      footer={<PrimaryButton label={t('Save and download')} onPress={() => void onSave()} loading={saving} disabled={!isValid} />}
+    >
       <AppText className="mb-4 font-gilroy-medium text-[13px] leading-5 text-muted dark:text-dark-muted">
         {t(
           "For the series on the documents, each ticket type needs a number of tickets. The number you enter also becomes the ticket's sales limit.",
         )}
       </AppText>
-      <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: height * 0.4 }} className="grow-0">
-        <PanelCard>
-          {prompt.ticketTypes.map((ticketType, index) => (
-            <RowDivider key={ticketType.id} index={index}>
-              <View className="flex-row items-center gap-3 py-3">
-                <View className="flex-1">
-                  <AppText numberOfLines={2} className="font-gilroy-semibold text-[14px]">
-                    {ticketType.name}
-                  </AppText>
-                  <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{`${t('Sold')}: ${ticketType.sold_count || 0}`}</AppText>
-                </View>
-                <View className="w-[120px]">
-                  <GlassInput
-                    value={values[ticketType.id] ?? ''}
-                    onChangeText={(value) => setValues((current) => ({ ...current, [ticketType.id]: value }))}
-                    placeholder={`min. ${minimumQuantity(ticketType)}`}
-                    keyboardType="number-pad"
-                    accessibilityLabel={ticketType.name}
-                  />
-                </View>
+      <PanelCard>
+        {prompt.ticketTypes.map((ticketType, index) => (
+          <RowDivider key={ticketType.id} index={index}>
+            <View className="flex-row items-center gap-3 py-3">
+              <View className="flex-1">
+                <AppText numberOfLines={2} className="font-gilroy-semibold text-[14px]">
+                  {ticketType.name}
+                </AppText>
+                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{`${t('Sold')}: ${ticketType.sold_count || 0}`}</AppText>
               </View>
-            </RowDivider>
-          ))}
-        </PanelCard>
-      </ScrollView>
-      <View className="mt-5">
-        <PrimaryButton label={t('Save and download')} onPress={() => void onSave()} loading={saving} disabled={!isValid} />
-      </View>
+              <View className="w-[120px]">
+                <GlassInput
+                  value={values[ticketType.id] ?? ''}
+                  onChangeText={(value) => setValues((current) => ({ ...current, [ticketType.id]: value }))}
+                  placeholder={`min. ${minimumQuantity(ticketType)}`}
+                  keyboardType="number-pad"
+                  accessibilityLabel={ticketType.name}
+                />
+              </View>
+            </View>
+          </RowDivider>
+        ))}
+      </PanelCard>
     </SheetModal>
   );
 }
@@ -355,7 +364,7 @@ function FormSkeleton() {
 
 export default function FiscalizareScreen() {
   const { t, i18n } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -727,13 +736,14 @@ export default function FiscalizareScreen() {
         bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

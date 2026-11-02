@@ -5,7 +5,7 @@ import { LayoutDashboard, ShieldCheck } from 'lucide-react-native';
 
 import { EmptyState, GlassHeader, Screen, Skeleton } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSections } from '@/hooks/useSections';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { navigate } from '@/lib/nav';
@@ -33,7 +33,7 @@ function HubSkeleton() {
 
 export function SectionHub({ tab, title, header }: { tab: TabKey; title: string; header?: ReactNode }) {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const spinnerColor = useThemeColor(colors.primary, colors.dark.text);
   const { groups, isLoading, isError, refetch } = useSections(tab);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,9 +52,10 @@ export function SectionHub({ tab, title, header }: { tab: TabKey; title: string;
       <GlassHeader title={title} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16, gap: 20 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16, gap: 20 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} progressViewOffset={scroll.refreshOffset} />
         }
       >
         {header}

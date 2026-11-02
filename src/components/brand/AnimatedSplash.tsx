@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -17,7 +17,6 @@ const EXIT_MS = 320;
 const PULSE = { duration: 650, easing: Easing.inOut(Easing.quad) };
 
 export function AnimatedSplash({ ready, onShown }: { ready: boolean; onShown: () => void }) {
-  const isDark = useColorScheme() === 'dark';
   const reducedMotion = useReducedMotion();
   const scale = useSharedValue(1);
   const logoOpacity = useSharedValue(1);
@@ -48,14 +47,9 @@ export function AnimatedSplash({ ready, onShown }: { ready: boolean; onShown: ()
   if (gone) return null;
 
   return (
-    <Animated.View
-      onLayout={onShown}
-      style={[StyleSheet.absoluteFill, styles.center, { backgroundColor: isDark ? '#0a0d10' : '#ffffff' }, screenStyle]}
-    >
+    <Animated.View onLayout={onShown} style={[StyleSheet.absoluteFill, styles.screen, screenStyle]}>
       <Animated.Image
-        source={
-          isDark ? require('../../../assets/images/splash-logo-dark.png') : require('../../../assets/images/splash-logo.png')
-        }
+        source={require('../../../assets/images/splash-logo.png')}
         resizeMode="contain"
         style={[{ width: LOGO_WIDTH, height: LOGO_HEIGHT }, logoStyle]}
       />
@@ -64,5 +58,5 @@ export function AnimatedSplash({ ready, onShown }: { ready: boolean; onShown: ()
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  screen: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', zIndex: 1000 },
 });

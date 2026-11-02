@@ -10,9 +10,9 @@ import { OverviewEventCard, OverviewEventCardSkeleton } from '@/components/overv
 import { OverviewStatistics } from '@/components/overview/OverviewStatistics';
 import { useSummaryCurrency } from '@/components/overview/useSummaryCurrency';
 import { WelcomeHeading } from '@/components/overview/WelcomeHeading';
-import { EmptyState, GlassHeader, Screen } from '@/components/ui';
+import { EmptyState, GlassHeader, KeyboardAwareListScroll, Screen } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { combineDateTime } from '@/lib/eventStatus';
@@ -36,7 +36,7 @@ function eventStartTime(event: OrganizerEventListItem): number {
 
 export default function OverviewScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets({ topOffset: 8 });
   const { user } = useAuth();
   const selectEvent = useSelectEvent();
   const spinnerColor = useThemeColor(colors.primary, colors.dark.text);
@@ -131,9 +131,11 @@ export default function OverviewScreen() {
             <EmptyState icon={CalendarDays} title={t('No data found.')} />
           )
         }
+        renderScrollComponent={KeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingTop: padding.top + 8, paddingBottom: padding.bottom }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -141,7 +143,7 @@ export default function OverviewScreen() {
             onRefresh={() => void onRefresh()}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       />

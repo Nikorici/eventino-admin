@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ChevronUp, Download, Ellipsis, FileCode, FileCodeCorner, FileSpreadsheet, FileText, Pencil, Ticket, X } from 'lucide-react-native';
+import { ChevronUp, Download, Ellipsis, FileCode, FileCodeCorner, FileSpreadsheet, FileText, Pencil, Ticket } from 'lucide-react-native';
 
-import { AppText, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, GlassInput, PressableScale } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { SheetModal } from '@/components/merch/merchParts';
 import {
   ACCENT_GREEN,
   ACCENT_ORANGE,
@@ -158,58 +158,44 @@ function SerialEditSheet({ order, onClose }: { order: FacturaOrder; onClose: () 
   }, [value, editSerial, order.id, toast, t, onClose]);
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
-          <Pressable
-            className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="font-gilroy-bold text-[20px]">{t('Edit serial number')}</AppText>
-              <Pressable
-                onPress={onClose}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
-            <AppText className="mb-3 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
-              {`${t('No.')} ${order.invoice_serial || '-'}`}
-            </AppText>
-            <View className="flex-row items-center gap-2">
-              {prefix ? <AppText className="font-gilroy-semibold text-[15px]">{`${prefix}-`}</AppText> : null}
-              <View className="flex-1">
-                <GlassInput
-                  placeholder={t('Serial number')}
-                  value={value}
-                  onChangeText={setValue}
-                  keyboardType="number-pad"
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-            <PressableScale
-              onPress={() => {
-                void haptics.selection();
-                void onSubmit();
-              }}
-              disabled={isLoading}
-              accessibilityLabel={t('Save')}
-              className="mt-5 h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white"
-            >
-              {isLoading ? (
-                <ActivityIndicator color={submitTint} />
-              ) : (
-                <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Save')}</AppText>
-              )}
-            </PressableScale>
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-      <ToastHost />
-    </Modal>
+    <SheetModal
+      visible
+      onClose={onClose}
+      title={t('Edit serial number')}
+      footer={
+        <PressableScale
+          onPress={() => {
+            void haptics.selection();
+            void onSubmit();
+          }}
+          disabled={isLoading}
+          accessibilityLabel={t('Save')}
+          className="h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white"
+        >
+          {isLoading ? (
+            <ActivityIndicator color={submitTint} />
+          ) : (
+            <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Save')}</AppText>
+          )}
+        </PressableScale>
+      }
+    >
+      <AppText className="mb-3 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+        {`${t('No.')} ${order.invoice_serial || '-'}`}
+      </AppText>
+      <View className="flex-row items-center gap-2">
+        {prefix ? <AppText className="font-gilroy-semibold text-[15px]">{`${prefix}-`}</AppText> : null}
+        <View className="flex-1">
+          <GlassInput
+            placeholder={t('Serial number')}
+            value={value}
+            onChangeText={setValue}
+            keyboardType="number-pad"
+            autoCapitalize="none"
+          />
+        </View>
+      </View>
+    </SheetModal>
   );
 }
 

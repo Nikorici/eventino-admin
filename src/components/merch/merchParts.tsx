@@ -1,20 +1,21 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, Switch, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, Modal, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { X } from 'lucide-react-native';
 
-import { AppText, GlassInput, PressableScale, SegmentedControl, Skeleton, ToastHost } from '@/components/ui';
+import { AppText, GlassInput, PressableScale, SegmentedControl, Skeleton, SlideUp, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
 import { dateFnsLocale } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { navigate } from '@/lib/nav';
 import { formatMoney } from '@/lib/pricing';
 import type { MerchFulfillmentStatus, MerchPaymentStatus } from '@/store/api/merchApi';
 import { colors, currencySymbol } from '@/theme/colors';
+import { sheetBottomPad } from '@/hooks/useScreenPadding';
 
 export const PRICE_PATTERN = /^\d+(\.\d{1,2})?$/;
 export const INTEGER_PATTERN = /^\d+$/;
@@ -344,22 +345,31 @@ export function SheetModal({
   onClose,
   title,
   children,
+  footer,
 }: {
   visible: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const bottomPad = sheetBottomPad(insets.bottom);
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
+        <View className="flex-1 justify-end" style={{ paddingTop: insets.top + 8 }}>
           <Pressable
-            className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View className="mb-4 flex-row items-center justify-between">
+            accessibilityRole="button"
+            accessibilityLabel={t('Close')}
+            onPress={onClose}
+            style={StyleSheet.absoluteFill}
+            className="bg-black/40"
+          />
+          <SlideUp>
+          <View className="max-h-full rounded-t-[24px] bg-app-bg pt-4 dark:bg-dark-bg">
+            <View className="mb-4 flex-row items-center justify-between px-5">
               <AppText numberOfLines={1} className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
                 {title}
               </AppText>
@@ -371,27 +381,31 @@ export function SheetModal({
                 <X size={18} color={colors.muted} />
               </Pressable>
             </View>
-            {children}
-          </Pressable>
-        </Pressable>
+            <KeyboardAwareScrollView
+              bottomOffset={24}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: footer ? 12 : bottomPad + 24 }}
+            >
+              {children}
+            </KeyboardAwareScrollView>
+            {footer ? (
+              <View className="border-t border-app-border px-5 pt-3 dark:border-dark-border" style={{ paddingBottom: bottomPad }}>
+                {footer}
+              </View>
+            ) : null}
+          </View>
+          </SlideUp>
+        </View>
       </KeyboardAvoidingView>
       <ToastHost />
     </Modal>
   );
 }
 
-export function MerchNav({ active }: { active: MerchSection }) {
+export function MerchNav({ active, onChange }: { active: MerchSection; onChange: (next: MerchSection) => void }) {
   const { t } = useTranslation();
-  const onChange = (next: MerchSection) => {
-    if (next === active) return;
-    if (next === 'products') {
-      navigate.dismissTo('merch');
-      return;
-    }
-    const key = next === 'orders' ? 'merchOrders' : 'merchSettings';
-    if (active === 'products') navigate.to(key);
-    else navigate.replace(key);
-  };
   return (
     <SegmentedControl<MerchSection>
       value={active}

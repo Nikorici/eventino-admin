@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Switch, useWindowDimensions, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { Check, Pencil, Search, Shield, Trash2, UserPlus, X } from 'lucide-react-native';
+import { Check, Pencil, Search, Shield, Trash2, UserPlus } from 'lucide-react-native';
 
 import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/cn';
@@ -13,12 +12,13 @@ import { navigate } from '@/lib/nav';
 import { eventPermissions } from '@/lib/sections';
 import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
 import { useAppSelector } from '@/store/hooks';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { confirmAction } from '@/components/dashboard/dashboardParts';
+import { SheetModal } from '@/components/merch/merchParts';
 import {
   useAddEventStaffMutation,
   useGetEventStaffQuery,
@@ -40,7 +40,6 @@ import {
   Screen,
   SegmentedControl,
   Skeleton,
-  ToastHost,
 } from '@/components/ui';
 
 const ACCENT_GREEN = '#34c759';
@@ -227,35 +226,6 @@ function StaffRow({
   );
 }
 
-function SheetModal({ visible, onClose, title, children }: { visible: boolean; onClose: () => void; title: string; children: ReactNode }) {
-  const { t } = useTranslation();
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
-          <Pressable
-            className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">{title}</AppText>
-              <Pressable
-                onPress={onClose}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
-            {children}
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-      <ToastHost />
-    </Modal>
-  );
-}
-
 function SheetSubmitButton({
   label,
   icon: Icon,
@@ -276,7 +246,7 @@ function SheetSubmitButton({
       disabled={disabled || loading}
       accessibilityLabel={label}
       className={cn(
-        'mt-5 h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white',
+        'h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white',
         disabled && !loading && 'opacity-50',
       )}
     >
@@ -309,9 +279,8 @@ function StaffRowSkeleton() {
 
 export default function EventStaffScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
-  const { height } = useWindowDimensions();
   const user = useAppSelector((s) => s.auth.user);
   const { eventId, data: event, isLoading: eventLoading } = useSelectedEvent();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
@@ -443,7 +412,8 @@ export default function EventStaffScreen() {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={isFetching && !isLoading}
@@ -452,7 +422,7 @@ export default function EventStaffScreen() {
             }}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >
@@ -524,104 +494,86 @@ export default function EventStaffScreen() {
         </View>
       </ScrollView>
 
-      <SheetModal visible={addOpen} onClose={() => setAddOpen(false)} title={t('Add Staff')}>
-        <ScrollView style={{ maxHeight: height * 0.72 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-          <View className="gap-4">
-            <View className="gap-2">
-              <GlassInput
-                placeholder={t('Search users by name or email...')}
-                accessibilityLabel={t('Search users')}
-                value={searchInput}
-                onChangeText={setSearchInput}
-                autoCapitalize="none"
-                autoCorrect={false}
-                leftIcon={<Search size={18} color={colors.muted} />}
-                rightIcon={searching ? <ActivityIndicator size="small" color={colors.muted} /> : undefined}
-              />
-              {results.length > 0 ? (
-                <View className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-                  {results.map((result, index) => {
-                    const active = selectedUser?.id === result.id;
-                    return (
-                      <Pressable
-                        key={result.id}
-                        onPress={() => {
-                          haptics.selection();
-                          setSelectedUser(result);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: active }}
-                        accessibilityLabel={staffUserLabel(result)}
-                        className={cn('flex-row items-center gap-3 py-3', index > 0 && 'border-t')}
-                        style={index > 0 ? { borderColor: rowDivider } : undefined}
-                      >
-                        <UserAvatar user={result} size={36} />
-                        <View className="flex-1">
-                          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
-                            {staffUserLabel(result)}
+      <SheetModal
+        visible={addOpen}
+        onClose={() => setAddOpen(false)}
+        title={t('Add Staff')}
+        footer={
+          <SheetSubmitButton
+            label={t('Add Staff')}
+            icon={UserPlus}
+            onPress={() => {
+              void submitAdd();
+            }}
+            disabled={!selectedUser}
+            loading={adding}
+          />
+        }
+      >
+        <View className="gap-4">
+          <View className="gap-2">
+            <GlassInput
+              placeholder={t('Search users by name or email...')}
+              accessibilityLabel={t('Search users')}
+              value={searchInput}
+              onChangeText={setSearchInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+              leftIcon={<Search size={18} color={colors.muted} />}
+              rightIcon={searching ? <ActivityIndicator size="small" color={colors.muted} /> : undefined}
+            />
+            {results.length > 0 ? (
+              <View className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
+                {results.map((result, index) => {
+                  const active = selectedUser?.id === result.id;
+                  return (
+                    <Pressable
+                      key={result.id}
+                      onPress={() => {
+                        haptics.selection();
+                        setSelectedUser(result);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                      accessibilityLabel={staffUserLabel(result)}
+                      className={cn('flex-row items-center gap-3 py-3', index > 0 && 'border-t')}
+                      style={index > 0 ? { borderColor: rowDivider } : undefined}
+                    >
+                      <UserAvatar user={result} size={36} />
+                      <View className="flex-1">
+                        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
+                          {staffUserLabel(result)}
+                        </AppText>
+                        {result.email ? (
+                          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
+                            {result.email}
                           </AppText>
-                          {result.email ? (
-                            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
-                              {result.email}
-                            </AppText>
-                          ) : null}
-                        </View>
-                        {active ? <Check size={18} color={ACCENT_GREEN} /> : null}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              ) : null}
-              {search.length >= 2 && !searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted leading-[17px]">{t('No users found')}</AppText>
-              ) : null}
-            </View>
-
-            <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Permissions for new staff member')}</AppText>
-              <PermissionEditor value={newPermissions} onChange={setNewPermissions} />
-            </View>
+                        ) : null}
+                      </View>
+                      {active ? <Check size={18} color={ACCENT_GREEN} /> : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+            {search.length >= 2 && !searching && results.length === 0 ? (
+              <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted leading-[17px]">{t('No users found')}</AppText>
+            ) : null}
           </View>
-        </ScrollView>
-        <SheetSubmitButton
-          label={t('Add Staff')}
-          icon={UserPlus}
-          onPress={() => {
-            void submitAdd();
-          }}
-          disabled={!selectedUser}
-          loading={adding}
-        />
+
+          <View className="gap-2">
+            <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Permissions for new staff member')}</AppText>
+            <PermissionEditor value={newPermissions} onChange={setNewPermissions} />
+          </View>
+        </View>
       </SheetModal>
 
-      <SheetModal visible={editingStaff != null} onClose={() => setEditingStaff(null)} title={t('Edit Staff Permissions')}>
-        {editingStaff ? (
-          <>
-            <ScrollView style={{ maxHeight: height * 0.72 }} showsVerticalScrollIndicator={false}>
-              <View className="gap-4">
-                <View
-                  className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
-                  style={{ borderColor: cardBorder }}
-                >
-                  <UserAvatar user={editingStaff.user_details} size={40} />
-                  <View className="flex-1">
-                    <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
-                      {staffUserLabel(editingStaff.user_details)}
-                    </AppText>
-                    {editingStaff.user_details.email ? (
-                      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
-                        {editingStaff.user_details.email}
-                      </AppText>
-                    ) : null}
-                  </View>
-                </View>
-
-                <View className="gap-2">
-                  <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Update permissions')}</AppText>
-                  <PermissionEditor value={editPermissions} onChange={setEditPermissions} />
-                </View>
-              </View>
-            </ScrollView>
+      <SheetModal
+        visible={editingStaff != null}
+        onClose={() => setEditingStaff(null)}
+        title={t('Edit Staff Permissions')}
+        footer={
+          editingStaff ? (
             <SheetSubmitButton
               label={t('Save')}
               icon={Check}
@@ -631,7 +583,33 @@ export default function EventStaffScreen() {
               disabled={false}
               loading={saving}
             />
-          </>
+          ) : undefined
+        }
+      >
+        {editingStaff ? (
+          <View className="gap-4">
+            <View
+              className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
+              style={{ borderColor: cardBorder }}
+            >
+              <UserAvatar user={editingStaff.user_details} size={40} />
+              <View className="flex-1">
+                <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
+                  {staffUserLabel(editingStaff.user_details)}
+                </AppText>
+                {editingStaff.user_details.email ? (
+                  <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
+                    {editingStaff.user_details.email}
+                  </AppText>
+                ) : null}
+              </View>
+            </View>
+
+            <View className="gap-2">
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Update permissions')}</AppText>
+              <PermissionEditor value={editPermissions} onChange={setEditPermissions} />
+            </View>
+          </View>
         ) : null}
       </SheetModal>
     </Screen>

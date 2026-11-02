@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { CreditCard, X } from 'lucide-react-native';
 
@@ -15,6 +16,7 @@ import { useGetStripeConnectUrlMutation, useSignContractMutation, type SignContr
 import { AppText, GlassButton, GlassInput, PressableScale, ToastHost } from '@/components/ui';
 
 import type { PaymentSetupKind } from './eventFormRules';
+import { sheetBottomPad } from '@/hooks/useScreenPadding';
 
 type ContractField = 'legalEntityName' | 'legalRepresentativeName' | 'legalEntityIdno' | 'legalEntityCui' | 'legalEntityAddress' | 'legalEntityIban';
 
@@ -70,6 +72,7 @@ export interface PaymentSetupSheetProps {
 export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSetupSheetProps) {
   const { t } = useTranslation();
   const toast = useToast();
+  const insets = useSafeAreaInsets();
   const isDark = useColorScheme() === 'dark';
   const mutedIcon = isDark ? colors.dark.textSecondary : colors.muted;
   const [values, setValues] = useState(EMPTY_CONTRACT);
@@ -162,8 +165,8 @@ export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSe
               : 'border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-bg',
           )}
         >
-          <View className={cn('h-[26px] w-[44px] justify-center rounded-full p-[3px]', acceptsTerms ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
-            <View className={cn('h-5 w-5 rounded-full bg-white dark:bg-dark-bg', acceptsTerms && 'self-end')} />
+          <View className={cn('h-[26px] w-[44px] justify-center overflow-hidden rounded-full p-[3px]', acceptsTerms ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
+            <View className={cn('aspect-square h-full rounded-full bg-white dark:bg-dark-bg', acceptsTerms && 'self-end')} />
           </View>
           <AppText className="flex-1 font-gilroy-medium text-[13px]">
             {`${t('I accept the')} `}
@@ -175,16 +178,22 @@ export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSe
             </AppText>
           </AppText>
         </PressableScale>
-        <GlassButton label={t(copy.submit)} variant="primary" loading={signing} onPress={() => void submitContract(contractKind)} className="rounded-[12px]" />
       </>
     );
   };
 
   return (
-    <Modal visible={kind != null} transparent animationType="fade" onRequestClose={close}>
+    <Modal visible={kind != null} transparent animationType="fade" onRequestClose={close} statusBarTranslucent navigationBarTranslucent>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable onPress={close} className="flex-1 justify-end bg-black/40">
-          <Pressable onPress={(event) => event.stopPropagation()} className="max-h-[90%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
+        <View className="flex-1 justify-end" style={{ paddingTop: insets.top + 8 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('Close')}
+            onPress={close}
+            style={StyleSheet.absoluteFill}
+            className="bg-black/40"
+          />
+          <View className="max-h-full rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
             <View className="mb-1 flex-row items-center justify-between px-5">
               <View className="h-10 w-10 items-center justify-center rounded-full bg-links/10 dark:bg-white/10">
                 <CreditCard size={18} color={isDark ? colors.dark.text : colors.links} />
@@ -197,7 +206,12 @@ export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSe
                 <X size={17} color={mutedIcon} />
               </PressableScale>
             </View>
-            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, gap: 14 }}>
+            <KeyboardAwareScrollView
+              bottomOffset={24}
+              keyboardShouldPersistTaps="handled"
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12, gap: 14 }}
+            >
               <AppText className="font-gilroy-bold text-[20px]">
                 {kind === 'stripe' ? t('Accept Payments') : kind ? t(CONTRACT_COPY[kind].title) : ''}
               </AppText>
@@ -209,14 +223,28 @@ export function PaymentSetupSheet({ kind, onClose, onContractSigned }: PaymentSe
                   <AppText className="font-gilroy-medium text-[13px] leading-5 text-muted dark:text-dark-muted">
                     {t('We use Stripe to process payments or set up a Stripe account to start accepting payments. It usually takes less than 5 minutes.')}
                   </AppText>
-                  <GlassButton label={t('Connect Stripe')} variant="primary" loading={connecting} onPress={() => void connectStripe()} className="rounded-[12px]" />
                 </>
               ) : kind ? (
                 renderContract(kind)
               ) : null}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
+            </KeyboardAwareScrollView>
+            {kind ? (
+              <View className="border-t border-app-border px-5 pt-3 dark:border-dark-border" style={{ paddingBottom: sheetBottomPad(insets.bottom) }}>
+                {kind === 'stripe' ? (
+                  <GlassButton label={t('Connect Stripe')} variant="primary" loading={connecting} onPress={() => void connectStripe()} className="rounded-[12px]" />
+                ) : (
+                  <GlassButton
+                    label={t(CONTRACT_COPY[kind].submit)}
+                    variant="primary"
+                    loading={signing}
+                    onPress={() => void submitContract(kind)}
+                    className="rounded-[12px]"
+                  />
+                )}
+              </View>
+            ) : null}
+          </View>
+        </View>
       </KeyboardAvoidingView>
       <ToastHost />
     </Modal>

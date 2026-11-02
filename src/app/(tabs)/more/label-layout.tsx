@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -415,12 +416,13 @@ export default function LabelLayoutScreen() {
   return (
     <Screen edges={[]}>
       <GlassHeader title={template ? template.name : t('New layout')} onBack={navigate.back} />
-      <ScrollView
+      <KeyboardAwareScrollView
+        bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
       >
         {waiting ? <Skeleton className="h-96 w-full rounded-[12px]" /> : <LayoutEditor key={template?.id ?? 'new'} template={template} />}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

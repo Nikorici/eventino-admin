@@ -6,7 +6,7 @@ import { Ban, Ticket } from 'lucide-react-native';
 import { AppText, EmptyState, GlassHeader, Screen } from '@/components/ui';
 import { PanelCard, moneyLabel } from '@/components/dashboard/dashboardParts';
 import { ProgressStatCard, ProgressStatCardSkeleton } from '@/components/sales-reports/ProgressStatCard';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { eventCurrencyCode } from '@/lib/format';
@@ -23,7 +23,7 @@ function soldOf(ticketType: TicketTypeSale, excludeZeroOrders: boolean): number 
 
 export default function TicketTypeSalesScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } = useSelectedEvent();
   const [excludeZeroOrders, setExcludeZeroOrders] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -132,14 +132,15 @@ export default function TicketTypeSalesScreen() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        {...scroll.scrollProps}
         contentContainerStyle={{
-          paddingTop: padding.top,
-          paddingBottom: padding.bottom,
+          paddingTop: scroll.paddingTop,
+          paddingBottom: scroll.paddingBottom,
           paddingHorizontal: 16,
           gap: 16,
         }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />
         }
       >
         {renderBody()}

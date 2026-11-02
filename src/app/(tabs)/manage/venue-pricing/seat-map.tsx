@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { Armchair, Check, ChevronDown, ChevronUp, MapPin } from 'lucide-react-native';
 
@@ -10,7 +11,7 @@ import { SeatLegend } from '@/components/seatmap/SeatLegend';
 import { SeatMapCanvas } from '@/components/seatmap/SeatMapCanvas';
 import { OptionSheet, type SheetOption } from '@/components/venue/OptionSheet';
 import { PaymentLinks } from '@/components/venue/PaymentLinks';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -138,6 +139,7 @@ export default function VenueSeatMapScreen() {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const { eventId, data: event } = useSelectedEvent();
   const skip = eventId == null;
@@ -341,10 +343,13 @@ export default function VenueSeatMapScreen() {
     }
 
     return (
-      <ScrollView
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top + (dirty ? saveBarHeight + 12 : 0), paddingBottom: padding.bottom, paddingHorizontal: 16 }}
-        refreshControl={dirty ? undefined : <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={colors.muted} progressViewOffset={padding.top} />}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop + (dirty ? saveBarHeight + 12 : 0), paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
+        refreshControl={dirty ? undefined : <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={colors.muted} progressViewOffset={scroll.refreshOffset} />}
       >
         <View className="gap-4">
           <Card
@@ -626,7 +631,7 @@ export default function VenueSeatMapScreen() {
             </>
           ) : null}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     );
   };
 

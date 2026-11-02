@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, TextInput, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, RefreshControl, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ import { EventFormDateTimeField } from '@/components/events/EventFormDateTimeFie
 import { SheetModal, ToggleRow } from '@/components/merch/merchParts';
 import { AppText, Chip, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -397,31 +397,30 @@ function EditTransferSheet({
   onSave: (form: TransferForm) => void;
 }) {
   const { t } = useTranslation();
-  const { height: windowHeight } = useWindowDimensions();
   const [form, setForm] = useState<TransferForm>(() => transferFormFrom(transfer));
   return (
-    <SheetModal visible title={t('Edit transfer')} onClose={onClose}>
-      <ScrollView
-        style={{ maxHeight: windowHeight * 0.6 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <TransferFields form={form} onChange={setForm} fallbackCurrency={currency} placeholders={placeholders} />
-      </ScrollView>
-      <View className="mt-4 flex-row gap-3">
-        <View className="flex-1">
-          <PressableScale
-            onPress={onClose}
-            accessibilityLabel={t('Cancel')}
-            className="h-12 w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface"
-          >
-            <AppText className="font-gilroy-semibold text-[15px]">{t('Cancel')}</AppText>
-          </PressableScale>
+    <SheetModal
+      visible
+      title={t('Edit transfer')}
+      onClose={onClose}
+      footer={
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <PressableScale
+              onPress={onClose}
+              accessibilityLabel={t('Cancel')}
+              className="h-12 w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface"
+            >
+              <AppText className="font-gilroy-semibold text-[15px]">{t('Cancel')}</AppText>
+            </PressableScale>
+          </View>
+          <View className="flex-1">
+            <SubmitButton label={t('Save')} loading={saving} onPress={() => onSave(form)} />
+          </View>
         </View>
-        <View className="flex-1">
-          <SubmitButton label={t('Save')} loading={saving} onPress={() => onSave(form)} />
-        </View>
-      </View>
+      }
+    >
+      <TransferFields form={form} onChange={setForm} fallbackCurrency={currency} placeholders={placeholders} />
     </SheetModal>
   );
 }
@@ -442,6 +441,7 @@ export default function AdminAccountingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
   const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { isAuthenticated, user } = useAuth();
   const eventId = Number(id);
   const isStaff = user?.is_staff === true;
@@ -613,13 +613,14 @@ export default function AdminAccountingScreen() {
         bottomOffset={24}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Printer as PrinterIcon } from 'lucide-react-native';
@@ -184,7 +185,8 @@ export default function LabelPrinterSettingsScreen() {
   return (
     <Screen edges={[]}>
       <GlassHeader title={t('Printer settings')} onBack={navigate.back} />
-      <ScrollView
+      <KeyboardAwareScrollView
+        bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
       >
@@ -203,7 +205,7 @@ export default function LabelPrinterSettingsScreen() {
             onAction={() => void refetch()}
           />
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

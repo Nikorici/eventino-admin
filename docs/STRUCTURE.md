@@ -65,7 +65,7 @@ items stay hidden until the selected event has loaded, exactly like the web.
 | Ticket Purchase Info | `/dashboard/events/[id]/ticket-info` | `canViewAnalytics` | Sales | `/sales/ticket-info` | EA-10 | stub |
 | Pre-sale | `/dashboard/events/[id]/presale` | `canViewBuyers && event.has_presale` | Sales | `/sales/presale` | EA-11 | stub |
 | Ticket Scan Statistics | `/dashboard/events/[id]/ticket-scan-statistics` | `hasFullAccess` | Sales | `/sales/scan-statistics` | EA-12 | stub |
-| Merch Store | `/dashboard/events/[id]/merch` (+ merch-orders, merch-products, merch-settings) | `hasFullAccess` | Sales | `/sales/merch` | EA-13 | stub |
+| Merch Store | `/dashboard/events/[id]/merch` (+ merch-orders, merch-products, merch-settings) | `hasFullAccess` | Sales | `/sales/merch` (Products · Orders · Settings switch in place; + `/sales/merch/products/[pid]`, `/sales/merch/orders/[oid]`) | EA-13 | designed |
 | Traffic Sources | `/dashboard/events/[id]/traffic-sources` | `hasFullAccess` | Analytics | `/analytics/traffic-sources` | EA-14 | stub |
 | Referral Tracking | `/dashboard/events/[id]/referral-tracking` | `hasFullAccess` | Analytics | `/analytics/referral-tracking` | EA-15 | stub |
 | Marketing & Tracking | `/dashboard/events/[id]/marketing-tracking` | `hasFullAccess` | Analytics | `/analytics/marketing-tracking` | EA-16 | stub |

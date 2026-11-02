@@ -1,11 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { Ban, CircleCheck, Copy, Megaphone, Plus, Search, X } from 'lucide-react-native';
+import { Ban, CircleCheck, Copy, Megaphone, Plus, Search } from 'lucide-react-native';
 
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -14,7 +13,7 @@ import { formatMoney } from '@/lib/pricing';
 import { colors, currencySymbol } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
@@ -34,13 +33,14 @@ import {
   EmptyState,
   GlassHeader,
   GlassInput,
+  KeyboardAwareListScroll,
   PressableScale,
   Screen,
   SegmentedControl,
   Skeleton,
-  ToastHost,
 } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { SheetModal } from '@/components/merch/merchParts';
 
 const WEB_ORIGIN = 'https://eventino.co';
 const CLICKS_COLOR = '#61859d';
@@ -376,90 +376,76 @@ function AddPromoterModal({
   }, [createdLink, toast, t]);
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
-          <Pressable
-            className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-            onPress={(event) => event.stopPropagation()}
+    <SheetModal
+      visible
+      title={t('Add New Promoter')}
+      onClose={onClose}
+      footer={
+        !createdLink ? (
+          <PressableScale
+            onPress={() => {
+              haptics.selection();
+              void onCreate();
+            }}
+            disabled={isLoading || !name.trim()}
+            accessibilityLabel={t('Create')}
+            className="h-12 w-full items-center justify-center rounded-[10px] bg-primary dark:bg-white"
           >
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="font-gilroy-bold text-[20px] leading-[26px]">{t('Add New Promoter')}</AppText>
-              <Pressable
-                onPress={onClose}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
-
-            {!createdLink ? (
-              <View className="gap-3">
-                <GlassInput
-                  label={t('Name')}
-                  placeholder={t('Promoter name')}
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                />
-                <GlassInput
-                  label={t('Notes')}
-                  placeholder={t('Optional notes')}
-                  value={notes}
-                  onChangeText={setNotes}
-                  autoCapitalize="sentences"
-                />
-                <PressableScale
-                  onPress={() => {
-                    haptics.selection();
-                    void onCreate();
-                  }}
-                  disabled={isLoading || !name.trim()}
-                  accessibilityLabel={t('Create')}
-                  className="mt-2 h-12 w-full items-center justify-center rounded-[10px] bg-primary dark:bg-white"
-                >
-                  {isLoading ? (
-                    <ActivityIndicator color={submitTint} />
-                  ) : (
-                    <AppText className="font-gilroy-semibold text-[16px] leading-[21px] text-white dark:text-primary">
-                      {t('Create')}
-                    </AppText>
-                  )}
-                </PressableScale>
-              </View>
+            {isLoading ? (
+              <ActivityIndicator color={submitTint} />
             ) : (
-              <View className="gap-4">
-                <View className="gap-2 rounded-[12px] bg-black/[0.04] p-4 dark:bg-white/10">
-                  <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Referral link is ready')}</AppText>
-                  <View className="flex-row items-center gap-2">
-                    <AppText numberOfLines={2} className="flex-1 font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
-                      {createdLink}
-                    </AppText>
-                    <PressableScale
-                      onPress={() => void onCopyCreated()}
-                      accessibilityLabel={t('Copy')}
-                      className="h-9 flex-row items-center gap-1.5 rounded-full border border-app-border px-3 dark:border-dark-border"
-                    >
-                      <Copy size={12} color={copyTint} />
-                      <AppText className="font-gilroy-semibold text-[12px] leading-4">{t('Copy')}</AppText>
-                    </PressableScale>
-                  </View>
-                </View>
-                <PressableScale
-                  onPress={onClose}
-                  accessibilityLabel={t('Close')}
-                  className="h-12 w-full items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border"
-                >
-                  <AppText className="font-gilroy-semibold text-[16px] leading-[21px]">{t('Close')}</AppText>
-                </PressableScale>
-              </View>
+              <AppText className="font-gilroy-semibold text-[16px] leading-[21px] text-white dark:text-primary">
+                {t('Create')}
+              </AppText>
             )}
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-      <ToastHost />
-    </Modal>
+          </PressableScale>
+        ) : (
+          <PressableScale
+            onPress={onClose}
+            accessibilityLabel={t('Close')}
+            className="h-12 w-full items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border"
+          >
+            <AppText className="font-gilroy-semibold text-[16px] leading-[21px]">{t('Close')}</AppText>
+          </PressableScale>
+        )
+      }
+    >
+      {!createdLink ? (
+        <View className="gap-3">
+          <GlassInput
+            label={t('Name')}
+            placeholder={t('Promoter name')}
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+          />
+          <GlassInput
+            label={t('Notes')}
+            placeholder={t('Optional notes')}
+            value={notes}
+            onChangeText={setNotes}
+            autoCapitalize="sentences"
+          />
+        </View>
+      ) : (
+        <View className="gap-2 rounded-[12px] bg-black/[0.04] p-4 dark:bg-white/10">
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Referral link is ready')}</AppText>
+          <View className="flex-row items-center gap-2">
+            <AppText numberOfLines={2} className="flex-1 font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
+              {createdLink}
+            </AppText>
+            <PressableScale
+              onPress={() => void onCopyCreated()}
+              accessibilityLabel={t('Copy')}
+              className="h-9 flex-row items-center gap-1.5 rounded-full border border-app-border px-3 dark:border-dark-border"
+            >
+              <Copy size={12} color={copyTint} />
+              <AppText className="font-gilroy-semibold text-[12px] leading-4">{t('Copy')}</AppText>
+            </PressableScale>
+          </View>
+        </View>
+      )}
+    </SheetModal>
   );
 }
 
@@ -467,7 +453,7 @@ export default function ReferralTrackingScreen() {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const scheme = useColorScheme();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets({ topOffset: -4 });
   const { eventId, data: event } = useSelectedEvent();
   const numericId = eventId ?? 0;
   const spinnerColor = scheme === 'dark' ? '#f9f9f9' : '#2b3a44';
@@ -633,7 +619,11 @@ export default function ReferralTrackingScreen() {
             />
           )
         }
-        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        renderScrollComponent={KeyboardAwareListScroll}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -641,7 +631,7 @@ export default function ReferralTrackingScreen() {
             onRefresh={() => void onRefresh()}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       />

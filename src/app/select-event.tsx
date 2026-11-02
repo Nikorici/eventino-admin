@@ -8,7 +8,7 @@ import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
 import { OrganizerEventRow, OrganizerEventRowSkeleton } from '@/components/events/OrganizerEventCard';
 import { AppText, DashedAddButton, EmptyState, GlassButton, GlassHeader, GlassInput, Screen } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectEvent, useSelectedEventId } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { combineDateTime } from '@/lib/eventStatus';
@@ -64,7 +64,7 @@ const ListHeader = memo(function ListHeader({
 
 export default function SelectEventScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding({ tabBar: false });
+  const scroll = useScrollInsets({ tabBar: false, topOffset: -4 });
   const { user } = useAuth();
   const selectedEventId = useSelectedEventId();
   const selectEvent = useSelectEvent();
@@ -162,10 +162,11 @@ export default function SelectEventScreen() {
         ListEmptyComponent={empty}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} progressViewOffset={scroll.refreshOffset} />
         }
       />
     </Screen>

@@ -6,7 +6,7 @@ import { Check, UserPen } from 'lucide-react-native';
 
 import { AppText, EmptyState, GlassHeader, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { matchesQuery, PanelCard, RowDivider, SearchField } from '@/components/dashboard/dashboardParts';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
@@ -103,7 +103,7 @@ function TicketNameRow({
 export default function TicketNamesScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } =
     useSelectedEvent();
   const cancelled = Boolean(event?.is_cancelled);
@@ -213,13 +213,14 @@ export default function TicketNamesScreen() {
         bottomOffset={24}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

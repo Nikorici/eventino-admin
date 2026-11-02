@@ -9,7 +9,7 @@ import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
 import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useFloatingBarOffset, useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useAppSelector } from '@/store/hooks';
 import {
   eventStartAt,
@@ -91,6 +91,8 @@ function SelectAllBar({
 export default function MessageSubscribersScreen() {
   const { t, i18n } = useTranslation();
   const padding = useScreenPadding();
+  const floatingBarBottom = useFloatingBarOffset();
+  const scroll = useScrollInsets();
   const userId = useAppSelector((s) => s.auth.user?.id ?? null);
   const headerIcon = useThemeColor(colors.primary, colors.dark.text);
   const composeTint = useThemeColor(colors.white, colors.primary);
@@ -422,9 +424,10 @@ export default function MessageSubscribersScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        {...scroll.scrollProps}
         contentContainerStyle={{
-          paddingTop: padding.top,
-          paddingBottom: padding.bottom + (showComposeBar ? 76 : 0),
+          paddingTop: scroll.paddingTop,
+          paddingBottom: scroll.paddingBottom + (showComposeBar ? 76 : 0),
           paddingHorizontal: 16,
         }}
         refreshControl={
@@ -433,7 +436,7 @@ export default function MessageSubscribersScreen() {
             onRefresh={onRefresh}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >
@@ -494,7 +497,7 @@ export default function MessageSubscribersScreen() {
 
       {showComposeBar ? (
         <View
-          style={{ paddingBottom: padding.bottom - 12 }}
+          style={{ paddingBottom: floatingBarBottom }}
           className="absolute bottom-0 left-0 right-0 border-t border-app-border bg-app-bg px-4 pt-3 dark:border-dark-border dark:bg-dark-bg"
         >
           <PressableScale

@@ -3,19 +3,8 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { FileSpreadsheet, ShoppingBag } from 'lucide-react-native';
 
-import { AppText, Chip, EmptyState, GlassHeader, Screen } from '@/components/ui';
+import { AppText, Chip, EmptyState } from '@/components/ui';
 import { XLSX_SHARE, useFileAction } from '@/components/dashboard/dashboardParts';
-import {
-  Card,
-  ListSkeleton,
-  MerchNav,
-  SecondaryButton,
-  StatusBadge,
-  formatDateTime,
-  fulfillmentColor,
-  money,
-  paymentColor,
-} from '@/components/merch/merchParts';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -30,6 +19,17 @@ import {
   type MerchPaymentStatus,
 } from '@/store/api/merchApi';
 import { colors } from '@/theme/colors';
+
+import {
+  Card,
+  ListSkeleton,
+  SecondaryButton,
+  StatusBadge,
+  formatDateTime,
+  fulfillmentColor,
+  money,
+  paymentColor,
+} from './merchParts';
 
 type StatusFilter = '' | MerchPaymentStatus;
 
@@ -76,7 +76,7 @@ function OrderCard({ order, lang }: { order: MerchOrder; lang: string }) {
   );
 }
 
-export default function MerchOrdersScreen() {
+export function OrdersSection() {
   const { t, i18n } = useTranslation();
   const padding = useScreenPadding();
   const iconTint = useThemeColor(colors.primary, colors.dark.text);
@@ -146,42 +146,33 @@ export default function MerchOrdersScreen() {
   };
 
   return (
-    <Screen edges={[]}>
-      <GlassHeader title={t('Merch Store')} onBack={navigate.back} />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => void onRefresh()}
-            tintColor={colors.muted}
-            progressViewOffset={padding.top}
-          />
-        }
-      >
-        <View className="gap-4">
-          <MerchNav active="orders" />
-          <SecondaryButton
-            label={busyKey === 'export' ? t('Exporting...') : t('Export Excel')}
-            onPress={exportOrders}
-            loading={busyKey === 'export'}
-            icon={<FileSpreadsheet size={16} color={iconTint} />}
-            radius={10}
-          />
-          <View className="flex-row flex-wrap gap-2">
-            {STATUS_FILTERS.map((value) => (
-              <Chip
-                key={value || 'all'}
-                label={value || t('All')}
-                selected={status === value}
-                onPress={() => setStatus(value)}
-              />
-            ))}
-          </View>
-          {renderList()}
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingTop: 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={colors.muted} />
+      }
+    >
+      <View className="gap-4">
+        <SecondaryButton
+          label={busyKey === 'export' ? t('Exporting...') : t('Export Excel')}
+          onPress={exportOrders}
+          loading={busyKey === 'export'}
+          icon={<FileSpreadsheet size={16} color={iconTint} />}
+          radius={10}
+        />
+        <View className="flex-row flex-wrap gap-2">
+          {STATUS_FILTERS.map((value) => (
+            <Chip
+              key={value || 'all'}
+              label={value || t('All')}
+              selected={status === value}
+              onPress={() => setStatus(value)}
+            />
+          ))}
         </View>
-      </ScrollView>
-    </Screen>
+        {renderList()}
+      </View>
+    </ScrollView>
   );
 }

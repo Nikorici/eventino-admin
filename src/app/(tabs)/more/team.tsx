@@ -10,7 +10,7 @@ import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
 import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useToast } from '@/hooks/useToast';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { confirmAction } from '@/components/dashboard/dashboardParts';
@@ -217,7 +217,7 @@ function DelegateRowSkeleton() {
 
 export default function TeamScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const rowDivider = useThemeColor('#f0f2f8', colors.dark.border);
@@ -338,7 +338,8 @@ export default function TeamScreen() {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={isFetching && !isLoading}
@@ -347,7 +348,7 @@ export default function TeamScreen() {
             }}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >
@@ -410,63 +411,11 @@ export default function TeamScreen() {
         </View>
       </ScrollView>
 
-      <SheetModal visible={addOpen} onClose={() => setAddOpen(false)} title={t('Add team member')}>
-        <ScrollView style={{ maxHeight: 520 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-          <View className="gap-4">
-            <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Step 1 — pick permissions')}</AppText>
-              <PermissionEditor value={newPermissions} onChange={setNewPermissions} />
-            </View>
-
-            <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Step 2 — pick a user to add')}</AppText>
-              <GlassInput
-                placeholder={t('Search users by name or email...')}
-                accessibilityLabel={t('Search users by name or email...')}
-                value={searchInput}
-                onChangeText={setSearchInput}
-                autoCapitalize="none"
-                autoCorrect={false}
-                leftIcon={<Search size={18} color={colors.muted} />}
-                rightIcon={searching ? <ActivityIndicator size="small" color={colors.muted} /> : undefined}
-              />
-              {results.length > 0 ? (
-                <View className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-                  {results.map((user, index) => {
-                    const active = selectedUser?.id === user.id;
-                    return (
-                      <Pressable
-                        key={user.id}
-                        onPress={() => {
-                          haptics.selection();
-                          setSelectedUser(user);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: active }}
-                        accessibilityLabel={delegateUserLabel(user)}
-                        className={cn('flex-row items-center gap-3 py-3', index > 0 && 'border-t')}
-                        style={index > 0 ? { borderColor: rowDivider } : undefined}
-                      >
-                        <UserAvatar user={user} size={36} />
-                        <View className="flex-1">
-                          <UserIdentity user={user} />
-                        </View>
-                        {active ? <Check size={18} color={ACCENT_GREEN} /> : null}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              ) : null}
-              {search.length >= 2 && searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Searching...')}</AppText>
-              ) : null}
-              {search.length >= 2 && !searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('No users found')}</AppText>
-              ) : null}
-            </View>
-          </View>
-        </ScrollView>
-        <View className="mt-5">
+      <SheetModal
+        visible={addOpen}
+        onClose={() => setAddOpen(false)}
+        title={t('Add team member')}
+        footer={
           <PrimaryButton
             label={t('Add team member')}
             icon={<UserPlus size={18} color={buttonTint} />}
@@ -476,35 +425,93 @@ export default function TeamScreen() {
             disabled={!selectedUser}
             loading={adding}
           />
+        }
+      >
+        <View className="gap-4">
+          <View className="gap-2">
+            <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Step 1 — pick permissions')}</AppText>
+            <PermissionEditor value={newPermissions} onChange={setNewPermissions} />
+          </View>
+
+          <View className="gap-2">
+            <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Step 2 — pick a user to add')}</AppText>
+            <GlassInput
+              placeholder={t('Search users by name or email...')}
+              accessibilityLabel={t('Search users by name or email...')}
+              value={searchInput}
+              onChangeText={setSearchInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+              leftIcon={<Search size={18} color={colors.muted} />}
+              rightIcon={searching ? <ActivityIndicator size="small" color={colors.muted} /> : undefined}
+            />
+            {results.length > 0 ? (
+              <View className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
+                {results.map((user, index) => {
+                  const active = selectedUser?.id === user.id;
+                  return (
+                    <Pressable
+                      key={user.id}
+                      onPress={() => {
+                        haptics.selection();
+                        setSelectedUser(user);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                      accessibilityLabel={delegateUserLabel(user)}
+                      className={cn('flex-row items-center gap-3 py-3', index > 0 && 'border-t')}
+                      style={index > 0 ? { borderColor: rowDivider } : undefined}
+                    >
+                      <UserAvatar user={user} size={36} />
+                      <View className="flex-1">
+                        <UserIdentity user={user} />
+                      </View>
+                      {active ? <Check size={18} color={ACCENT_GREEN} /> : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+            {search.length >= 2 && searching && results.length === 0 ? (
+              <AppText className="py-2 text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Searching...')}</AppText>
+            ) : null}
+            {search.length >= 2 && !searching && results.length === 0 ? (
+              <AppText className="py-2 text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('No users found')}</AppText>
+            ) : null}
+          </View>
         </View>
       </SheetModal>
 
-      <SheetModal visible={editingDelegate != null} onClose={() => setEditingDelegate(null)} title={t('Update permissions')}>
+      <SheetModal
+        visible={editingDelegate != null}
+        onClose={() => setEditingDelegate(null)}
+        title={t('Update permissions')}
+        footer={
+          editingDelegate ? (
+            <PrimaryButton
+              label={t('Save changes')}
+              icon={<Check size={18} color={buttonTint} />}
+              onPress={() => {
+                void submitEdit();
+              }}
+              loading={saving}
+            />
+          ) : undefined
+        }
+      >
         {editingDelegate ? (
-          <>
-            <View className="gap-4">
-              <View
-                className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
-                style={{ borderColor: cardBorder }}
-              >
-                <UserAvatar user={editingDelegate.delegate_details} size={40} />
-                <View className="flex-1">
-                  <UserIdentity user={editingDelegate.delegate_details} />
-                </View>
+          <View className="gap-4">
+            <View
+              className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
+              style={{ borderColor: cardBorder }}
+            >
+              <UserAvatar user={editingDelegate.delegate_details} size={40} />
+              <View className="flex-1">
+                <UserIdentity user={editingDelegate.delegate_details} />
               </View>
-              <PermissionEditor value={editPermissions} onChange={setEditPermissions} />
             </View>
-            <View className="mt-5 gap-2">
-              <PrimaryButton
-                label={t('Save changes')}
-                icon={<Check size={18} color={buttonTint} />}
-                onPress={() => {
-                  void submitEdit();
-                }}
-                loading={saving}
-              />
-            </View>
-          </>
+            <PermissionEditor value={editPermissions} onChange={setEditPermissions} />
+          </View>
         ) : null}
       </SheetModal>
     </Screen>

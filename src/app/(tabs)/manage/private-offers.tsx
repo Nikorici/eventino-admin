@@ -7,7 +7,7 @@ import { AppText, EmptyState, GlassHeader, PressableScale, Screen } from '@/comp
 import { confirmAction } from '@/components/dashboard/dashboardParts';
 import { NewOfferSheet } from '@/components/offers/NewOfferSheet';
 import { OfferActionButton, OfferCard, OffersSkeleton, copyOfferLink, type OfferTone } from '@/components/offers/offerParts';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -59,7 +59,7 @@ function OfferPayments({ offer }: { offer: PrivateOffer }) {
 export default function PrivateOffersScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const onPrimary = useThemeColor(colors.white, colors.primary);
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } =
     useSelectedEvent();
@@ -207,13 +207,14 @@ export default function PrivateOffersScreen() {
       <GlassHeader title={t('Private offers')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

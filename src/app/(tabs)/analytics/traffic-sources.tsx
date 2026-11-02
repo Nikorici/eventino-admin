@@ -4,7 +4,7 @@ import { CalendarX2 } from 'lucide-react-native';
 
 import { navigate } from '@/lib/nav';
 import { colors } from '@/theme/colors';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useGetEventBuyerLocationsQuery, useGetEventTrafficSourcesQuery } from '@/store/api/trackingApi';
 import { TrafficStatsSection } from '@/components/traffic/TrafficStatsSection';
@@ -13,7 +13,7 @@ import { AppText, EmptyState, GlassHeader, Screen, Skeleton } from '@/components
 
 export default function TrafficSourcesScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets({ topOffset: -4 });
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } = useSelectedEvent();
   const isCancelled = Boolean(event?.is_cancelled);
   const stats = useGetEventTrafficSourcesQuery(eventId ?? 0, { skip: eventId == null || !event || isCancelled });
@@ -31,8 +31,9 @@ export default function TrafficSourcesScreen() {
       <GlassHeader title={t('Traffic Sources')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.muted} />}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.muted} progressViewOffset={scroll.refreshOffset} />}
       >
         <View className="gap-3">
           <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">

@@ -27,6 +27,7 @@ import { WelcomeHeading } from '@/components/overview/WelcomeHeading';
 import { EventThumb, organizerEventStatus } from '@/components/events/OrganizerEventCard';
 import { AppText, Chip, EmptyState, GlassButton, GlassSurface, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
+import { HEADER_CLEARANCE, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
@@ -63,67 +64,70 @@ function StatCard({
   return (
     <View
       className={cn(
-        'gap-0.5 rounded-[14px] border px-5 py-[18px]',
+        'flex-row items-center gap-3 rounded-[14px] border px-4 py-2.5',
         hero ? 'border-primary bg-primary dark:border-white/[0.12]' : 'bg-white dark:bg-dark-surface',
       )}
       style={hero ? undefined : { borderColor: cardBorder }}
     >
-      <View className={cn('flex-row justify-between gap-3', unit ? 'items-start' : 'items-center')}>
+      <View className="flex-1">
         <AppText
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.6}
           className={cn(
-            'shrink font-gilroy-bold',
-            unit
-              ? hero
-                ? 'text-[34px] leading-[40px] tracking-[-0.68px]'
-                : 'text-[32px] leading-[38px] tracking-[-0.64px]'
-              : 'text-[38px] leading-[44px] tracking-[-0.76px]',
+            'font-gilroy-bold',
+            hero ? 'text-[26px] leading-[32px] tracking-[-0.52px]' : 'text-[24px] leading-[30px] tracking-[-0.48px]',
             hero && 'text-white dark:text-white',
           )}
         >
           {unit ? `${value} ` : value}
           {unit ? (
             <AppText
-              className={cn('font-gilroy-semibold text-[18px] leading-[24px] tracking-normal', hero && 'text-white dark:text-white')}
+              className={cn('font-gilroy-semibold text-[15px] leading-[20px] tracking-normal', hero && 'text-white dark:text-white')}
             >
               {unit}
             </AppText>
           ) : null}
         </AppText>
-        <View
+        <AppText
+          numberOfLines={1}
           className={cn(
-            'h-10 w-10 items-center justify-center rounded-[10px]',
-            hero ? 'bg-white/[0.12]' : 'bg-black/[0.04] dark:bg-white/10',
+            'font-gilroy-semibold text-[13px] leading-[17px]',
+            hero ? 'text-white/75 dark:text-white/75' : 'text-primary/70 dark:text-dark-text/70',
           )}
         >
-          <Icon size={20} color={hero ? colors.white : iconColor} />
-        </View>
+          {label}
+        </AppText>
+        {hint ? (
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
+            {hint}
+          </AppText>
+        ) : null}
       </View>
-      <AppText
+      <View
         className={cn(
-          'font-gilroy-semibold text-[15px] leading-[20px]',
-          unit && 'mt-1',
-          hero ? 'text-white/75 dark:text-white/75' : 'text-primary/70 dark:text-dark-text/70',
+          'h-9 w-9 items-center justify-center rounded-[10px]',
+          hero ? 'bg-white/[0.12]' : 'bg-black/[0.04] dark:bg-white/10',
         )}
       >
-        {label}
-      </AppText>
-      {hint ? <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">{hint}</AppText> : null}
+        <Icon size={18} color={hero ? colors.white : iconColor} />
+      </View>
     </View>
   );
 }
 
-function StatCardSkeleton({ hero }: { hero?: boolean }) {
+function StatCardSkeleton() {
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   return (
-    <View className="gap-2 rounded-[14px] border bg-white px-5 py-[18px] dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-      <View className="flex-row items-center justify-between">
-        <Skeleton className={cn('h-10', hero ? 'w-2/3' : 'w-1/3')} />
-        <Skeleton className="h-10 w-10 rounded-[10px]" />
+    <View
+      className="flex-row items-center gap-3 rounded-[14px] border bg-white px-4 py-2.5 dark:bg-dark-surface"
+      style={{ borderColor: cardBorder }}
+    >
+      <View className="flex-1 gap-1.5">
+        <Skeleton className="h-7 w-1/2" />
+        <Skeleton className="h-3.5 w-24" />
       </View>
-      <Skeleton className="h-4 w-28" />
+      <Skeleton className="h-9 w-9 rounded-[10px]" />
     </View>
   );
 }
@@ -174,6 +178,7 @@ function CurrentEventRow({ eventId }: { eventId: number }) {
 export default function HomeScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const scroll = useScrollInsets({ tabBar: false, topOffset: 8 - HEADER_CLEARANCE });
   const { user, isAuthenticated } = useAuth();
   const isBootstrapping = useAppSelector((s) => s.auth.isBootstrapping);
   const { eventId } = useSelectedEvent();
@@ -213,10 +218,11 @@ export default function HomeScreen() {
   return (
     <Screen edges={[]}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 180 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: insets.bottom + 180 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} progressViewOffset={scroll.refreshOffset} />
         }
       >
         <View className="flex-row items-start gap-3 px-4 pb-3.5">
@@ -239,12 +245,11 @@ export default function HomeScreen() {
           </View>
 
           {isLoading ? (
-            <>
-              <StatCardSkeleton hero />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-            </>
+            <View className="gap-2">
+              {[0, 1, 2, 3, 4, 5].map((key) => (
+                <StatCardSkeleton key={key} />
+              ))}
+            </View>
           ) : isError ? (
             <EmptyState
               icon={LayoutDashboard}
@@ -255,37 +260,39 @@ export default function HomeScreen() {
             />
           ) : (
             <>
-              <StatCard
-                hero
-                icon={BriefcaseBusiness}
-                label={t('Total Revenue')}
-                value={money(bucket?.income_by_currency)}
-                unit={currency}
-              />
-              <StatCard icon={CircleCheckBig} label={t('Tickets Sold')} value={groupThousands(bucket?.tickets_sold ?? 0)} />
-              <StatCard icon={Users} label={t('Total Users')} value={groupThousands(bucket?.new_users ?? 0)} />
-              <StatCard
-                icon={CreditCard}
-                label={
-                  <>
-                    {t('Paid Tickets')}
-                    {totalTickets > 0 ? (
-                      <AppText className="font-gilroy-medium text-[15px] text-muted dark:text-dark-muted">
-                        {` ${t('({{percent}}% of all tickets)', { percent: ((paidTickets / totalTickets) * 100).toFixed(1) })}`}
-                      </AppText>
-                    ) : null}
-                  </>
-                }
-                value={groupThousands(paidTickets)}
-              />
-              <StatCard icon={Gift} label={t('Free Tickets')} value={groupThousands(freeTickets)} />
-              <StatCard
-                icon={Heart}
-                label={t('Total Received')}
-                value={money(bucket?.total_received_by_currency)}
-                unit={currency}
-                hint={t('sum without invoices')}
-              />
+              <View className="gap-2">
+                <StatCard
+                  hero
+                  icon={BriefcaseBusiness}
+                  label={t('Total Revenue')}
+                  value={money(bucket?.income_by_currency)}
+                  unit={currency}
+                />
+                <StatCard icon={CircleCheckBig} label={t('Tickets Sold')} value={groupThousands(bucket?.tickets_sold ?? 0)} />
+                <StatCard icon={Users} label={t('Total Users')} value={groupThousands(bucket?.new_users ?? 0)} />
+                <StatCard
+                  icon={CreditCard}
+                  label={
+                    <>
+                      {t('Paid Tickets')}
+                      {totalTickets > 0 ? (
+                        <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+                          {` ${t('({{percent}}% of all tickets)', { percent: ((paidTickets / totalTickets) * 100).toFixed(1) })}`}
+                        </AppText>
+                      ) : null}
+                    </>
+                  }
+                  value={groupThousands(paidTickets)}
+                />
+                <StatCard icon={Gift} label={t('Free Tickets')} value={groupThousands(freeTickets)} />
+                <StatCard
+                  icon={Heart}
+                  label={t('Total Received')}
+                  value={money(bucket?.total_received_by_currency)}
+                  unit={currency}
+                  hint={t('sum without invoices')}
+                />
+              </View>
               <PressableScale
                 onPress={() => {
                   haptics.selection();

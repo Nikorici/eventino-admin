@@ -1,17 +1,19 @@
 import { useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, View, useWindowDimensions } from 'react-native';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, TriangleAlert, type LucideIcon } from 'lucide-react-native';
 
-import { AppText, GlassButton, GlassInput, PressableScale } from '@/components/ui';
+import { AppText, GlassButton, GlassInput, PressableScale, SlideUp } from '@/components/ui';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 
 import { TONE_COLORS, type Tone } from './printingLogic';
+import { sheetBottomPad } from '@/hooks/useScreenPadding';
 
 export interface SelectOption {
   value: string;
@@ -81,11 +83,13 @@ function SelectSheet({
 }) {
   const { t } = useTranslation();
   const checkColor = useThemeColor(colors.primary, colors.dark.text);
+  const { height: windowHeight } = useWindowDimensions();
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/40">
         <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <View className="max-h-[70%] rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-bg">
+        <SlideUp>
+        <View className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-bg" style={{ maxHeight: windowHeight * 0.7 }}>
           <View className="mb-2 h-1 w-10 self-center rounded-full bg-black/15 dark:bg-white/20" />
           <AppText className="px-5 pb-2 font-gilroy-bold text-[18px] leading-[24px]">{title}</AppText>
           <ScrollView>
@@ -106,6 +110,7 @@ function SelectSheet({
             ))}
           </ScrollView>
         </View>
+        </SlideUp>
       </View>
     </Modal>
   );
@@ -356,19 +361,33 @@ export function PromptSheet({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [value, setValue] = useState(initialValue ?? '');
   const hasInput = initialValue !== undefined;
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <View className="flex-1 justify-end bg-black/40">
+        <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
           <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-          <View className="gap-4 rounded-t-[20px] bg-app-bg px-5 pb-10 pt-3 dark:bg-dark-bg">
-            <View className="h-1 w-10 self-center rounded-full bg-black/15 dark:bg-white/20" />
-            <AppText className="font-gilroy-bold text-[18px] leading-[24px]">{title}</AppText>
-            {message ? <AppText className="font-gilroy-medium text-[14px] text-muted">{message}</AppText> : null}
-            {hasInput ? <GlassInput label={inputLabel} value={value} onChangeText={setValue} autoFocus /> : null}
-            <View className="flex-row gap-3">
+          <SlideUp>
+          <View className="max-h-full rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-bg">
+            <View className="mb-4 gap-4 px-5">
+              <View className="h-1 w-10 self-center rounded-full bg-black/15 dark:bg-white/20" />
+              <AppText className="font-gilroy-bold text-[18px] leading-[24px]">{title}</AppText>
+            </View>
+            {message || hasInput ? (
+              <KeyboardAwareScrollView
+                bottomOffset={24}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                style={{ flexShrink: 1 }}
+                contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 12, gap: 16 }}
+              >
+                {message ? <AppText className="font-gilroy-medium text-[14px] text-muted">{message}</AppText> : null}
+                {hasInput ? <GlassInput label={inputLabel} value={value} onChangeText={setValue} autoFocus /> : null}
+              </KeyboardAwareScrollView>
+            ) : null}
+            <View className="flex-row gap-3 border-t border-app-border px-5 pt-3 dark:border-dark-border" style={{ paddingBottom: sheetBottomPad(insets.bottom) }}>
               <View className="flex-1">
                 <GlassButton label={t('Cancel')} variant="secondary" onPress={onClose} />
               </View>
@@ -385,6 +404,7 @@ export function PromptSheet({
               </View>
             </View>
           </View>
+          </SlideUp>
         </View>
       </KeyboardAvoidingView>
     </Modal>

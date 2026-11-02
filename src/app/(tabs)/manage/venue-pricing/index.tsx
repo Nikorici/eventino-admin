@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Switch, View, useWindowDimensions } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { Armchair, Building2, LayoutGrid, MapPin, Pencil, RotateCcw, Ticket, X } from 'lucide-react-native';
+import { Armchair, Building2, LayoutGrid, MapPin, Pencil, RotateCcw, Ticket } from 'lucide-react-native';
 
-import { AppText, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton, ToastHost } from '@/components/ui';
+import { AppText, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { SheetModal } from '@/components/merch/merchParts';
 import { confirmAction } from '@/components/dashboard/dashboardParts';
 import { ArenaPreview } from '@/components/venue/ArenaPreview';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -216,9 +215,7 @@ interface ZoneEditSheetProps {
 function ZoneEditSheet({ eventId, eventVenueId, zone, mapping, ticketTypes, currency, onClose }: ZoneEditSheetProps) {
   const { t } = useTranslation();
   const toast = useToast();
-  const insets = useSafeAreaInsets();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
-  const { height: windowHeight } = useWindowDimensions();
   const [name, setName] = useState(zone.name);
   const [capacity, setCapacity] = useState(String(zone.capacity));
   const [comment, setComment] = useState(zone.comment ?? '');
@@ -276,83 +273,71 @@ function ZoneEditSheet({ eventId, eventVenueId, zone, mapping, ticketTypes, curr
   };
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/40">
-        <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <KeyboardAvoidingView behavior="padding">
-          <View className="rounded-t-[24px] bg-app-bg px-5 pt-4 dark:bg-dark-bg" style={{ paddingBottom: insets.bottom + 12, maxHeight: windowHeight * 0.88 }}>
-            <View className="mb-4 flex-row items-center justify-between gap-3">
-              <AppText numberOfLines={1} className="flex-1 font-gilroy-bold text-[20px]">
-                {zone.name}
-              </AppText>
-              <PressableScale onPress={onClose} accessibilityLabel={t('Close')} className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10">
-                <X size={18} color={colors.muted} />
-              </PressableScale>
-            </View>
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-              <View className="gap-3">
-                <GlassInput label={t('Zone name')} value={name} onChangeText={setName} />
-                <GlassInput label={t('Capacity')} value={capacity} keyboardType="number-pad" onChangeText={(next) => setCapacity(next.replace(/\D/g, ''))} />
-                <View className="gap-1.5">
-                  <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Colour')}</AppText>
-                  <View className="flex-row flex-wrap gap-2">
-                    {[zone.color, ...CATEGORY_PALETTE.filter((hex) => hex !== zone.color)].map((hex) => (
-                      <PressableScale key={hex} onPress={() => setColor(hex)} accessibilityLabel={hex} className="h-8 w-8 rounded-full" style={{ backgroundColor: hex }}>
-                        {color === hex ? <View className="absolute -inset-1 rounded-full border-2 border-primary dark:border-white" /> : <View />}
-                      </PressableScale>
-                    ))}
-                  </View>
-                </View>
-                <View className="gap-1.5">
-                  <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Ticket Type')}</AppText>
-                  <View className="flex-row flex-wrap gap-2">
-                    <PressableScale onPress={() => setTicketTypeId(null)} accessibilityLabel={t('Not configured')} className={cn('h-9 justify-center rounded-full border px-3', ticketTypeId === null ? 'border-primary bg-primary dark:border-white dark:bg-white' : 'border-app-border dark:border-dark-border')}>
-                      <AppText className={cn('font-gilroy-medium text-[12px]', ticketTypeId === null ? 'text-white dark:text-primary' : '')}>{t('Not configured')}</AppText>
-                    </PressableScale>
-                    {ticketTypes.map((type) => {
-                      const active = ticketTypeId === type.id;
-                      return (
-                        <PressableScale key={type.id} onPress={() => setTicketTypeId(type.id)} accessibilityLabel={type.name} className={cn('h-9 justify-center rounded-full border px-3', active ? 'border-primary bg-primary dark:border-white dark:bg-white' : 'border-app-border dark:border-dark-border')}>
-                          <AppText className={cn('font-gilroy-medium text-[12px]', active ? 'text-white dark:text-primary' : '')}>
-                            {type.name} — {type.price}
-                          </AppText>
-                        </PressableScale>
-                      );
-                    })}
-                  </View>
-                </View>
-                <View className="flex-row items-end gap-2">
-                  <GlassInput containerClassName="flex-1" label={`${t('Price')} (${currency})`} placeholder={t('Default')} value={priceOverride} keyboardType="decimal-pad" onChangeText={(next) => setPriceOverride(next.replace(',', '.'))} />
-                  {priceOverride ? (
-                    <PressableScale onPress={() => setPriceOverride('')} accessibilityLabel={t('Reset price')} className="h-12 w-12 items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border">
-                      <RotateCcw size={16} color={colors.muted} />
-                    </PressableScale>
-                  ) : null}
-                </View>
-                <GlassInput label={t('Comment')} placeholder={t('Optional note for this zone')} value={comment} onChangeText={setComment} />
-                <View className="flex-row items-center justify-between rounded-[12px] border px-4 py-3" style={{ borderColor: cardBorder }}>
-                  <AppText className="font-gilroy-semibold text-[14px]">{t('Active')}</AppText>
-                  <Switch value={isActive} onValueChange={setIsActive} trackColor={{ true: colors.primary, false: '#d1d1d6' }} thumbColor={colors.white} />
-                </View>
-              </View>
-            </ScrollView>
-            <View className="mt-4 flex-row gap-3">
-              <View className="flex-1">
-                <PressableScale onPress={onClose} accessibilityLabel={t('Cancel')} className="h-[52px] w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface">
-                  <AppText className="font-gilroy-semibold text-[16px]">{t('Cancel')}</AppText>
-                </PressableScale>
-              </View>
-              <View className="flex-1">
-                <PressableScale onPress={() => void save()} disabled={saving} accessibilityLabel={t('Save')} className="h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white">
-                  {saving ? <ActivityIndicator color={colors.muted} /> : <AppText className="font-gilroy-semibold text-[16px] text-white dark:text-primary">{t('Save')}</AppText>}
-                </PressableScale>
-              </View>
-            </View>
+    <SheetModal
+      visible
+      title={zone.name}
+      onClose={onClose}
+      footer={
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <PressableScale onPress={onClose} accessibilityLabel={t('Cancel')} className="h-[52px] w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface">
+              <AppText className="font-gilroy-semibold text-[16px]">{t('Cancel')}</AppText>
+            </PressableScale>
           </View>
-        </KeyboardAvoidingView>
+          <View className="flex-1">
+            <PressableScale onPress={() => void save()} disabled={saving} accessibilityLabel={t('Save')} className="h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white">
+              {saving ? <ActivityIndicator color={colors.muted} /> : <AppText className="font-gilroy-semibold text-[16px] text-white dark:text-primary">{t('Save')}</AppText>}
+            </PressableScale>
+          </View>
+        </View>
+      }
+    >
+      <View className="gap-3">
+        <GlassInput label={t('Zone name')} value={name} onChangeText={setName} />
+        <GlassInput label={t('Capacity')} value={capacity} keyboardType="number-pad" onChangeText={(next) => setCapacity(next.replace(/\D/g, ''))} />
+        <View className="gap-1.5">
+          <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Colour')}</AppText>
+          <View className="flex-row flex-wrap gap-2">
+            {[zone.color, ...CATEGORY_PALETTE.filter((hex) => hex !== zone.color)].map((hex) => (
+              <PressableScale key={hex} onPress={() => setColor(hex)} accessibilityLabel={hex} className="h-8 w-8 rounded-full" style={{ backgroundColor: hex }}>
+                {color === hex ? <View className="absolute -inset-1 rounded-full border-2 border-primary dark:border-white" /> : <View />}
+              </PressableScale>
+            ))}
+          </View>
+        </View>
+        <View className="gap-1.5">
+          <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Ticket Type')}</AppText>
+          <View className="flex-row flex-wrap gap-2">
+            <PressableScale onPress={() => setTicketTypeId(null)} accessibilityLabel={t('Not configured')} className={cn('h-9 justify-center rounded-full border px-3', ticketTypeId === null ? 'border-primary bg-primary dark:border-white dark:bg-white' : 'border-app-border dark:border-dark-border')}>
+              <AppText className={cn('font-gilroy-medium text-[12px]', ticketTypeId === null ? 'text-white dark:text-primary' : '')}>{t('Not configured')}</AppText>
+            </PressableScale>
+            {ticketTypes.map((type) => {
+              const active = ticketTypeId === type.id;
+              return (
+                <PressableScale key={type.id} onPress={() => setTicketTypeId(type.id)} accessibilityLabel={type.name} className={cn('h-9 justify-center rounded-full border px-3', active ? 'border-primary bg-primary dark:border-white dark:bg-white' : 'border-app-border dark:border-dark-border')}>
+                  <AppText className={cn('font-gilroy-medium text-[12px]', active ? 'text-white dark:text-primary' : '')}>
+                    {type.name} — {type.price}
+                  </AppText>
+                </PressableScale>
+              );
+            })}
+          </View>
+        </View>
+        <View className="flex-row items-end gap-2">
+          <GlassInput containerClassName="flex-1" label={`${t('Price')} (${currency})`} placeholder={t('Default')} value={priceOverride} keyboardType="decimal-pad" onChangeText={(next) => setPriceOverride(next.replace(',', '.'))} />
+          {priceOverride ? (
+            <PressableScale onPress={() => setPriceOverride('')} accessibilityLabel={t('Reset price')} className="h-12 w-12 items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border">
+              <RotateCcw size={16} color={colors.muted} />
+            </PressableScale>
+          ) : null}
+        </View>
+        <GlassInput label={t('Comment')} placeholder={t('Optional note for this zone')} value={comment} onChangeText={setComment} />
+        <View className="flex-row items-center justify-between rounded-[12px] border px-4 py-3" style={{ borderColor: cardBorder }}>
+          <AppText className="font-gilroy-semibold text-[14px]">{t('Active')}</AppText>
+          <Switch value={isActive} onValueChange={setIsActive} trackColor={{ true: colors.primary, false: '#d1d1d6' }} thumbColor={colors.white} />
+        </View>
       </View>
-      <ToastHost />
-    </Modal>
+    </SheetModal>
   );
 }
 
@@ -375,7 +360,7 @@ function ZoneRowSkeleton() {
 export default function VenuePricingScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const rowDivider = useThemeColor('#f0f2f8', colors.dark.border);
   const headerIconTint = useThemeColor(colors.primary, colors.dark.text);
@@ -625,8 +610,9 @@ export default function VenuePricingScreen() {
       <GlassHeader title={t('Venue & Pricing')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={colors.muted} progressViewOffset={padding.top} />}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={colors.muted} progressViewOffset={scroll.refreshOffset} />}
       >
         <View className="gap-4">
           <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">{t('Seated venue layout and zone pricing for this event.')}</AppText>

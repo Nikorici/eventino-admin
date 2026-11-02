@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import { navigate } from '@/lib/nav';
 import { colors } from '@/theme/colors';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useGetOrgTrafficStatsQuery } from '@/store/api/trafficApi';
 import { TrafficStatsSection } from '@/components/traffic/TrafficStatsSection';
 import { AppText, GlassHeader, Screen } from '@/components/ui';
 
 export default function ProfileTrafficScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets({ topOffset: -4 });
   const stats = useGetOrgTrafficStatsQuery({});
 
   return (
@@ -18,12 +18,14 @@ export default function ProfileTrafficScreen() {
       <GlassHeader title={t('Profile Traffic')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={stats.isFetching && !stats.isLoading}
             onRefresh={() => void stats.refetch()}
             tintColor={colors.muted}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

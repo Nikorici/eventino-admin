@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { Ban, LayoutDashboard } from 'lucide-react-native';
 
@@ -17,7 +18,7 @@ import { FacturaOrdersPanel, type FacturaTab } from '@/components/dashboard/Fact
 import { FreeTicketRequestsPanel, SPECIAL_FREE_TICKET_EVENT_IDS } from '@/components/dashboard/FreeTicketRequestsPanel';
 import { PendingOrdersPanel } from '@/components/dashboard/PendingOrdersPanel';
 import { PanelCard, SectionTitle } from '@/components/dashboard/dashboardParts';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { eventCurrencyCode } from '@/lib/format';
@@ -64,6 +65,7 @@ function CancelledStats() {
 export default function DashboardScreen() {
   const { t } = useTranslation();
   const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const user = useAppSelector((s) => s.auth.user);
   const { eventId, data: event, isLoading, isError, refetch } = useSelectedEvent();
   const [tab, setTab] = useState<OrdersTab>('buyers');
@@ -135,18 +137,20 @@ export default function DashboardScreen() {
   return (
     <Screen edges={[]}>
       {header}
-      <ScrollView
-        className="flex-1"
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        {...scroll.scrollProps}
         contentContainerStyle={{
-          paddingTop: padding.top,
-          paddingBottom: padding.bottom,
+          paddingTop: scroll.paddingTop,
+          paddingBottom: scroll.paddingBottom,
           paddingHorizontal: 16,
           gap: 16,
         }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />
         }
       >
         {isLoading || !event || eventId == null ? (
@@ -227,7 +231,7 @@ export default function DashboardScreen() {
             {tourOpen ? <EventTourSheet permissions={permissions} onClose={() => setTourOpen(false)} /> : null}
           </>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

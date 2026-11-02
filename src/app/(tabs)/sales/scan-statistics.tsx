@@ -7,7 +7,7 @@ import { AppText, EmptyState, GlassHeader, PressableScale, Screen, Skeleton } fr
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { ACCENT_GREEN, PanelCard, PanelMessage } from '@/components/dashboard/dashboardParts';
 import { ProgressStatCard, ProgressStatCardSkeleton } from '@/components/sales-reports/ProgressStatCard';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
@@ -50,7 +50,7 @@ function SummarySkeleton() {
 
 export default function ScanStatisticsScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const headerIconTint = useThemeColor('#2b3a44', '#f9f9f9');
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } = useSelectedEvent();
   const [refreshing, setRefreshing] = useState(false);
@@ -177,14 +177,15 @@ export default function ScanStatisticsScreen() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        {...scroll.scrollProps}
         contentContainerStyle={{
-          paddingTop: padding.top,
-          paddingBottom: padding.bottom,
+          paddingTop: scroll.paddingTop,
+          paddingBottom: scroll.paddingBottom,
           paddingHorizontal: 16,
           gap: 16,
         }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />
         }
       >
         <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">{t('Track scanned tickets by type')}</AppText>

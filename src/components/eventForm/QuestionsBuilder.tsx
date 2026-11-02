@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { View } from 'react-native';
 import { ChevronDown, ChevronUp, GitBranch, ListChecks, Pencil, Plus, Trash2, X } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
@@ -10,6 +9,7 @@ import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { QuestionType } from '@/types/api';
 import { AppText, Chip, GlassButton, GlassInput, PressableScale } from '@/components/ui';
+import { SheetModal } from '@/components/merch/merchParts';
 import { FormAddButton } from './FormAddButton';
 
 export type QuestionConditionAction = 'continue' | 'skip' | 'end' | 'show_message';
@@ -122,8 +122,8 @@ function RequiredToggle({ value, onValueChange, label }: RequiredToggleProps) {
       className="flex-row items-center justify-between rounded-[12px] border border-app-border bg-app-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface"
     >
       <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{label}</AppText>
-      <View className={cn('h-[26px] w-[44px] justify-center rounded-full p-[3px]', value ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
-        <View className={cn('h-5 w-5 rounded-full bg-white dark:bg-dark-bg', value && 'self-end')} />
+      <View className={cn('h-[26px] w-[44px] justify-center overflow-hidden rounded-full p-[3px]', value ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
+        <View className={cn('aspect-square h-full rounded-full bg-white dark:bg-dark-bg', value && 'self-end')} />
       </View>
     </PressableScale>
   );
@@ -314,158 +314,144 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
         onPress={openAdd}
       />
 
-      <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
-        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-          <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
-            <Pressable onPress={(event) => event.stopPropagation()} className="max-h-[85%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
-              <View className="mb-2 flex-row items-center justify-between px-5">
-                <AppText className="font-gilroy-bold text-[17px] leading-[22px]">
-                  {editIndex == null ? t('Add Question') : t('Edit Question')}
-                </AppText>
-                <PressableScale
-                  onPress={() => setModalOpen(false)}
-                  accessibilityLabel={t('Cancel')}
-                  className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/10"
-                >
-                  <X size={17} color={mutedIcon} />
-                </PressableScale>
-              </View>
-              <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 14 }}>
-                <GlassInput
-                  label={t('Question Text')}
-                  placeholder={t('Enter your question')}
-                  value={draft.question}
-                  onChangeText={(value) => {
-                    setQuestionError(undefined);
-                    setDraft((prev) => ({ ...prev, question: value }));
+      <SheetModal
+        visible={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editIndex == null ? t('Add Question') : t('Edit Question')}
+        footer={<GlassButton label={t('Save')} variant="primary" onPress={saveDraft} className="rounded-[12px]" />}
+      >
+        <View className="gap-3.5">
+          <GlassInput
+            label={t('Question Text')}
+            placeholder={t('Enter your question')}
+            value={draft.question}
+            onChangeText={(value) => {
+              setQuestionError(undefined);
+              setDraft((prev) => ({ ...prev, question: value }));
+            }}
+            error={questionError}
+            autoCapitalize="sentences"
+          />
+          <GlassInput
+            label={`${t('Description')} (${t('optional')})`}
+            placeholder={t('Add a description or helper text')}
+            value={draft.description}
+            onChangeText={(value) => setDraft((prev) => ({ ...prev, description: value }))}
+            autoCapitalize="sentences"
+          />
+          <View className="gap-2">
+            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Question Type')}</AppText>
+            <View className="flex-row flex-wrap gap-2">
+              {QUESTION_TYPE_LABELS.map((entry) => (
+                <Chip
+                  key={entry.value}
+                  label={t(entry.label)}
+                  selected={draft.type === entry.value}
+                  onPress={() => {
+                    setOptionsError(undefined);
+                    setDraft((prev) => ({ ...prev, type: entry.value }));
                   }}
-                  error={questionError}
-                  autoCapitalize="sentences"
                 />
-                <GlassInput
-                  label={`${t('Description')} (${t('optional')})`}
-                  placeholder={t('Add a description or helper text')}
-                  value={draft.description}
-                  onChangeText={(value) => setDraft((prev) => ({ ...prev, description: value }))}
-                  autoCapitalize="sentences"
-                />
-                <View className="gap-2">
-                  <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Question Type')}</AppText>
-                  <View className="flex-row flex-wrap gap-2">
-                    {QUESTION_TYPE_LABELS.map((entry) => (
-                      <Chip
-                        key={entry.value}
-                        label={t(entry.label)}
-                        selected={draft.type === entry.value}
-                        onPress={() => {
-                          setOptionsError(undefined);
-                          setDraft((prev) => ({ ...prev, type: entry.value }));
-                        }}
-                      />
-                    ))}
-                  </View>
-                </View>
-                {supportsOptions ? (
-                  <View className="gap-2">
-                    <View className="flex-row items-center gap-1.5">
-                      <ListChecks size={15} color={mutedIcon} />
-                      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Answer Options')}</AppText>
+              ))}
+            </View>
+          </View>
+          {supportsOptions ? (
+            <View className="gap-2">
+              <View className="flex-row items-center gap-1.5">
+                <ListChecks size={15} color={mutedIcon} />
+                <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Answer Options')}</AppText>
+              </View>
+              {draft.options.map((option, index) => {
+                const condition = conditionFor(index);
+                return (
+                  <View key={index} className="gap-2">
+                    <View className="flex-row items-center gap-2">
+                      <View className="flex-1">
+                        <GlassInput
+                          placeholder={`${t('Option')} ${index + 1}`}
+                          value={option}
+                          onChangeText={(value) => setDraftOption(index, value)}
+                          autoCapitalize="sentences"
+                        />
+                      </View>
+                      <PressableScale
+                        onPress={() => removeDraftOption(index)}
+                        accessibilityLabel={t('Remove')}
+                        className="h-9 w-9 items-center justify-center rounded-full bg-danger/10"
+                      >
+                        <X size={15} color={colors.danger} />
+                      </PressableScale>
                     </View>
-                    {draft.options.map((option, index) => {
-                      const condition = conditionFor(index);
-                      return (
-                        <View key={index} className="gap-2">
-                          <View className="flex-row items-center gap-2">
-                            <View className="flex-1">
-                              <GlassInput
-                                placeholder={`${t('Option')} ${index + 1}`}
-                                value={option}
-                                onChangeText={(value) => setDraftOption(index, value)}
-                                autoCapitalize="sentences"
-                              />
-                            </View>
-                            <PressableScale
-                              onPress={() => removeDraftOption(index)}
-                              accessibilityLabel={t('Remove')}
-                              className="h-9 w-9 items-center justify-center rounded-full bg-danger/10"
-                            >
-                              <X size={15} color={colors.danger} />
-                            </PressableScale>
+                    {condition ? (
+                      <View className="gap-2 rounded-[12px] border border-app-border bg-app-surface p-3 dark:border-dark-border dark:bg-dark-bg">
+                        <View className="flex-row items-center justify-between">
+                          <View className="flex-row items-center gap-1.5">
+                            <GitBranch size={14} color={mutedIcon} />
+                            <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-muted dark:text-dark-muted">{t('Add Logic')}</AppText>
                           </View>
-                          {condition ? (
-                            <View className="gap-2 rounded-[12px] border border-app-border bg-app-surface p-3 dark:border-dark-border dark:bg-dark-bg">
-                              <View className="flex-row items-center justify-between">
-                                <View className="flex-row items-center gap-1.5">
-                                  <GitBranch size={14} color={mutedIcon} />
-                                  <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-muted dark:text-dark-muted">{t('Add Logic')}</AppText>
-                                </View>
-                                <PressableScale onPress={() => removeCondition(index)} accessibilityLabel={t('Remove')} hitSlop={8}>
-                                  <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-danger">{t('Remove')}</AppText>
-                                </PressableScale>
-                              </View>
-                              <View className="flex-row flex-wrap gap-2">
-                                {CONDITION_ACTIONS.map((entry) => (
-                                  <Chip
-                                    key={entry.value}
-                                    label={t(entry.label)}
-                                    selected={condition.action === entry.value}
-                                    onPress={() => updateCondition(index, { action: entry.value })}
-                                  />
-                                ))}
-                              </View>
-                              {condition.action === 'show_message' ? (
-                                <GlassInput
-                                  placeholder={t('Enter message to display')}
-                                  value={condition.message}
-                                  onChangeText={(value) => updateCondition(index, { message: value })}
-                                  autoCapitalize="sentences"
-                                />
-                              ) : null}
-                              {condition.action === 'skip' ? (
-                                <View className="gap-1.5">
-                                  <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">{t('Select question')}</AppText>
-                                  <View className="flex-row flex-wrap gap-2">
-                                    {questions.map((target, targetIndex) => (
-                                      <Chip
-                                        key={target.id ?? `target-${targetIndex}`}
-                                        label={`${targetIndex + 1}. ${target.question.length > 30 ? `${target.question.slice(0, 30)}...` : target.question}`}
-                                        selected={condition.targetQuestionIndex === targetIndex}
-                                        onPress={() =>
-                                          updateCondition(index, { targetQuestionIndex: targetIndex, targetQuestionId: target.id ?? null })
-                                        }
-                                      />
-                                    ))}
-                                  </View>
-                                </View>
-                              ) : null}
-                            </View>
-                          ) : (
-                            <PressableScale onPress={() => addCondition(index)} accessibilityLabel={t('Add Logic')} className="flex-row items-center gap-1 self-start pl-1">
-                              <Plus size={13} color={colors.links} />
-                              <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-links dark:text-dark-text">{t('Add Logic')}</AppText>
-                            </PressableScale>
-                          )}
+                          <PressableScale onPress={() => removeCondition(index)} accessibilityLabel={t('Remove')} hitSlop={8}>
+                            <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-danger">{t('Remove')}</AppText>
+                          </PressableScale>
                         </View>
-                      );
-                    })}
-                    <PressableScale onPress={addDraftOption} accessibilityLabel={t('Add an option')} className="flex-row items-center gap-1.5 self-start">
-                      <Plus size={15} color={colors.links} />
-                      <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-dark-text">{t('Add an option')}</AppText>
-                    </PressableScale>
-                    {optionsError ? <AppText className="font-gilroy-medium text-xs leading-[16px] text-danger">{optionsError}</AppText> : null}
+                        <View className="flex-row flex-wrap gap-2">
+                          {CONDITION_ACTIONS.map((entry) => (
+                            <Chip
+                              key={entry.value}
+                              label={t(entry.label)}
+                              selected={condition.action === entry.value}
+                              onPress={() => updateCondition(index, { action: entry.value })}
+                            />
+                          ))}
+                        </View>
+                        {condition.action === 'show_message' ? (
+                          <GlassInput
+                            placeholder={t('Enter message to display')}
+                            value={condition.message}
+                            onChangeText={(value) => updateCondition(index, { message: value })}
+                            autoCapitalize="sentences"
+                          />
+                        ) : null}
+                        {condition.action === 'skip' ? (
+                          <View className="gap-1.5">
+                            <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">{t('Select question')}</AppText>
+                            <View className="flex-row flex-wrap gap-2">
+                              {questions.map((target, targetIndex) => (
+                                <Chip
+                                  key={target.id ?? `target-${targetIndex}`}
+                                  label={`${targetIndex + 1}. ${target.question.length > 30 ? `${target.question.slice(0, 30)}...` : target.question}`}
+                                  selected={condition.targetQuestionIndex === targetIndex}
+                                  onPress={() =>
+                                    updateCondition(index, { targetQuestionIndex: targetIndex, targetQuestionId: target.id ?? null })
+                                  }
+                                />
+                              ))}
+                            </View>
+                          </View>
+                        ) : null}
+                      </View>
+                    ) : (
+                      <PressableScale onPress={() => addCondition(index)} accessibilityLabel={t('Add Logic')} className="flex-row items-center gap-1 self-start pl-1">
+                        <Plus size={13} color={colors.links} />
+                        <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-links dark:text-dark-text">{t('Add Logic')}</AppText>
+                      </PressableScale>
+                    )}
                   </View>
-                ) : null}
-                <RequiredToggle
-                  label={t('Required question')}
-                  value={draft.required}
-                  onValueChange={(value) => setDraft((prev) => ({ ...prev, required: value }))}
-                />
-                <GlassButton label={t('Save')} variant="primary" onPress={saveDraft} className="rounded-[12px]" />
-              </ScrollView>
-            </Pressable>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Modal>
+                );
+              })}
+              <PressableScale onPress={addDraftOption} accessibilityLabel={t('Add an option')} className="flex-row items-center gap-1.5 self-start">
+                <Plus size={15} color={colors.links} />
+                <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-dark-text">{t('Add an option')}</AppText>
+              </PressableScale>
+              {optionsError ? <AppText className="font-gilroy-medium text-xs leading-[16px] text-danger">{optionsError}</AppText> : null}
+            </View>
+          ) : null}
+          <RequiredToggle
+            label={t('Required question')}
+            value={draft.required}
+            onValueChange={(value) => setDraft((prev) => ({ ...prev, required: value }))}
+          />
+        </View>
+      </SheetModal>
     </View>
   );
 }

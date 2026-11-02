@@ -1,13 +1,12 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 
-import { AppText, PressableScale, Skeleton, ToastHost } from '@/components/ui';
+import { AppText, PressableScale, Skeleton } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { SheetModal } from '@/components/merch/merchParts';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { WEB_ORIGIN } from '@/lib/constants';
 import { haptics } from '@/lib/haptics';
@@ -133,59 +132,40 @@ export function OfferFormSheet({
   children: ReactNode;
 }) {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/40">
-        <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <KeyboardAvoidingView behavior="padding">
-          <View
-            className="rounded-t-[24px] bg-app-bg px-5 pt-4 dark:bg-dark-bg"
-            style={{ paddingBottom: insets.bottom + 12, maxHeight: windowHeight * 0.88 }}
-          >
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px]">{title}</AppText>
-              <PressableScale
-                onPress={onClose}
-                accessibilityLabel={t('Close')}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </PressableScale>
-            </View>
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-              <View className="gap-3">{children}</View>
-            </ScrollView>
-            <View className="mt-4 flex-row gap-3">
-              <View className="flex-1">
-                <PressableScale
-                  onPress={onClose}
-                  accessibilityLabel={t('Cancel')}
-                  className="h-[52px] w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface"
-                >
-                  <AppText className="font-gilroy-semibold text-[16px]">{t('Cancel')}</AppText>
-                </PressableScale>
-              </View>
-              <View className="flex-1">
-                <PressableScale
-                  onPress={onSubmit}
-                  disabled={saving}
-                  accessibilityLabel={submitLabel}
-                  className="h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white"
-                >
-                  {saving ? (
-                    <ActivityIndicator color={colors.muted} />
-                  ) : (
-                    <AppText className="font-gilroy-semibold text-[16px] text-white dark:text-primary">{submitLabel}</AppText>
-                  )}
-                </PressableScale>
-              </View>
-            </View>
+    <SheetModal
+      visible
+      onClose={onClose}
+      title={title}
+      footer={
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <PressableScale
+              onPress={onClose}
+              accessibilityLabel={t('Cancel')}
+              className="h-[52px] w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface"
+            >
+              <AppText className="font-gilroy-semibold text-[16px]">{t('Cancel')}</AppText>
+            </PressableScale>
           </View>
-        </KeyboardAvoidingView>
-      </View>
-      <ToastHost />
-    </Modal>
+          <View className="flex-1">
+            <PressableScale
+              onPress={onSubmit}
+              disabled={saving}
+              accessibilityLabel={submitLabel}
+              className="h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white"
+            >
+              {saving ? (
+                <ActivityIndicator color={colors.muted} />
+              ) : (
+                <AppText className="font-gilroy-semibold text-[16px] text-white dark:text-primary">{submitLabel}</AppText>
+              )}
+            </PressableScale>
+          </View>
+        </View>
+      }
+    >
+      <View className="gap-3">{children}</View>
+    </SheetModal>
   );
 }

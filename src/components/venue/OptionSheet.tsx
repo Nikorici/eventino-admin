@@ -3,7 +3,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Check, X } from 'lucide-react-native';
 
-import { AppText, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, PressableScale, SlideUp, ToastHost } from '@/components/ui';
+import { sheetBottomPad } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
@@ -32,7 +33,8 @@ export function OptionSheet({ title, options, value, onPick, onClose }: OptionSh
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/40">
         <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
-        <View className="rounded-t-[24px] bg-app-bg px-5 pt-4 dark:bg-dark-bg" style={{ paddingBottom: insets.bottom + 12, maxHeight: windowHeight * 0.7 }}>
+        <SlideUp>
+        <View className="rounded-t-[24px] bg-app-bg px-5 pt-4 dark:bg-dark-bg" style={{ paddingBottom: sheetBottomPad(insets.bottom), maxHeight: windowHeight * 0.7 }}>
           <View className="mb-3 flex-row items-center justify-between gap-3">
             <AppText className="flex-1 font-gilroy-bold text-[18px]">{title}</AppText>
             <PressableScale onPress={onClose} accessibilityLabel={t('Close')} className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10">
@@ -66,6 +68,7 @@ export function OptionSheet({ title, options, value, onPick, onClose }: OptionSh
             </View>
           </ScrollView>
         </View>
+        </SlideUp>
       </View>
       <ToastHost />
     </Modal>

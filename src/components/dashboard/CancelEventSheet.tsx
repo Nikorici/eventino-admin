@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, Modal, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, X } from 'lucide-react-native';
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/useToast';
 import { useCancelEventMutation, useGetEventBuyersQuery, type EventBuyer } from '@/store/api/organizerApi';
 import { AppText, GlassInput, PressableScale, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { sheetBottomPad } from '@/hooks/useScreenPadding';
 
 const REASON_MAX = 300;
 
@@ -33,7 +34,6 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
   const { t } = useTranslation();
   const toast = useToast();
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const [confirmText, setConfirmText] = useState('');
   const [reason, setReason] = useState('');
@@ -61,12 +61,12 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
   };
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/40">
-        <Pressable className="flex-1" onPress={isLoading ? undefined : onClose} accessibilityLabel={t('Close')} />
-        <KeyboardAvoidingView behavior="padding">
-          <View className="rounded-t-[24px] bg-app-bg px-5 pt-4 dark:bg-dark-bg" style={{ paddingBottom: insets.bottom + 12, maxHeight: windowHeight * 0.88 }}>
-            <View className="mb-4 flex-row items-center justify-between">
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <View className="flex-1 justify-end bg-black/40" style={{ paddingTop: insets.top + 8 }}>
+          <Pressable className="flex-1" onPress={isLoading ? undefined : onClose} accessibilityLabel={t('Close')} />
+          <View className="max-h-full rounded-t-[24px] bg-app-bg pt-4 dark:bg-dark-bg">
+            <View className="mb-4 flex-row items-center justify-between px-5">
               <View className="flex-row items-center gap-2">
                 <View className="h-9 w-9 items-center justify-center rounded-full bg-danger/10">
                   <AlertTriangle size={18} color={colors.danger} />
@@ -77,7 +77,13 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
                 <X size={18} color={colors.muted} />
               </PressableScale>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <KeyboardAwareScrollView
+              bottomOffset={24}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              style={{ flexShrink: 1 }}
+              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 12 }}
+            >
               <View className="gap-4">
                 <View className="gap-1.5 rounded-[12px] bg-danger/10 px-4 py-3">
                   <AppText className="font-gilroy-bold text-[14px] text-danger dark:text-danger">{t('Warning: This action cannot be undone')}</AppText>
@@ -158,8 +164,8 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
                 </View>
                 {error ? <AppText className="font-gilroy-medium text-[13px] text-danger dark:text-danger">{error}</AppText> : null}
               </View>
-            </ScrollView>
-            <View className="mt-4 flex-row gap-3">
+            </KeyboardAwareScrollView>
+            <View className="flex-row gap-3 border-t border-app-border px-5 pt-3 dark:border-dark-border" style={{ paddingBottom: sheetBottomPad(insets.bottom) }}>
               <View className="flex-1">
                 <PressableScale onPress={onClose} disabled={isLoading} accessibilityLabel={t('Keep Event')} className="h-[52px] w-full items-center justify-center rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface">
                   <AppText className="font-gilroy-semibold text-[16px]">{t('Keep Event')}</AppText>
@@ -177,8 +183,8 @@ export function CancelEventSheet({ eventId, eventTitle, onClose, onCancelled }: 
               </View>
             </View>
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
       <ToastHost />
     </Modal>
   );

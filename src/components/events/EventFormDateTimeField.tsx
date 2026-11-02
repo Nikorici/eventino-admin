@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Modal, Platform, Pressable, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { format, isValid, parse } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -85,8 +85,9 @@ export function EventFormDateTimeField({ value, mode, onChange, placeholder, ico
 
       {Platform.OS === 'ios' ? (
         <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-          <Pressable onPress={() => setOpen(false)} className="flex-1 justify-end bg-black/40">
-            <Pressable onPress={(event) => event.stopPropagation()} className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-surface">
+          <View className="flex-1 justify-end">
+            <Pressable onPress={() => setOpen(false)} style={StyleSheet.absoluteFill} className="bg-black/40" />
+            <View className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-surface">
               <View className="mb-1 flex-row items-center justify-between px-5">
                 <PressableScale onPress={() => setOpen(false)} accessibilityLabel={t('Cancel')}>
                   <AppText className="font-gilroy-medium text-[15px] leading-[20px] text-muted dark:text-dark-muted">{t('Cancel')}</AppText>
@@ -106,8 +107,8 @@ export function EventFormDateTimeField({ value, mode, onChange, placeholder, ico
                 onChange={handleChange}
                 style={{ alignSelf: 'stretch' }}
               />
-            </Pressable>
-          </Pressable>
+            </View>
+          </View>
         </Modal>
       ) : null}
     </>

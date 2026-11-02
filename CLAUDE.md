@@ -268,7 +268,7 @@ Core already answers: every auth endpoint (login/OTP/register/verify/reset/chang
 
 - Never put `className` on a Reanimated `Animated.*` component: on iOS/Android (NativeWind 4 + Reanimated 4) the classes
   are dropped while web still shows them. Animate a wrapper and style a plain `View`/`Pressable` inside it.
-  `PressableScale` is a plain `Pressable` with `active:scale-[0.97]` for that reason.
+  `PressableScale` is a plain `Pressable` with `active:opacity-70` for that reason (no transform classes: they misrender on native).
 - The web build is not proof of the native look. Check styling changes in Expo Go, and start Metro with
   `npx expo start -c` after adding new Tailwind classes or the phone keeps the cached style sheet.
 - On web NativeWind runs in `class` mode; `useBootstrapTheme` resolves `system` to the real scheme there.

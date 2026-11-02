@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { RefreshControl, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { Megaphone } from 'lucide-react-native';
 
 import { navigate } from '@/lib/nav';
 import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
 import { useAppSelector } from '@/store/hooks';
@@ -23,7 +23,7 @@ const TIKTOK_PIXEL_PATTERN = /^[A-Za-z0-9]{6,40}$/;
 export default function MarketingTrackingScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets({ topOffset: -4 });
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const metaTint = useThemeColor(colors.primary, colors.dark.text);
   const userId = useAppSelector((state) => state.auth.user?.id ?? null);
@@ -68,87 +68,88 @@ export default function MarketingTrackingScreen() {
   return (
     <Screen edges={[]}>
       <GlassHeader title={t('Marketing & Tracking')} onBack={navigate.back} />
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={pixels.isFetching && !pixels.isLoading}
-              onRefresh={() => void pixels.refetch()}
-              tintColor={colors.muted}
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={pixels.isFetching && !pixels.isLoading}
+            onRefresh={() => void pixels.refetch()}
+            tintColor={colors.muted}
+            progressViewOffset={scroll.refreshOffset}
+          />
+        }
+      >
+        <View className="gap-3">
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
+            {t('Connect Meta and TikTok pixels to track conversions across all your events')}
+          </AppText>
+          {pixels.isLoading || userId == null ? (
+            <View className="gap-4 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
+              <Skeleton className="h-3.5 w-24" />
+              <Skeleton className="h-12 w-full rounded-[10px]" />
+              <Skeleton className="h-3.5 w-24" />
+              <Skeleton className="h-12 w-full rounded-[10px]" />
+            </View>
+          ) : pixels.isError ? (
+            <EmptyState
+              icon={Megaphone}
+              title={t('Something went wrong.')}
+              message={t('Please try again.')}
+              actionLabel={t('Try again')}
+              onAction={() => void pixels.refetch()}
             />
-          }
-        >
-          <View className="gap-3">
-            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
-              {t('Connect Meta and TikTok pixels to track conversions across all your events')}
-            </AppText>
-            {pixels.isLoading || userId == null ? (
+          ) : (
+            <>
               <View className="gap-4 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-                <Skeleton className="h-3.5 w-24" />
-                <Skeleton className="h-12 w-full rounded-[10px]" />
-                <Skeleton className="h-3.5 w-24" />
-                <Skeleton className="h-12 w-full rounded-[10px]" />
-              </View>
-            ) : pixels.isError ? (
-              <EmptyState
-                icon={Megaphone}
-                title={t('Something went wrong.')}
-                message={t('Please try again.')}
-                actionLabel={t('Try again')}
-                onAction={() => void pixels.refetch()}
-              />
-            ) : (
-              <>
-                <View className="gap-4 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-                  <View className="gap-1.5">
-                    <GlassInput
-                      label={t('Meta Pixel ID')}
-                      value={metaPixel}
-                      onChangeText={setMetaPixel}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      placeholder="123456789012345"
-                      leftIcon={<MetaIcon color={metaTint} />}
-                    />
-                    <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
-                      {t('Find this in Meta Events Manager → Data Sources. Numeric ID only — paste just the digits, not the full snippet.')}
-                    </AppText>
-                  </View>
-                  <View className="gap-1.5">
-                    <GlassInput
-                      label={t('TikTok Pixel ID')}
-                      value={tiktokPixel}
-                      onChangeText={setTiktokPixel}
-                      autoCapitalize="characters"
-                      autoCorrect={false}
-                      placeholder="C4ABCDEFGHIJKLMNOP"
-                      leftIcon={<TikTokIcon />}
-                    />
-                    <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
-                      {t('Find this in TikTok Events Manager → Web Events. Pixel code only (e.g. C4ABCDEFGHIJKLMNOP).')}
-                    </AppText>
-                  </View>
-                  <AppText className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
-                    {t('Pixels apply automatically to every event you organize. Standard events fired: PageView, ViewContent, InitiateCheckout, Purchase / CompletePayment.')}
+                <View className="gap-1.5">
+                  <GlassInput
+                    label={t('Meta Pixel ID')}
+                    value={metaPixel}
+                    onChangeText={setMetaPixel}
+                    keyboardType="number-pad"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    placeholder="123456789012345"
+                    leftIcon={<MetaIcon color={metaTint} />}
+                  />
+                  <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
+                    {t('Find this in Meta Events Manager → Data Sources. Numeric ID only — paste just the digits, not the full snippet.')}
                   </AppText>
                 </View>
-                <GlassButton
-                  label={t('Save Changes')}
-                  onPress={() => void onSave()}
-                  loading={saving}
-                  disabled={saving || Boolean(event?.is_cancelled)}
-                  fullWidth
-                  className="mt-2"
-                />
-              </>
-            )}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+                <View className="gap-1.5">
+                  <GlassInput
+                    label={t('TikTok Pixel ID')}
+                    value={tiktokPixel}
+                    onChangeText={setTiktokPixel}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    placeholder="C4ABCDEFGHIJKLMNOP"
+                    leftIcon={<TikTokIcon />}
+                  />
+                  <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
+                    {t('Find this in TikTok Events Manager → Web Events. Pixel code only (e.g. C4ABCDEFGHIJKLMNOP).')}
+                  </AppText>
+                </View>
+                <AppText className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
+                  {t('Pixels apply automatically to every event you organize. Standard events fired: PageView, ViewContent, InitiateCheckout, Purchase / CompletePayment.')}
+                </AppText>
+              </View>
+              <GlassButton
+                label={t('Save Changes')}
+                onPress={() => void onSave()}
+                loading={saving}
+                disabled={saving || Boolean(event?.is_cancelled)}
+                fullWidth
+                className="mt-2"
+              />
+            </>
+          )}
+        </View>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

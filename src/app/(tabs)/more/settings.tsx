@@ -22,7 +22,7 @@ import { OrganizerSwitcherSheet, type OrganizerSwitcherSheetHandle } from '@/com
 import { AppText, Chip, GlassButton, GlassHeader, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useSetThemePreference } from '@/hooks/useThemePreference';
 import { useToast } from '@/hooks/useToast';
@@ -164,7 +164,7 @@ function ProfileHeaderSkeleton() {
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets({ topOffset: -4 });
   const toast = useToast();
   const { user, logout } = useAuth();
   const themePreference = useAppSelector((state) => state.theme.preference);
@@ -288,14 +288,15 @@ export default function SettingsScreen() {
       <GlassHeader title={t('Settings')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

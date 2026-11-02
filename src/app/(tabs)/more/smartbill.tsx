@@ -7,7 +7,7 @@ import { CircleCheck, CircleX, ReceiptText } from 'lucide-react-native';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { ToggleRow } from '@/components/merch/merchParts';
 import { AppText, EmptyState, GlassButton, GlassHeader, GlassInput, Screen, Skeleton } from '@/components/ui';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
@@ -67,7 +67,7 @@ function FormSkeleton() {
 
 export default function SmartBillScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
 
@@ -245,13 +245,14 @@ export default function SmartBillScreen() {
         bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ import { downloadAuthedFile, shareFile } from '@/lib/downloads';
 import { colors } from '@/theme/colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { usePresaleRealtime, type PresaleStreamStatus } from '@/hooks/usePresaleRealtime';
 import { formatStamp, matchesFilter, mergeRegistrations, percentOf, refreshRegistrations, sourceLabel, sourceShares } from '@/lib/presale';
@@ -25,7 +25,7 @@ import {
   type PresaleRegistrationRow,
   type PresaleStreamMessage,
 } from '@/store/api/presaleApi';
-import { AppText, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton, ToastHost } from '@/components/ui';
+import { AppText, EmptyState, GlassHeader, GlassInput, KeyboardAwareListScroll, PressableScale, Screen, Skeleton, SlideUp, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 
 type LoadState = 'loading' | 'ready' | 'denied' | 'error';
@@ -106,7 +106,9 @@ export default function PresaleScreen() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const iconTint = useThemeColor(colors.primary, colors.dark.text);
@@ -506,7 +508,9 @@ export default function PresaleScreen() {
       <FlashList
         data={rows}
         keyExtractor={(item) => String(item.id)}
+        renderScrollComponent={KeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
@@ -558,15 +562,24 @@ export default function PresaleScreen() {
         }
         onEndReached={() => void loadMore()}
         onEndReachedThreshold={0.4}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
       />
-      <Modal visible={selected != null} animationType="slide" transparent onRequestClose={() => setSelected(null)}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setSelected(null)}>
+      <Modal visible={selected != null} animationType="fade" transparent onRequestClose={() => setSelected(null)}>
+        <View className="flex-1 justify-end">
           <Pressable
-            className="max-h-[80%] rounded-t-[28px] bg-white px-4 pt-3 dark:bg-dark-surface"
-            onPress={() => undefined}
+            accessibilityRole="button"
+            accessibilityLabel={t('Close')}
+            onPress={() => setSelected(null)}
+            style={StyleSheet.absoluteFill}
+            className="bg-black/40"
+          />
+          <SlideUp>
+          <View
+            className="rounded-t-[28px] bg-white px-4 pt-3 dark:bg-dark-surface"
+            style={{ maxHeight: windowHeight * 0.8 }}
             accessibilityViewIsModal
             accessibilityLabel={t('Registration details')}
           >
@@ -606,8 +619,9 @@ export default function PresaleScreen() {
                 ))}
               </ScrollView>
             ) : null}
-          </Pressable>
-        </Pressable>
+          </View>
+          </SlideUp>
+        </View>
         <ToastHost />
       </Modal>
     </Screen>

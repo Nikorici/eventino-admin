@@ -33,7 +33,7 @@ import {
   Tag,
 } from '@/components/printing/printingParts';
 import { useBusyKeys } from '@/components/printing/useBusyKeys';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
@@ -79,7 +79,7 @@ function ToolIcon({ icon: Icon }: { icon: typeof Laptop }) {
 
 export default function LabelPrintersScreen() {
   const { t, i18n } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const mutedTint = useThemeColor(colors.muted, colors.dark.textSecondary);
@@ -251,8 +251,9 @@ export default function LabelPrintersScreen() {
     <Screen edges={[]}>
       <GlassHeader title={t('Label Printers')} onBack={navigate.back} />
       <ScrollView
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16, gap: 28 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16, gap: 28 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />}
       >
         {failed ? (
           <PanelError onRetry={() => void onRefresh()} />

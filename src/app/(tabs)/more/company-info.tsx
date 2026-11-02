@@ -6,7 +6,7 @@ import { Building2 } from 'lucide-react-native';
 
 import { AppText, EmptyState, GlassButton, GlassHeader, GlassInput, Screen, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
@@ -87,7 +87,7 @@ function CompanyFormSkeleton() {
 
 export default function CompanyInfoScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { user } = useAuth();
   const iconColor = useThemeColor(colors.primary, colors.dark.text);
   const spinnerColor = useThemeColor(colors.primary, colors.dark.text);
@@ -111,14 +111,15 @@ export default function CompanyInfoScreen() {
         bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={spinnerColor}
             colors={[spinnerColor]}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Modal, Pressable, View } from 'react-native';
+import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Image } from 'expo-image';
 import { Search, UserRound, X } from 'lucide-react-native';
@@ -146,8 +146,15 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
 
       <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
         <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-          <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
-            <Pressable onPress={(event) => event.stopPropagation()} className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
+          <View className="flex-1 justify-end">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('Close')}
+              onPress={() => setModalOpen(false)}
+              style={StyleSheet.absoluteFill}
+              className="bg-black/40"
+            />
+            <View className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
               <View className="mb-2 flex-row items-center justify-between px-5">
                 <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Add Organizers')}</AppText>
                 <PressableScale
@@ -171,6 +178,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
                 data={visibleResults}
                 keyExtractor={(item) => String(item.id)}
                 keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
                 contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 10 }}
                 onEndReachedThreshold={0.4}
                 onEndReached={() => {
@@ -206,8 +214,8 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
                   );
                 }}
               />
-            </Pressable>
-          </Pressable>
+            </View>
+          </View>
         </KeyboardAvoidingView>
       </Modal>
     </View>

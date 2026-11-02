@@ -22,8 +22,6 @@ export const routes = {
   presale: '/sales/presale',
   scanStatistics: '/sales/scan-statistics',
   merch: '/sales/merch',
-  merchOrders: '/sales/merch/orders',
-  merchSettings: '/sales/merch/settings',
 
   analytics: '/analytics',
   trafficSources: '/analytics/traffic-sources',
@@ -89,8 +87,6 @@ export const navigate = {
   presale: push('presale'),
   scanStatistics: push('scanStatistics'),
   merch: push('merch'),
-  merchOrders: push('merchOrders'),
-  merchSettings: push('merchSettings'),
   merchProduct: (productId: number) =>
     router.push(href('/sales/merch/products/[pid]', { pid: String(productId) })),
   merchOrder: (orderId: number) => router.push(href('/sales/merch/orders/[oid]', { oid: String(orderId) })),

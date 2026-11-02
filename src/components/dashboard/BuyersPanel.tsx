@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, X } from 'lucide-react-native';
 
-import { AppText, Chip, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, Chip, PressableScale, SlideUp, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import {
   ACCENT_GREEN,
@@ -126,11 +126,16 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
   const status = attendanceStatus(buyer);
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
+      <View className="flex-1 justify-end">
         <Pressable
-          className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-          onPress={(event) => event.stopPropagation()}
-        >
+          accessibilityRole="button"
+          accessibilityLabel={t('Close')}
+          onPress={onClose}
+          style={StyleSheet.absoluteFill}
+          className="bg-black/40"
+        />
+        <SlideUp>
+        <View className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg">
           <View className="mb-4 flex-row items-center justify-between">
             <View className="flex-1 flex-row items-center gap-3 pr-3">
               <Avatar name={name} image={buyer.profile_image} />
@@ -224,8 +229,9 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
               </View>
             </View>
           </ScrollView>
-        </Pressable>
-      </Pressable>
+        </View>
+        </SlideUp>
+      </View>
       <ToastHost />
     </Modal>
   );

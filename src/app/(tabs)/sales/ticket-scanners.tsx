@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
   Switch,
   View,
 } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -20,7 +18,6 @@ import {
   Search,
   Trash2,
   UserPlus,
-  X,
 } from "lucide-react-native";
 
 import { cn } from "@/lib/cn";
@@ -28,7 +25,7 @@ import { haptics } from "@/lib/haptics";
 import { navigate } from "@/lib/nav";
 import { colors } from "@/theme/colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { useScreenPadding } from "@/hooks/useScreenPadding";
+import { useScrollInsets } from "@/hooks/useScreenPadding";
 import { useSelectedEvent } from "@/hooks/useSelectedEvent";
 import { eventPermissions } from "@/lib/sections";
 import { useAppSelector } from "@/store/hooks";
@@ -36,6 +33,7 @@ import { useToast } from "@/hooks/useToast";
 import { extractClientErrorMessage } from "@/lib/apiError";
 import { CARD_BORDER } from "@/components/dashboard/DashboardStats";
 import { confirmAction } from "@/components/dashboard/dashboardParts";
+import { SheetModal } from "@/components/merch/merchParts";
 import {
   useAddEventScannerMutation,
   useGetEventScannersQuery,
@@ -59,7 +57,6 @@ import {
   PressableScale,
   Screen,
   Skeleton,
-  ToastHost,
 } from "@/components/ui";
 
 const ACCENT_GREEN = "#34c759";
@@ -295,52 +292,6 @@ function ScannerRow({
   );
 }
 
-function SheetModal({
-  visible,
-  onClose,
-  title,
-  children,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  title: string;
-  children: ReactNode;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
-          <Pressable
-            className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
-                {title}
-              </AppText>
-              <Pressable
-                onPress={onClose}
-                accessibilityLabel={t("Close")}
-                className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
-              >
-                <X size={18} color={colors.muted} />
-              </Pressable>
-            </View>
-            {children}
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-      <ToastHost />
-    </Modal>
-  );
-}
-
 function SheetSubmitButton({
   label,
   icon: Icon,
@@ -361,7 +312,7 @@ function SheetSubmitButton({
       disabled={disabled || loading}
       accessibilityLabel={label}
       className={cn(
-        "mt-5 h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white",
+        "h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white",
         disabled && !loading && "opacity-50",
       )}
     >
@@ -398,7 +349,7 @@ function ScannerRowSkeleton() {
 
 export default function TicketScannersScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const toast = useToast();
   const user = useAppSelector((s) => s.auth.user);
   const { eventId, data: event, isLoading: eventLoading } = useSelectedEvent();
@@ -614,9 +565,10 @@ export default function TicketScannersScreen() {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
+        {...scroll.scrollProps}
         contentContainerStyle={{
-          paddingTop: padding.top,
-          paddingBottom: padding.bottom,
+          paddingTop: scroll.paddingTop,
+          paddingBottom: scroll.paddingBottom,
           paddingHorizontal: 16,
         }}
         refreshControl={
@@ -626,6 +578,7 @@ export default function TicketScannersScreen() {
               if (!skipScanners) void refetch();
             }}
             tintColor={colors.muted}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >
@@ -708,116 +661,133 @@ export default function TicketScannersScreen() {
         visible={addOpen}
         onClose={() => setAddOpen(false)}
         title={t("Add Scanner")}
+        footer={
+          <SheetSubmitButton
+            label={t("Add Scanner")}
+            icon={UserPlus}
+            onPress={() => {
+              void submitAdd();
+            }}
+            disabled={!selectedUser}
+            loading={adding}
+          />
+        }
       >
-        <ScrollView
-          style={{ maxHeight: 560 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="gap-4">
-            <View className="gap-2">
-              <GlassInput
-                placeholder={t("Search users by name or email...")}
-                value={searchInput}
-                onChangeText={setSearchInput}
-                autoCapitalize="none"
-                autoCorrect={false}
-                leftIcon={<Search size={18} color={colors.muted} />}
-                rightIcon={
-                  searching ? (
-                    <ActivityIndicator size="small" color={colors.muted} />
-                  ) : undefined
-                }
-              />
-              {results.length > 0 ? (
-                <View
-                  className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface"
-                  style={{ borderColor: cardBorder }}
-                >
-                  {results.map((user, index) => {
-                    const active = selectedUser?.id === user.id;
-                    return (
-                      <Pressable
-                        key={user.id}
-                        onPress={() => {
-                          haptics.selection();
-                          setSelectedUser(user);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={availableUserLabel(user)}
-                        className={cn(
-                          "flex-row items-center gap-3 py-3",
-                          index > 0 && "border-t",
-                        )}
-                        style={
-                          index > 0 ? { borderColor: rowDivider } : undefined
-                        }
-                      >
-                        <ScannerAvatar user={user} size={36} />
-                        <View className="flex-1">
+        <View className="gap-4">
+          <View className="gap-2">
+            <GlassInput
+              placeholder={t("Search users by name or email...")}
+              value={searchInput}
+              onChangeText={setSearchInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+              leftIcon={<Search size={18} color={colors.muted} />}
+              rightIcon={
+                searching ? (
+                  <ActivityIndicator size="small" color={colors.muted} />
+                ) : undefined
+              }
+            />
+            {results.length > 0 ? (
+              <View
+                className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface"
+                style={{ borderColor: cardBorder }}
+              >
+                {results.map((user, index) => {
+                  const active = selectedUser?.id === user.id;
+                  return (
+                    <Pressable
+                      key={user.id}
+                      onPress={() => {
+                        haptics.selection();
+                        setSelectedUser(user);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={availableUserLabel(user)}
+                      className={cn(
+                        "flex-row items-center gap-3 py-3",
+                        index > 0 && "border-t",
+                      )}
+                      style={
+                        index > 0 ? { borderColor: rowDivider } : undefined
+                      }
+                    >
+                      <ScannerAvatar user={user} size={36} />
+                      <View className="flex-1">
+                        <AppText
+                          numberOfLines={1}
+                          className="font-gilroy-semibold text-[14px] leading-[19px]"
+                        >
+                          {availableUserLabel(user)}
+                        </AppText>
+                        {user.email ? (
                           <AppText
                             numberOfLines={1}
-                            className="font-gilroy-semibold text-[14px] leading-[19px]"
+                            className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
                           >
-                            {availableUserLabel(user)}
+                            {user.email}
                           </AppText>
-                          {user.email ? (
-                            <AppText
-                              numberOfLines={1}
-                              className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
-                            >
-                              {user.email}
-                            </AppText>
-                          ) : null}
-                        </View>
-                        {active ? (
-                          <Check size={18} color={ACCENT_GREEN} />
                         ) : null}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              ) : null}
-              {search.length >= 2 && !searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted">
-                  {t("No users found")}
-                </AppText>
-              ) : null}
-            </View>
-
-            <ScopePicker
-              value={addScope}
-              onChange={setAddScope}
-              ticketTypes={activeTicketTypes}
-            />
-
-            <PressableScale
-              onPress={openInvite}
-              accessibilityLabel={t("Invite by email")}
-              className="h-11 flex-row items-center justify-center gap-2 rounded-[12px] border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
-            >
-              <Mail size={16} color={headerIconTint} />
-              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">
-                {t("Invite by email")}
+                      </View>
+                      {active ? (
+                        <Check size={18} color={ACCENT_GREEN} />
+                      ) : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+            {search.length >= 2 && !searching && results.length === 0 ? (
+              <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted">
+                {t("No users found")}
               </AppText>
-            </PressableScale>
+            ) : null}
           </View>
-        </ScrollView>
-        <SheetSubmitButton
-          label={t("Add Scanner")}
-          icon={UserPlus}
-          onPress={() => {
-            void submitAdd();
-          }}
-          disabled={!selectedUser}
-          loading={adding}
-        />
+
+          <ScopePicker
+            value={addScope}
+            onChange={setAddScope}
+            ticketTypes={activeTicketTypes}
+          />
+
+          <PressableScale
+            onPress={openInvite}
+            accessibilityLabel={t("Invite by email")}
+            className="h-11 flex-row items-center justify-center gap-2 rounded-[12px] border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
+          >
+            <Mail size={16} color={headerIconTint} />
+            <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">
+              {t("Invite by email")}
+            </AppText>
+          </PressableScale>
+        </View>
       </SheetModal>
 
       <SheetModal
         visible={inviteOpen}
         onClose={() => setInviteOpen(false)}
         title={t("Invite by email")}
+        footer={
+          inviteResult ? (
+            <SheetSubmitButton
+              label={t("Done")}
+              icon={Check}
+              onPress={() => setInviteOpen(false)}
+              disabled={false}
+              loading={false}
+            />
+          ) : (
+            <SheetSubmitButton
+              label={t("Send invitation")}
+              icon={Mail}
+              onPress={() => {
+                void submitInvite();
+              }}
+              disabled={!inviteEmail.trim()}
+              loading={inviting}
+            />
+          )
+        }
       >
         {inviteResult ? (
           <View className="items-center gap-3 py-4">
@@ -837,48 +807,24 @@ export default function TicketScannersScreen() {
                 ? `${t("Invitation sent to")} ${inviteResult.email}`
                 : `${inviteResult.email} ${t("added as scanner")}`}
             </AppText>
-            <SheetSubmitButton
-              label={t("Done")}
-              icon={Check}
-              onPress={() => setInviteOpen(false)}
-              disabled={false}
-              loading={false}
-            />
           </View>
         ) : (
-          <>
-            <ScrollView
-              style={{ maxHeight: 560 }}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View className="gap-4">
-                <GlassInput
-                  placeholder={t("Email")}
-                  value={inviteEmail}
-                  onChangeText={setInviteEmail}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="email-address"
-                  leftIcon={<Mail size={18} color={colors.muted} />}
-                />
-                <ScopePicker
-                  value={inviteScope}
-                  onChange={setInviteScope}
-                  ticketTypes={activeTicketTypes}
-                />
-              </View>
-            </ScrollView>
-            <SheetSubmitButton
-              label={t("Send invitation")}
-              icon={Mail}
-              onPress={() => {
-                void submitInvite();
-              }}
-              disabled={!inviteEmail.trim()}
-              loading={inviting}
+          <View className="gap-4">
+            <GlassInput
+              placeholder={t("Email")}
+              value={inviteEmail}
+              onChangeText={setInviteEmail}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              leftIcon={<Mail size={18} color={colors.muted} />}
             />
-          </>
+            <ScopePicker
+              value={inviteScope}
+              onChange={setInviteScope}
+              ticketTypes={activeTicketTypes}
+            />
+          </View>
         )}
       </SheetModal>
 
@@ -886,43 +832,8 @@ export default function TicketScannersScreen() {
         visible={editingScanner != null}
         onClose={() => setEditingScanner(null)}
         title={t("Edit scanner scope")}
-      >
-        {editingScanner ? (
-          <>
-            <ScrollView
-              style={{ maxHeight: 560 }}
-              showsVerticalScrollIndicator={false}
-            >
-              <View className="gap-4">
-                <View
-                  className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
-                  style={{ borderColor: cardBorder }}
-                >
-                  <ScannerAvatar user={editingScanner.user_details} size={40} />
-                  <View className="flex-1">
-                    <AppText
-                      numberOfLines={1}
-                      className="font-gilroy-semibold text-[14px] leading-[19px]"
-                    >
-                      {scannerUserLabel(editingScanner.user_details)}
-                    </AppText>
-                    {editingScanner.user_details.email ? (
-                      <AppText
-                        numberOfLines={1}
-                        className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
-                      >
-                        {editingScanner.user_details.email}
-                      </AppText>
-                    ) : null}
-                  </View>
-                </View>
-                <ScopePicker
-                  value={editScope}
-                  onChange={setEditScope}
-                  ticketTypes={activeTicketTypes}
-                />
-              </View>
-            </ScrollView>
+        footer={
+          editingScanner ? (
             <SheetSubmitButton
               label={t("Save")}
               icon={Check}
@@ -932,7 +843,39 @@ export default function TicketScannersScreen() {
               disabled={false}
               loading={savingScope}
             />
-          </>
+          ) : undefined
+        }
+      >
+        {editingScanner ? (
+          <View className="gap-4">
+            <View
+              className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
+              style={{ borderColor: cardBorder }}
+            >
+              <ScannerAvatar user={editingScanner.user_details} size={40} />
+              <View className="flex-1">
+                <AppText
+                  numberOfLines={1}
+                  className="font-gilroy-semibold text-[14px] leading-[19px]"
+                >
+                  {scannerUserLabel(editingScanner.user_details)}
+                </AppText>
+                {editingScanner.user_details.email ? (
+                  <AppText
+                    numberOfLines={1}
+                    className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
+                  >
+                    {editingScanner.user_details.email}
+                  </AppText>
+                ) : null}
+              </View>
+            </View>
+            <ScopePicker
+              value={editScope}
+              onChange={setEditScope}
+              ticketTypes={activeTicketTypes}
+            />
+          </View>
         ) : null}
       </SheetModal>
     </Screen>

@@ -37,7 +37,7 @@ export function PressableScale({
       accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel}
       testID={testID}
-      className={cn(className, !disabled && 'active:scale-[0.97]')}
+      className={cn(className, !disabled && 'active:opacity-70')}
       style={style}
     >
       {children}

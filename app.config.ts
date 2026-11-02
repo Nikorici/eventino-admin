@@ -10,6 +10,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/images/icon.png',
   scheme: 'eventino-admin',
   userInterfaceStyle: 'automatic',
+  backgroundColor: '#ffffff',
   ios: {
     supportsTablet: false,
     userInterfaceStyle: 'automatic',
@@ -61,10 +62,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         imageWidth: 180,
         resizeMode: 'contain',
         backgroundColor: '#ffffff',
-        dark: {
-          image: './assets/images/splash-logo-dark.png',
-          backgroundColor: '#0a0d10',
-        },
       },
     ],
   ],

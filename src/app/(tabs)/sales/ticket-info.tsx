@@ -16,7 +16,7 @@ import {
   moneyLabel,
 } from '@/components/dashboard/dashboardParts';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { dateFnsLocale } from '@/lib/format';
 import { navigate } from '@/lib/nav';
@@ -60,7 +60,7 @@ function PurchaseRow({ buyer, currency }: { buyer: EventBuyer; currency: string 
 
 export default function TicketInfoScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const user = useAppSelector((state) => state.auth.user);
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } = useSelectedEvent();
   const [searchInput, setSearchInput] = useState('');
@@ -184,14 +184,16 @@ export default function TicketInfoScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        {...scroll.scrollProps}
         contentContainerStyle={{
-          paddingTop: padding.top,
-          paddingBottom: padding.bottom,
+          paddingTop: scroll.paddingTop,
+          paddingBottom: scroll.paddingBottom,
           paddingHorizontal: 16,
           gap: 8,
         }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={scroll.refreshOffset} />
         }
       >
         {renderBody()}

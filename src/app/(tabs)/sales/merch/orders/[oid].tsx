@@ -20,7 +20,7 @@ import {
   money,
   paymentColor,
 } from '@/components/merch/merchParts';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
@@ -217,7 +217,7 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
 
 export default function MerchOrderScreen() {
   const { t, i18n } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { oid } = useLocalSearchParams<{ oid: string }>();
   const orderId = Number(oid);
   const orderQuery = useGetMerchOrderQuery(orderId, { skip: !orderId });
@@ -263,13 +263,14 @@ export default function MerchOrderScreen() {
       <GlassHeader title={t('Order #{{number}}', { number: oid })} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >

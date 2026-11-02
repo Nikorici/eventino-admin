@@ -5,10 +5,9 @@ import {
   Platform,
   Pressable,
   RefreshControl,
-  ScrollView,
+  StyleSheet,
   Switch,
   View,
-  useWindowDimensions,
 } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { FlashList } from '@shopify/flash-list';
@@ -22,7 +21,7 @@ import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { SheetModal } from '@/components/merch/merchParts';
 import { AppText, Badge, Chip, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEventId } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -399,11 +398,15 @@ function VoucherDateTimeField({
 
       {Platform.OS === 'ios' ? (
         <Modal visible={iosOpen} transparent animationType="fade" onRequestClose={() => setIosOpen(false)}>
-          <Pressable onPress={() => setIosOpen(false)} className="flex-1 justify-end bg-black/40">
+          <View className="flex-1 justify-end">
             <Pressable
-              onPress={(event) => event.stopPropagation()}
-              className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-surface"
-            >
+              accessibilityRole="button"
+              accessibilityLabel={t('Close')}
+              onPress={() => setIosOpen(false)}
+              style={StyleSheet.absoluteFill}
+              className="bg-black/40"
+            />
+            <View className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-surface">
               <View className="mb-1 flex-row items-center justify-between px-5">
                 <PressableScale onPress={() => setIosOpen(false)} accessibilityLabel={t('Cancel')}>
                   <AppText className="font-gilroy-medium text-[15px] text-muted dark:text-dark-muted">{t('Cancel')}</AppText>
@@ -422,8 +425,8 @@ function VoucherDateTimeField({
                 onChange={handleIosChange}
                 style={{ alignSelf: 'stretch' }}
               />
-            </Pressable>
-          </Pressable>
+            </View>
+          </View>
         </Modal>
       ) : null}
     </View>
@@ -433,8 +436,7 @@ function VoucherDateTimeField({
 export default function VouchersScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  const padding = useScreenPadding();
-  const { height: windowHeight } = useWindowDimensions();
+  const scroll = useScrollInsets();
   const eventId = useSelectedEventId();
   const headerIconTint = useThemeColor(colors.primary, colors.dark.text);
   const submitTint = useThemeColor(colors.white, colors.primary);
@@ -653,135 +655,136 @@ export default function VouchersScreen() {
             />
           )
         }
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       />
 
       {sheetOpen ? (
-        <SheetModal visible title={editing ? t('Edit voucher') : t('Add voucher')} onClose={closeSheet}>
-          <ScrollView
-            style={{ maxHeight: windowHeight * 0.75 }}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View className="gap-4">
+        <SheetModal
+          visible
+          title={editing ? t('Edit voucher') : t('Add voucher')}
+          onClose={closeSheet}
+          footer={
+            <PressableScale
+              onPress={() => {
+                haptics.selection();
+                void submit();
+              }}
+              disabled={saving}
+              accessibilityLabel={t('Save')}
+              className="h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white"
+            >
+              {saving ? (
+                <ActivityIndicator color={submitTint} />
+              ) : (
+                <>
+                  <Check size={18} color={submitTint} />
+                  <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Save')}</AppText>
+                </>
+              )}
+            </PressableScale>
+          }
+        >
+          <View className="gap-4">
+            <GlassInput
+              label={t('Code')}
+              placeholder={t('Voucher code')}
+              value={form.code}
+              onChangeText={(text) => setForm((prev) => ({ ...prev, code: text }))}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              maxLength={20}
+            />
+            <GlassInput
+              label={`${t('Discount')} (%)`}
+              placeholder="10"
+              value={form.discount}
+              onChangeText={(text) => setForm((prev) => ({ ...prev, discount: text }))}
+              keyboardType="number-pad"
+            />
+            <SwitchRow
+              label={t('Unlimited uses')}
+              value={form.unlimited}
+              onChange={(next) => setForm((prev) => ({ ...prev, unlimited: next }))}
+            />
+            {!form.unlimited ? (
               <GlassInput
-                label={t('Code')}
-                placeholder={t('Voucher code')}
-                value={form.code}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, code: text }))}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                maxLength={20}
-              />
-              <GlassInput
-                label={`${t('Discount')} (%)`}
-                placeholder="10"
-                value={form.discount}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, discount: text }))}
+                label={t('Usage limit')}
+                placeholder="100"
+                value={form.maxUses}
+                onChangeText={(text) => setForm((prev) => ({ ...prev, maxUses: text }))}
                 keyboardType="number-pad"
               />
-              <SwitchRow
-                label={t('Unlimited uses')}
-                value={form.unlimited}
-                onChange={(next) => setForm((prev) => ({ ...prev, unlimited: next }))}
-              />
-              {!form.unlimited ? (
-                <GlassInput
-                  label={t('Usage limit')}
-                  placeholder="100"
-                  value={form.maxUses}
-                  onChangeText={(text) => setForm((prev) => ({ ...prev, maxUses: text }))}
-                  keyboardType="number-pad"
-                />
-              ) : null}
-              <View className="gap-2">
-                <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
-                  {t('Applies to tickets')}
-                </AppText>
-                <View className="flex-row flex-wrap gap-2">
-                  <Chip label={t('All tickets')} selected={form.allTickets} onPress={() => toggleAllTickets(true)} />
-                  {ticketTypes.map((ticketType) => (
-                    <Chip
-                      key={ticketType.id}
-                      label={ticketType.name}
-                      selected={!form.allTickets && form.ticketTypeIds.includes(ticketType.id)}
-                      onPress={() => toggleTicketType(ticketType.id)}
-                    />
-                  ))}
-                </View>
-                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
-                  {ticketTypes.length === 0
-                    ? t('No ticket types')
-                    : form.allTickets
-                      ? t('The discount applies to every ticket type.')
-                      : t('Select the ticket types the discount applies to.')}
-                </AppText>
+            ) : null}
+            <View className="gap-2">
+              <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
+                {t('Applies to tickets')}
+              </AppText>
+              <View className="flex-row flex-wrap gap-2">
+                <Chip label={t('All tickets')} selected={form.allTickets} onPress={() => toggleAllTickets(true)} />
+                {ticketTypes.map((ticketType) => (
+                  <Chip
+                    key={ticketType.id}
+                    label={ticketType.name}
+                    selected={!form.allTickets && form.ticketTypeIds.includes(ticketType.id)}
+                    onPress={() => toggleTicketType(ticketType.id)}
+                  />
+                ))}
               </View>
-              <VoucherDateTimeField
-                label={t('Valid from')}
-                value={form.validFrom}
-                onChange={(next) => setForm((prev) => ({ ...prev, validFrom: next }))}
-              />
-              <VoucherDateTimeField
-                label={t('Valid until')}
-                value={form.validUntil}
-                onChange={(next) => setForm((prev) => ({ ...prev, validUntil: next }))}
-              />
-              <View className="gap-3">
-                <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
-                  {t('Abuse prevention')}
-                </AppText>
-                <SwitchRow
-                  label={t('Limit to one use per account')}
-                  description={t(
-                    'Prevents the same Eventino account from successfully using this voucher more than once.',
-                  )}
-                  value={form.limitOneUsePerAccount}
-                  onChange={(next) => setForm((prev) => ({ ...prev, limitOneUsePerAccount: next }))}
-                />
-                <SwitchRow
-                  label={t('Limit to one use per IP address')}
-                  description={t(
-                    'Prevents the voucher from being successfully used more than once from the same public IP address. Users sharing a network (office, university, hotel, mobile carrier) may be affected.',
-                  )}
-                  value={form.limitOneUsePerIp}
-                  onChange={(next) => setForm((prev) => ({ ...prev, limitOneUsePerIp: next }))}
-                />
-              </View>
-              <SwitchRow
-                label={t('Active')}
-                value={form.isActive}
-                onChange={(next) => setForm((prev) => ({ ...prev, isActive: next }))}
-              />
-              <PressableScale
-                onPress={() => {
-                  haptics.selection();
-                  void submit();
-                }}
-                disabled={saving}
-                accessibilityLabel={t('Save')}
-                className="mt-1 h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white"
-              >
-                {saving ? (
-                  <ActivityIndicator color={submitTint} />
-                ) : (
-                  <>
-                    <Check size={18} color={submitTint} />
-                    <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{t('Save')}</AppText>
-                  </>
-                )}
-              </PressableScale>
+              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                {ticketTypes.length === 0
+                  ? t('No ticket types')
+                  : form.allTickets
+                    ? t('The discount applies to every ticket type.')
+                    : t('Select the ticket types the discount applies to.')}
+              </AppText>
             </View>
-          </ScrollView>
+            <VoucherDateTimeField
+              label={t('Valid from')}
+              value={form.validFrom}
+              onChange={(next) => setForm((prev) => ({ ...prev, validFrom: next }))}
+            />
+            <VoucherDateTimeField
+              label={t('Valid until')}
+              value={form.validUntil}
+              onChange={(next) => setForm((prev) => ({ ...prev, validUntil: next }))}
+            />
+            <View className="gap-3">
+              <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
+                {t('Abuse prevention')}
+              </AppText>
+              <SwitchRow
+                label={t('Limit to one use per account')}
+                description={t(
+                  'Prevents the same Eventino account from successfully using this voucher more than once.',
+                )}
+                value={form.limitOneUsePerAccount}
+                onChange={(next) => setForm((prev) => ({ ...prev, limitOneUsePerAccount: next }))}
+              />
+              <SwitchRow
+                label={t('Limit to one use per IP address')}
+                description={t(
+                  'Prevents the voucher from being successfully used more than once from the same public IP address. Users sharing a network (office, university, hotel, mobile carrier) may be affected.',
+                )}
+                value={form.limitOneUsePerIp}
+                onChange={(next) => setForm((prev) => ({ ...prev, limitOneUsePerIp: next }))}
+              />
+            </View>
+            <SwitchRow
+              label={t('Active')}
+              value={form.isActive}
+              onChange={(next) => setForm((prev) => ({ ...prev, isActive: next }))}
+            />
+          </View>
         </SheetModal>
       ) : null}
     </Screen>

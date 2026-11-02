@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { FileText, ReceiptText, Search, Send } from 'lucide-react-native';
 
@@ -14,7 +15,7 @@ import {
   moneyLabel,
   useFileAction,
 } from '@/components/dashboard/dashboardParts';
-import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
@@ -279,7 +280,7 @@ function SmartBillInvoices({ eventId, refreshSignal }: { eventId: number; refres
 
 export default function InvoicesScreen() {
   const { t } = useTranslation();
-  const padding = useScreenPadding();
+  const scroll = useScrollInsets();
   const { eventId, data: event, isLoading: eventLoading, isError: eventError, refetch: refetchEvent } =
     useSelectedEvent();
   const [tab, setTab] = useState<InvoicesTab>('smartbill');
@@ -347,16 +348,18 @@ export default function InvoicesScreen() {
   return (
     <Screen edges={[]}>
       <GlassHeader title={t('Ticket sales invoices')} onBack={navigate.back} />
-      <ScrollView
+      <KeyboardAwareScrollView
+        bottomOffset={24}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        {...scroll.scrollProps}
+        contentContainerStyle={{ paddingTop: scroll.paddingTop, paddingBottom: scroll.paddingBottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
             tintColor={colors.muted}
-            progressViewOffset={padding.top}
+            progressViewOffset={scroll.refreshOffset}
           />
         }
       >
@@ -375,7 +378,7 @@ export default function InvoicesScreen() {
             <SmartBillInvoices eventId={eventId} refreshSignal={refreshSignal} />
           ) : null}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }

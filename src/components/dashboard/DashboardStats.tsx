@@ -33,8 +33,7 @@ import {
   type ChartViewMode,
 } from '@/lib/analyticsRange';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { sumInCurrency, type ExchangeRates } from '@/lib/currency';
-import { formatMoney } from '@/lib/pricing';
+import { groupThousands, sumInCurrency, type ExchangeRates } from '@/lib/currency';
 import { colors, currencySymbol } from '@/theme/colors';
 import { baseApi } from '@/store/api/baseApi';
 import {
@@ -59,8 +58,8 @@ const MINI_HEIGHT = 30;
 const CHART_PAD = 12;
 const TOOLTIP_WIDTH = 172;
 
-function wholeMoney(value: number): string {
-  return formatMoney(Math.round(value));
+function moneyText(value: number): string {
+  return groupThousands(value, 2);
 }
 
 const hourlyGraphApi = baseApi.injectEndpoints({
@@ -203,10 +202,10 @@ export function RevenueCard({
   const rest = entries.slice(1);
   const invoiceSuffix = (code: string) => {
     const amount = invoiceByCurrency?.[code];
-    return amount != null ? ` (${currencySymbol(code)} ${wholeMoney(amount)})` : '';
+    return amount != null ? ` (${currencySymbol(code)} ${moneyText(amount)})` : '';
   };
   const allTimeLine = allTimeEntries?.length
-    ? allTimeEntries.map((entry) => `${currencySymbol(entry.code)} ${wholeMoney(entry.amount)}`).join(' · ')
+    ? allTimeEntries.map((entry) => `${currencySymbol(entry.code)} ${moneyText(entry.amount)}`).join(' · ')
     : null;
   return (
     <View
@@ -221,7 +220,7 @@ export function RevenueCard({
             minimumFontScale={0.6}
             className="font-gilroy-bold text-[20px] leading-[24px] text-primary"
           >
-            {primary ? `${currencySymbol(primary.code)} ${wholeMoney(primary.amount)}${wide ? '' : invoiceSuffix(primary.code)}` : '—'}
+            {primary ? `${currencySymbol(primary.code)} ${moneyText(primary.amount)}${wide ? '' : invoiceSuffix(primary.code)}` : '—'}
             {primary && wide && invoiceSuffix(primary.code) ? (
               <AppText className={suffixClassName}>
                 {invoiceSuffix(primary.code)}
@@ -230,7 +229,7 @@ export function RevenueCard({
           </AppText>
           {rest.map((entry) => (
             <AppText key={entry.code} numberOfLines={1} className="mt-0.5 font-gilroy-semibold text-[13px] text-primary/60">
-              {`${currencySymbol(entry.code)} ${wholeMoney(entry.amount)}${invoiceSuffix(entry.code)}`}
+              {`${currencySymbol(entry.code)} ${moneyText(entry.amount)}${invoiceSuffix(entry.code)}`}
             </AppText>
           ))}
         </View>
@@ -638,7 +637,7 @@ export const AnalyticsChart = memo(function AnalyticsChart({
             {rangeLabel}
           </AppText>
           <AppText numberOfLines={1} className="font-gilroy-bold text-[13px] leading-[17px]" style={{ color: INCOME_COLOR }}>
-            {currency ? `${currencySymbol(currency)} ${wholeMoney(periodTotal)}` : wholeMoney(periodTotal)}
+            {currency ? `${currencySymbol(currency)} ${moneyText(periodTotal)}` : moneyText(periodTotal)}
           </AppText>
           {summary && deltaPercent != null ? (
             <AppText
@@ -750,8 +749,8 @@ export const AnalyticsChart = memo(function AnalyticsChart({
                     <AppText className="font-gilroy-semibold text-[10px]">
                       {series.key === 'income'
                         ? currency
-                          ? `${currencySymbol(currency)} ${wholeMoney(selected.income)}`
-                          : wholeMoney(selected.income)
+                          ? `${currencySymbol(currency)} ${moneyText(selected.income)}`
+                          : moneyText(selected.income)
                         : String(selected[series.key])}
                     </AppText>
                   </View>
