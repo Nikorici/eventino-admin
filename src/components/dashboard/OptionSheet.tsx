@@ -48,7 +48,7 @@ export function OptionSheet<T extends string>({
             >
               <View className="flex-row items-center gap-2">
                 <AppText className="font-gilroy-semibold text-[15px] leading-[20px]">{option.label}</AppText>
-                {option.hint ? <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">{option.hint}</AppText> : null}
+                {option.hint ? <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">{option.hint}</AppText> : null}
               </View>
               {option.value === value ? <Check size={18} color={checkColor} /> : null}
             </PressableScale>

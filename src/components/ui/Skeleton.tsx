@@ -38,12 +38,12 @@ export function Skeleton({ className, style }: SkeletonProps) {
 
   const shimmerColors: readonly [ColorValue, ColorValue, ColorValue] = [
     'transparent',
-    isDark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.85)',
+    isDark ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0.035)',
     'transparent',
   ];
 
   return (
-    <View onLayout={onLayout} style={style} className={cn('overflow-hidden rounded-glass-sm bg-black/[0.08] dark:bg-white/10', className)}>
+    <View onLayout={onLayout} style={style} className={cn('overflow-hidden bg-black/[0.04] dark:bg-white/10', !/(^|\s)rounded/.test(className ?? '') && 'rounded-[6px]', className)}>
       {width > 0 ? (
         <AnimatedGradient
           colors={shimmerColors}

@@ -3,8 +3,8 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Lock, Printer as PrinterIcon } from 'lucide-react-native';
 
-import { AppText, EmptyState, GlassHeader, Screen, SegmentedControl, Skeleton, Stepper } from '@/components/ui';
-import { PanelCard, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { AppText, EmptyState, GlassHeader, GlassInput, Screen, SegmentedControl, Skeleton } from '@/components/ui';
+import { PanelCard } from '@/components/dashboard/dashboardParts';
 import { DoorsPanel } from '@/components/printing/DoorsPanel';
 import { JobsPanel } from '@/components/printing/JobsPanel';
 import { PrintLabelPanel } from '@/components/printing/PrintLabelPanel';
@@ -17,7 +17,7 @@ import {
   printingErrorText,
   unavailablePrinterLabel,
 } from '@/components/printing/printingLogic';
-import { ErrorText, Notice, SelectField } from '@/components/printing/printingParts';
+import { ErrorText, FieldBlock, Notice, SectionHeading, SelectField } from '@/components/printing/printingParts';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEventId } from '@/hooks/useSelectedEvent';
 import { extractApiError } from '@/lib/apiError';
@@ -68,6 +68,7 @@ export default function LabelPrintingScreen() {
   const [updateSettings] = useUpdateEventPrintSettingsMutation();
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [printerFilter, setPrinterFilter] = useState('');
+  const [copiesDraft, setCopiesDraft] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -137,16 +138,23 @@ export default function LabelPrintingScreen() {
     const defaultWarning = defaultPrinterWarning(defaultProblem, t);
     const printMode = printModeOf(settings);
     const filter = printersKnown && offered.some((printer) => printer.uuid === printerFilter) ? printerFilter : '';
+    const commitCopies = () => {
+      if (copiesDraft == null) return;
+      const copies = Math.min(10, Math.max(1, Math.floor(Number(copiesDraft)) || 1));
+      setCopiesDraft(null);
+      if (copies !== settings.default_copies) void patch('default_copies', { default_copies: copies });
+    };
 
     return (
       <View className="gap-7">
         <View className="gap-3">
-          <SectionTitle subtitle={t('Print a label automatically when a ticket is scanned at this event.')}>
-            {t('Label printing')}
-          </SectionTitle>
+          <SectionHeading
+            title={t('Label printing')}
+            subtitle={t('Print a label automatically when a ticket is scanned at this event.')}
+          />
           <PanelCard className="gap-4 py-4">
             <View className="gap-2">
-              <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Print mode')}</AppText>
+              <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Print mode')}</AppText>
               <SegmentedControl<PrintMode>
                 value={printMode}
                 onChange={(next) => {
@@ -155,7 +163,7 @@ export default function LabelPrintingScreen() {
                 }}
                 options={PRINT_MODES.map((mode) => ({ value: mode.value, label: t(mode.label) }))}
               />
-              <AppText className="font-gilroy-medium text-[13px] text-muted">{t(PRINT_MODE_HINTS[printMode])}</AppText>
+              <AppText className="font-gilroy text-[13px] leading-[17px] text-muted">{t(PRINT_MODE_HINTS[printMode])}</AppText>
               <ErrorText text={errors.print_mode} />
             </View>
             <View className="gap-2">
@@ -189,13 +197,17 @@ export default function LabelPrintingScreen() {
               <ErrorText text={errors.default_template_id} />
             </View>
             <View className="gap-2">
-              <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Copies')}</AppText>
-              <Stepper
-                value={settings.default_copies}
-                min={1}
-                max={10}
-                onChange={(copies) => void patch('default_copies', { default_copies: Math.max(1, Math.floor(copies) || 1) })}
-              />
+              <FieldBlock label={t('Copies')}>
+                <GlassInput
+                  value={copiesDraft ?? String(settings.default_copies)}
+                  onChangeText={(text) => setCopiesDraft(text.replace(/[^0-9]/g, ''))}
+                  onBlur={commitCopies}
+                  keyboardType="number-pad"
+                  returnKeyType="done"
+                  maxLength={2}
+                  accessibilityLabel={t('Copies')}
+                />
+              </FieldBlock>
               <ErrorText text={errors.default_copies} />
             </View>
           </PanelCard>

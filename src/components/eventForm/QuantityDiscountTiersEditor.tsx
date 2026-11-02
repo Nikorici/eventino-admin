@@ -1,6 +1,7 @@
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
-import { X } from 'lucide-react-native';
+import { Plus, X } from 'lucide-react-native';
 
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
@@ -24,7 +25,7 @@ function TierInput({
       keyboardType="number-pad"
       maxLength={3}
       accessibilityLabel={accessibilityLabel}
-      className="h-11 w-14 rounded-[10px] border border-app-border bg-app-surface text-center font-gilroy text-[16px] text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
+      className="h-10 w-16 rounded-[10px] border border-app-border bg-app-surface px-2.5 text-center font-gilroy text-[16px] text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
     />
   );
 }
@@ -53,38 +54,45 @@ export function QuantityDiscountTiersEditor({ value, onChange, error }: Quantity
 
   return (
     <View className="gap-2">
-      {value.map((row, index) => (
-        <View key={index} className="flex-row items-center gap-2">
-          <View className="flex-1 flex-row flex-wrap items-center gap-2">
-            <View className="flex-row items-center gap-2">
-              <TierInput
-                value={row.min_quantity}
-                onChangeText={(text) => updateRow(index, { min_quantity: text })}
-                accessibilityLabel={t('Minimum number of tickets')}
-              />
-              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('or more tickets')}</AppText>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <TierInput
-                value={row.percent}
-                onChangeText={(text) => updateRow(index, { percent: text })}
-                accessibilityLabel={t('Discount percent')}
-              />
-              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('% off each')}</AppText>
-            </View>
-          </View>
-          <PressableScale
-            onPress={() => removeRow(index)}
-            accessibilityLabel={t('Remove discount tier')}
-            className="h-8 w-8 items-center justify-center rounded-full bg-danger/10"
-          >
-            <X size={14} color={colors.danger} />
-          </PressableScale>
+      {value.length > 0 ? (
+        <View className="gap-2 py-1">
+          {value.map((row, index) => (
+            <Fragment key={index}>
+              <View className="flex-row items-center gap-2">
+                <TierInput
+                  value={row.min_quantity}
+                  onChangeText={(text) => updateRow(index, { min_quantity: text })}
+                  accessibilityLabel={t('Minimum number of tickets')}
+                />
+                <AppText className="flex-1 font-gilroy-medium text-[13px] leading-[17px] text-primary/80 dark:text-dark-text/80">
+                  {t('or more tickets')}
+                </AppText>
+                <PressableScale
+                  onPress={() => removeRow(index)}
+                  accessibilityLabel={t('Remove discount tier')}
+                  className="h-7 w-7 items-center justify-center rounded-full bg-danger/10"
+                >
+                  <X size={14} color={colors.danger} />
+                </PressableScale>
+              </View>
+              <View className="flex-row items-center gap-2">
+                <TierInput
+                  value={row.percent}
+                  onChangeText={(text) => updateRow(index, { percent: text })}
+                  accessibilityLabel={t('Discount percent')}
+                />
+                <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/80 dark:text-dark-text/80">
+                  {t('% off each')}
+                </AppText>
+              </View>
+            </Fragment>
+          ))}
         </View>
-      ))}
+      ) : null}
       {value.length < MAX_QUANTITY_DISCOUNT_TIERS ? (
-        <PressableScale onPress={addRow} accessibilityLabel={t('+ Add discount tier')} className="self-start py-1">
-          <AppText className="font-gilroy-semibold text-[13px] text-links dark:text-dark-text">{t('+ Add discount tier')}</AppText>
+        <PressableScale onPress={addRow} accessibilityLabel={t('Add discount tier')} className="flex-row items-center gap-1.5 self-start">
+          <Plus size={16} color={colors.links} />
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-links">{t('Add discount tier')}</AppText>
         </PressableScale>
       ) : null}
       {error ? <AppText className="font-gilroy-medium text-xs text-danger">{error}</AppText> : null}

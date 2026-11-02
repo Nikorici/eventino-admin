@@ -4,12 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, X } from 'lucide-react-native';
 
 import { AppText, Chip, GlassInput, PressableScale } from '@/components/ui';
-import { Card, PrimaryButton, SecondaryButton, SheetModal, ToggleRow } from '@/components/merch/merchParts';
+import { Card, SheetModal, ToggleRow } from '@/components/merch/merchParts';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 
+import { FormButton } from './FormButton';
 import {
   CONDITION_ACTIONS,
   emptyCondition,
@@ -54,7 +55,7 @@ function InlineSelect({
         accessibilityLabel={accessibilityLabel}
         className="h-11 flex-row items-center justify-between gap-2 rounded-[10px] border border-app-border bg-app-surface px-3 dark:border-dark-border dark:bg-dark-surface"
       >
-        <AppText numberOfLines={1} className={cn('flex-1 font-gilroy-medium text-[14px]', !selected && 'text-muted dark:text-dark-muted')}>
+        <AppText numberOfLines={1} className={cn('flex-1 font-gilroy-medium text-[14px] leading-[19px]', !selected && 'text-muted dark:text-dark-muted')}>
           {selected?.label ?? placeholder}
         </AppText>
         <ChevronDown size={16} color={colors.muted} />
@@ -76,7 +77,7 @@ function InlineSelect({
                 index > 0 && 'border-t border-app-border dark:border-dark-border',
               )}
             >
-              <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[14px]">
+              <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[14px] leading-[19px]">
                 {option.label}
               </AppText>
               {option.value === value ? <Check size={16} color={iconColor} /> : null}
@@ -90,9 +91,9 @@ function InlineSelect({
 
 function FieldLabel({ label, required }: { label: string; required?: boolean }) {
   return (
-    <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
+    <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70 leading-[17px]">
       {label}
-      {required ? <AppText className="font-gilroy-medium text-[13px] text-danger dark:text-danger"> *</AppText> : null}
+      {required ? <AppText className="font-gilroy-medium text-[13px] text-danger dark:text-danger leading-[17px]"> *</AppText> : null}
     </AppText>
   );
 }
@@ -108,7 +109,7 @@ function LinkButton({ label, onPress, danger }: { label: string; onPress: () => 
       hitSlop={8}
       className="self-start px-1"
     >
-      <AppText className={cn('font-gilroy-semibold text-[13px]', danger ? 'text-danger dark:text-danger' : 'text-links dark:text-dark-text')}>
+      <AppText className={cn('font-gilroy-semibold text-[13px] leading-[17px]', danger ? 'text-danger dark:text-danger' : 'text-links dark:text-dark-text')}>
         {label}
       </AppText>
     </PressableScale>
@@ -335,7 +336,7 @@ export function QuestionSheet({
                       <PressableScale
                         onPress={() => removeOption(index)}
                         accessibilityLabel={t('Remove option')}
-                        className="h-10 w-10 items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/10"
+                        className="h-10 w-10 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
                       >
                         <X size={16} color={mutedIcon} />
                       </PressableScale>
@@ -371,13 +372,7 @@ export function QuestionSheet({
                     accessibilityLabel={t('Add an option')}
                   />
                 </View>
-                <PressableScale
-                  onPress={addOption}
-                  accessibilityLabel={t('Add')}
-                  className="h-12 items-center justify-center rounded-[12px] border border-app-border bg-app-surface px-4 dark:border-dark-border dark:bg-dark-surface"
-                >
-                  <AppText className="font-gilroy-semibold text-[14px]">{t('Add')}</AppText>
-                </PressableScale>
+                <FormButton size="field" label={t('Add')} onPress={addOption} />
               </View>
               {errors.options ? (
                 <AppText className="font-gilroy-medium text-xs text-danger dark:text-danger">{errors.options}</AppText>
@@ -396,7 +391,7 @@ export function QuestionSheet({
                 onValueChange={(required) => setDraft((prev) => ({ ...prev, required }))}
               />
             </View>
-            <View className="border-t border-app-border py-2 dark:border-dark-border">
+            <View className="border-t border-[#f0f2f8] py-2 dark:border-dark-border">
               <ToggleRow
                 bordered={false}
                 label={t('End form at this question')}
@@ -406,7 +401,7 @@ export function QuestionSheet({
             </View>
           </Card>
           {draft.is_terminal ? (
-            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
               {t('The form will end after this question is answered. No further questions will be shown.')}
             </AppText>
           ) : null}
@@ -416,7 +411,7 @@ export function QuestionSheet({
           <View className="gap-2">
             <View className="gap-0.5">
               <FieldLabel label={t('Question Routing')} />
-              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
                 {t('Control what happens after this question is answered')}
               </AppText>
             </View>
@@ -439,10 +434,10 @@ export function QuestionSheet({
 
       <View className="mt-5 flex-row gap-3">
         <View className="flex-1">
-          <SecondaryButton label={t('Cancel')} onPress={onClose} />
+          <FormButton size="lg" label={t('Cancel')} onPress={onClose} />
         </View>
         <View className="flex-1">
-          <PrimaryButton compact label={isEditing ? t('Update Question') : t('Add Question')} onPress={submit} />
+          <FormButton primary size="lg" label={isEditing ? t('Update Question') : t('Add Question')} onPress={submit} />
         </View>
       </View>
     </SheetModal>

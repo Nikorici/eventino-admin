@@ -44,6 +44,7 @@ function linkGroups(a: number, b: number): void {
 }
 
 mockUsers.forEach((user) => linkGroups(mockUsers[0].id, user.id));
+mockUsers.push(organizer(1007, 'elena.rotaru@evenimente.md', 'Elena', 'Rotaru', 'Chișinău', 'Moldova'));
 
 function accountByEmail(email: string): User | undefined {
   const normalized = email.trim().toLowerCase();

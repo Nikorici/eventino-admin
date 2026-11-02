@@ -7,7 +7,6 @@ import { Check, Copy, Store } from 'lucide-react-native';
 
 import { AppText, Chip, EmptyState, GlassHeader, GlassInput, Screen, Skeleton } from '@/components/ui';
 import {
-  Card,
   MerchNav,
   MultilineInput,
   PRICE_PATTERN,
@@ -15,6 +14,7 @@ import {
   SecondaryButton,
   SectionLabel,
   ToggleRow,
+  useCardBorder,
 } from '@/components/merch/merchParts';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
@@ -42,6 +42,7 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
   const { t } = useTranslation();
   const toast = useToast();
   const iconTint = useThemeColor(colors.primary, colors.dark.text);
+  const cardBorder = useCardBorder();
   const [updateSettings, { isLoading: saving }] = useUpdateMerchSettingsMutation();
   const [storeEnabled, setStoreEnabled] = useState(settings.is_store_enabled);
   const [togglingStore, setTogglingStore] = useState(false);
@@ -86,7 +87,7 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
   };
 
   return (
-    <View className="gap-6">
+    <View className="gap-4">
       <View className="gap-2">
         <SectionLabel>{t('Storefront')}</SectionLabel>
         <ToggleRow
@@ -109,12 +110,12 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
               onChangeText={setShippingFee}
               keyboardType="decimal-pad"
             />
-            <AppText className="font-gilroy-medium text-[12px] text-muted">
+            <AppText className="font-gilroy text-[12px] leading-4 text-muted dark:text-dark-muted">
               {t('Charged once per order, regardless of item quantity.')}
             </AppText>
           </View>
           <View className="gap-2">
-            <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
+            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">
               {t('Currency')}
             </AppText>
             <View className="flex-row flex-wrap gap-2">
@@ -130,24 +131,26 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
             onChangeText={setStoreIntro}
             hint={t('Shown at the top of your storefront.')}
           />
-          <PrimaryButton
-            label={saving ? t('Saving...') : t('Save changes')}
-            onPress={() => void onSave()}
-            loading={saving && !togglingStore}
-          />
+          <View className="mt-1">
+            <PrimaryButton
+              label={saving ? t('Saving...') : t('Save changes')}
+              onPress={() => void onSave()}
+              loading={saving && !togglingStore}
+            />
+          </View>
         </View>
       </View>
 
       <View className="gap-2">
         <SectionLabel>{t('Embed')}</SectionLabel>
-        <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">
           {t('Paste this onto any HTML page on your website.')}
         </AppText>
-        <Card className="p-3">
-          <AppText selectable className="font-mono text-[12px] leading-[18px]">
+        <View className="rounded-[12px] border bg-card-sm p-3 dark:bg-dark-elevated" style={{ borderColor: cardBorder }}>
+          <AppText selectable className="font-mono text-[12px] leading-[18px] text-primary/80 dark:text-dark-text/80">
             {snippet}
           </AppText>
-        </Card>
+        </View>
         <SecondaryButton
           label={copied ? t('Copied') : t('Copy')}
           onPress={() => void onCopy()}
@@ -218,7 +221,7 @@ export default function MerchSettingsScreen() {
       >
         <View className="gap-4">
           <MerchNav active="settings" />
-          <AppText className="font-gilroy-medium text-[13px] text-muted">
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
             {t("Configure your event's merch storefront")}
           </AppText>
           {renderBody()}

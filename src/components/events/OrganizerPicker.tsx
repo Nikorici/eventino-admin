@@ -10,7 +10,8 @@ import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLazyGetOrganizationsQuery, type OrganizationResult } from '@/store/api/usersApi';
-import { AppText, DashedAddButton, EmptyState, GlassInput, PressableScale, Skeleton } from '@/components/ui';
+import { AppText, EmptyState, GlassInput, PressableScale, Skeleton } from '@/components/ui';
+import { FormAddButton } from '@/components/eventForm/FormAddButton';
 
 export interface SelectedOrganizer {
   id: number;
@@ -31,7 +32,7 @@ function Avatar({ uri, name }: { uri: string | null; name: string }) {
       {uri ? (
         <Image source={{ uri }} contentFit="cover" transition={100} style={{ width: '100%', height: '100%' }} />
       ) : initial ? (
-        <AppText className="font-gilroy-bold text-[15px] text-muted dark:text-dark-muted">{initial}</AppText>
+        <AppText className="font-gilroy-bold text-[15px] leading-[20px] text-muted dark:text-dark-muted">{initial}</AppText>
       ) : (
         <UserRound size={16} color={colors.muted} />
       )}
@@ -117,7 +118,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
   return (
     <View className="gap-3">
       {selected.length === 0 ? (
-        <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No organizers added yet')}</AppText>
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('No organizers added yet')}</AppText>
       ) : (
         <View className="gap-2">
           {selected.map((organizer) => (
@@ -126,7 +127,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
               className="flex-row items-center gap-3 rounded-[12px] border border-app-border bg-app-surface px-3 py-2.5 dark:border-dark-border dark:bg-dark-surface"
             >
               <Avatar uri={organizer.profile_image} name={organizerDisplayName(organizer)} />
-              <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px]">
+              <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px] leading-[19px]">
                 {organizerDisplayName(organizer)}
               </AppText>
               <PressableScale
@@ -141,14 +142,14 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
         </View>
       )}
 
-      <DashedAddButton label={t('Add Organizer')} onPress={openModal} />
+      <FormAddButton label={t('Add Organizer')} onPress={openModal} />
 
       <Modal visible={modalOpen} transparent animationType="fade" onRequestClose={() => setModalOpen(false)}>
         <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
           <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
             <Pressable onPress={(event) => event.stopPropagation()} className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
               <View className="mb-2 flex-row items-center justify-between px-5">
-                <AppText className="font-gilroy-bold text-[17px]">{t('Add Organizers')}</AppText>
+                <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Add Organizers')}</AppText>
                 <PressableScale
                   onPress={() => setModalOpen(false)}
                   accessibilityLabel={t('Cancel')}
@@ -191,7 +192,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
                   return (
                     <View className="flex-row items-center gap-3 rounded-[12px] border border-app-border bg-app-surface px-3 py-2.5 dark:border-dark-border dark:bg-dark-surface">
                       <Avatar uri={item.profile_image} name={name} />
-                      <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px]">
+                      <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px] leading-[19px]">
                         {name}
                       </AppText>
                       <PressableScale
@@ -199,7 +200,7 @@ export function OrganizerPicker({ selected, onChange, excludeUserId }: Organizer
                         accessibilityLabel={t('Add')}
                         className="rounded-full bg-primary px-4 py-2 dark:bg-white"
                       >
-                        <AppText className="font-gilroy-semibold text-[13px] text-white dark:text-dark-bg">{t('Add')}</AppText>
+                        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-white dark:text-dark-bg">{t('Add')}</AppText>
                       </PressableScale>
                     </View>
                   );

@@ -28,8 +28,9 @@ describe('sourceDisplayName', () => {
 });
 
 describe('sharePercent', () => {
-  it('rounds to two decimals and guards zero totals', () => {
-    expect(sharePercent(1876, 5214)).toBe(35.98);
+  it('rounds to one decimal and guards zero totals', () => {
+    expect(sharePercent(1876, 5214)).toBe(36);
+    expect(sharePercent(1342, 5214)).toBe(25.7);
     expect(sharePercent(3, 0)).toBe(0);
   });
 });
@@ -69,5 +70,15 @@ describe('placeLabels', () => {
     expect(labels[0].anchor).not.toBe(labels[1].anchor);
     const crowded = placeLabels([marker('A', 100, 100), marker('B', 100, 101), marker('C', 100, 102)], 300);
     expect(crowded).toHaveLength(2);
+  });
+
+  it('skips a label that would cover another marker and stops at the limit', () => {
+    const marker = (label: string, x: number, y: number, r = 6) => ({ key: label, label, x, y, r });
+    const labels = placeLabels(
+      [marker('Chișinău', 212, 62, 18), marker('Orhei', 210, 42, 8), marker('Cahul', 187, 121), marker('Bucharest', 110, 199)],
+      324,
+      2,
+    );
+    expect(labels.map((label) => label.text)).toEqual(['Chișinău', 'Cahul']);
   });
 });

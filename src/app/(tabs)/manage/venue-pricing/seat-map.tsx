@@ -351,8 +351,8 @@ export default function VenueSeatMapScreen() {
             title={t('Seat map')}
             subtitle={layout ? `${layout.name}${layout.venue?.name ? ` · ${layout.venue.name}` : ''}` : t('Attendees pick numbered seats on a venue layout. Start by choosing the layout of your venue.')}
             right={
-              <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: isLive ? 'rgba(15,159,95,0.14)' : 'rgba(138,141,147,0.16)' }}>
-                <AppText className="font-gilroy-bold text-[10px] uppercase tracking-wide" style={{ color: isLive ? '#0f9f5f' : colors.muted }}>
+              <View className="h-6 justify-center rounded-full px-2.5" style={{ backgroundColor: isLive ? 'rgba(15,159,95,0.14)' : 'rgba(138,141,147,0.16)' }}>
+                <AppText className="font-gilroy-bold text-[10px] uppercase tracking-[0.5px]" style={{ color: isLive ? '#0f9f5f' : colors.muted }}>
                   {isLive ? t('Published') : t('Draft')}
                 </AppText>
               </View>
@@ -502,7 +502,7 @@ export default function VenueSeatMapScreen() {
                             <AppText className="font-gilroy-semibold text-[12px] text-links">
                               {rowRuleCount > 0 ? t('{{count}} rows priced differently', { count: rowRuleCount }) : t('Price rows differently')}
                             </AppText>
-                            {rowsOpen ? <ChevronUp size={14} color={colors.muted} /> : <ChevronDown size={14} color={colors.muted} />}
+                            {rowsOpen ? <ChevronUp size={14} color={colors.links} /> : <ChevronDown size={14} color={colors.links} />}
                           </PressableScale>
                         ) : null}
                         {rowsOpen && section.is_active ? (
@@ -603,7 +603,7 @@ export default function VenueSeatMapScreen() {
                 {!blockMode && eligibleTicketTypes.length > 0 ? (
                   <View className="gap-1.5">
                     <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{tableMode ? t('Paint tables with') : t('Paint seats with')}</AppText>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4" contentContainerClassName="gap-2 px-4">
                       {eligibleTicketTypes.map((ticketType) => (
                         <Chip key={ticketType.id} label={ticketTypeLabel(ticketType, currency, t('multi-QR'))} selected={brushTicketTypeId === ticketType.id} onPress={() => setBrushTicketTypeId(ticketType.id)} />
                       ))}
@@ -621,9 +621,7 @@ export default function VenueSeatMapScreen() {
                     onSeatPress={onSeatPress}
                   />
                 </View>
-                <View className="-mx-4">
-                  <SeatLegend categories={usedCategories} currency={currency} />
-                </View>
+                <SeatLegend categories={usedCategories} currency={currency} />
               </Card>
             </>
           ) : null}

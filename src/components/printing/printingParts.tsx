@@ -3,7 +3,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, View } from 'r
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronDown } from 'lucide-react-native';
+import { Check, ChevronDown, TriangleAlert, type LucideIcon } from 'lucide-react-native';
 
 import { AppText, GlassButton, GlassInput, PressableScale } from '@/components/ui';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -41,7 +41,7 @@ export function SelectField({
   const title = label ?? accessibilityLabel ?? '';
   return (
     <View className="w-full gap-1.5">
-      {label ? <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{label}</AppText> : null}
+      {label ? <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{label}</AppText> : null}
       <PressableScale
         onPress={() => {
           haptics.selection();
@@ -54,7 +54,7 @@ export function SelectField({
           disabled && 'opacity-60',
         )}
       >
-        <AppText numberOfLines={1} className="flex-1 font-gilroy text-[15px]">
+        <AppText numberOfLines={1} className="flex-1 font-gilroy text-[15px] leading-[20px]">
           {current}
         </AppText>
         <ChevronDown size={18} color={iconColor} />
@@ -115,6 +115,8 @@ export function SmallButton({
   label,
   onPress,
   primary,
+  danger,
+  icon: Icon,
   disabled,
   loading,
   compact,
@@ -122,11 +124,14 @@ export function SmallButton({
   label: string;
   onPress: () => void;
   primary?: boolean;
+  danger?: boolean;
+  icon?: LucideIcon;
   disabled?: boolean;
   loading?: boolean;
   compact?: boolean;
 }) {
   const spinner = useThemeColor(primary ? colors.white : colors.primary, primary ? colors.primary : colors.dark.text);
+  const iconColor = danger ? colors.danger : spinner;
   return (
     <PressableScale
       onPress={() => {
@@ -136,7 +141,7 @@ export function SmallButton({
       disabled={disabled || loading}
       accessibilityLabel={label}
       className={cn(
-        'items-center justify-center rounded-[10px] border',
+        'flex-row items-center justify-center gap-1.5 rounded-[10px] border',
         compact ? 'h-8 px-3' : 'h-9 px-3.5',
         primary
           ? 'border-transparent bg-primary dark:bg-white'
@@ -147,16 +152,23 @@ export function SmallButton({
       {loading ? (
         <ActivityIndicator size="small" color={spinner} />
       ) : (
-        <AppText
-          numberOfLines={1}
-          className={cn(
-            'font-gilroy-semibold',
-            compact ? 'text-[12px]' : 'text-[13px]',
-            primary ? 'text-white dark:text-primary' : 'text-primary dark:text-dark-text',
-          )}
-        >
-          {label}
-        </AppText>
+        <>
+          {Icon ? <Icon size={15} color={iconColor} /> : null}
+          <AppText
+            numberOfLines={1}
+            className={cn(
+              'font-gilroy-semibold',
+              compact ? 'text-[12px] leading-[16px]' : 'text-[13px] leading-[17px]',
+              primary
+                ? 'text-white dark:text-primary'
+                : danger
+                  ? 'text-danger dark:text-danger'
+                  : 'text-primary dark:text-dark-text',
+            )}
+          >
+            {label}
+          </AppText>
+        </>
       )}
     </PressableScale>
   );
@@ -166,8 +178,14 @@ export function Notice({ text, tone = 'warn' }: { text: string; tone?: 'warn' | 
   const warnColor = useThemeColor('#c2410c', TONE_COLORS.warn);
   const color = tone === 'warn' ? warnColor : TONE_COLORS.error;
   return (
-    <View className="rounded-[10px] px-3 py-2.5" style={{ backgroundColor: tone === 'warn' ? 'rgba(249,115,22,0.1)' : 'rgba(216,54,54,0.1)' }}>
-      <AppText className="font-gilroy-medium text-[13px]" style={{ color }}>
+    <View
+      className="flex-row items-start gap-2 rounded-[10px] px-3 py-2.5"
+      style={{ backgroundColor: tone === 'warn' ? 'rgba(249,115,22,0.1)' : 'rgba(216,54,54,0.1)' }}
+    >
+      <View className="mt-px">
+        <TriangleAlert size={16} color={color} />
+      </View>
+      <AppText className="flex-1 font-gilroy-medium text-[13px] leading-[17px]" style={{ color }}>
         {text}
       </AppText>
     </View>
@@ -176,7 +194,7 @@ export function Notice({ text, tone = 'warn' }: { text: string; tone?: 'warn' | 
 
 export function ErrorText({ text }: { text?: string | null }) {
   if (!text) return null;
-  return <AppText className="font-gilroy-medium text-[12px] text-danger dark:text-danger">{text}</AppText>;
+  return <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-danger dark:text-danger">{text}</AppText>;
 }
 
 export function StaleNote({ show }: { show: boolean }) {
@@ -189,7 +207,7 @@ export function StatusPill({ label, tone }: { label: string; tone: Tone }) {
   const color = TONE_COLORS[tone];
   return (
     <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: `${color}21` }}>
-      <AppText numberOfLines={1} className="font-gilroy-semibold text-[11px]" style={{ color }}>
+      <AppText numberOfLines={1} className="font-gilroy-semibold text-[11px] leading-[14px]" style={{ color }}>
         {label}
       </AppText>
     </View>
@@ -198,8 +216,8 @@ export function StatusPill({ label, tone }: { label: string; tone: Tone }) {
 
 export function Tag({ label }: { label: string }) {
   return (
-    <View className="rounded-full bg-black/[0.06] px-2 py-0.5 dark:bg-white/10">
-      <AppText className="font-gilroy-semibold text-[11px] text-primary/80 dark:text-dark-text/80">{label}</AppText>
+    <View className="h-5 justify-center rounded-[6px] bg-black/[0.04] px-2 dark:bg-white/10">
+      <AppText className="font-gilroy-semibold text-[11px] leading-[14px] text-primary/80 dark:text-dark-text/80">{label}</AppText>
     </View>
   );
 }
@@ -245,7 +263,7 @@ export function ToggleRow({
 }) {
   return (
     <View className="flex-row items-center justify-between gap-3">
-      <AppText className="flex-1 font-gilroy-medium text-[14px]">{label}</AppText>
+      <AppText className="flex-1 font-gilroy-medium text-[14px] leading-[19px]">{label}</AppText>
       <Toggle value={value} onChange={onChange} disabled={disabled} accessibilityLabel={label} />
     </View>
   );
@@ -373,10 +391,19 @@ export function PromptSheet({
   );
 }
 
+export function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <View className="gap-1">
+      <AppText className="font-gilroy-semibold text-[18px] leading-[24px]">{title}</AppText>
+      {subtitle ? <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted">{subtitle}</AppText> : null}
+    </View>
+  );
+}
+
 export function FieldBlock({ label, children }: { label: string; children: ReactNode }) {
   return (
     <View className="gap-1.5">
-      <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{label}</AppText>
+      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{label}</AppText>
       {children}
     </View>
   );

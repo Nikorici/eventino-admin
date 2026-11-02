@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, TextInput, View, useWindowDimensions } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -147,7 +147,7 @@ function StatusPill({ status }: { status: string }) {
   const tone = STATUS_TONES[status] ?? STATUS_TONES.CANCELLED;
   return (
     <View className="shrink-0 rounded-full px-2.5 py-1" style={{ backgroundColor: tone.background }}>
-      <AppText className="font-gilroy-bold text-[10px] uppercase tracking-wide" style={{ color: tone.color }}>
+      <AppText className="font-gilroy-bold text-[10px] uppercase tracking-[0.04em]" style={{ color: tone.color }}>
         {t(status)}
       </AppText>
     </View>
@@ -183,7 +183,7 @@ function Figure({
   const color = TONE_COLORS[tone];
   return (
     <View className="min-w-[45%] flex-1 gap-0.5 rounded-[12px] bg-black/[0.03] px-3 py-2.5 dark:bg-white/[0.05]">
-      <AppText className="font-gilroy-medium text-[11px] uppercase tracking-wide text-muted dark:text-dark-muted">
+      <AppText className="font-gilroy-medium text-[11px] uppercase tracking-[0.04em] text-muted dark:text-dark-muted">
         {label}
       </AppText>
       <AppText className="font-gilroy-bold text-[16px]" style={color ? { color } : undefined}>
@@ -200,11 +200,48 @@ function Figure({
 function Pair({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-start justify-between gap-3">
-      <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{label}</AppText>
-      <AppText className="flex-1 text-right font-gilroy-semibold text-[13px]">{value}</AppText>
+      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{label}</AppText>
+      <AppText className="flex-1 text-right font-gilroy-semibold text-[13px] leading-[17px]">{value}</AppText>
     </View>
   );
 }
+
+function NotesField({
+  value,
+  placeholder,
+  onChangeText,
+}: {
+  value: string;
+  placeholder?: string;
+  onChangeText: (next: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <View className="w-full gap-1.5">
+      <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Notes')}</AppText>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={colors.muted}
+        accessibilityLabel={t('Notes')}
+        multiline
+        textAlignVertical="top"
+        className="h-20 rounded-[10px] border border-app-border bg-app-surface px-3 py-3 font-gilroy text-[16px] leading-[22px] text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
+      />
+    </View>
+  );
+}
+
+function SettingToggle(props: Parameters<typeof ToggleRow>[0]) {
+  return (
+    <View className="py-1">
+      <ToggleRow bordered={false} {...props} />
+    </View>
+  );
+}
+
+const CHIP_LABEL_KEYS: Partial<Record<string, string>> = { OVERDUE: 'Overdue' };
 
 function SubmitButton({
   label,
@@ -254,7 +291,7 @@ function StatusChips<T extends string>({
       <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{label}</AppText>
       <View className="flex-row flex-wrap gap-2">
         {options.map((option) => (
-          <Chip key={option} label={t(option)} selected={value === option} onPress={() => onChange(option)} />
+          <Chip key={option} label={t(CHIP_LABEL_KEYS[option] ?? option)} selected={value === option} onPress={() => onChange(option)} />
         ))}
       </View>
     </View>
@@ -339,13 +376,7 @@ function TransferFields({
         value={form.status}
         onChange={(status) => onChange({ ...form, status })}
       />
-      <GlassInput
-        label={t('Notes')}
-        value={form.notes}
-        multiline
-        className="h-20"
-        onChangeText={(notes) => onChange({ ...form, notes })}
-      />
+      <NotesField value={form.notes} onChangeText={(notes) => onChange({ ...form, notes })} />
     </View>
   );
 }
@@ -795,8 +826,7 @@ export default function AdminAccountingScreen() {
               autoCapitalize="characters"
               onChangeText={(recipient_iban) => setSettings({ ...settings, recipient_iban })}
             />
-            <ToggleRow
-              bordered={false}
+            <SettingToggle
               label={t('Applies VAT')}
               value={settings.has_vat}
               onValueChange={(has_vat) => setSettings({ ...settings, has_vat })}
@@ -809,8 +839,7 @@ export default function AdminAccountingScreen() {
                 onChangeText={(vat_percent) => setSettings({ ...settings, vat_percent: vat_percent.replace(',', '.') })}
               />
             ) : null}
-            <ToggleRow
-              bordered={false}
+            <SettingToggle
               label={t('Applies tax')}
               value={settings.has_tax}
               onValueChange={(has_tax) => setSettings({ ...settings, has_tax })}
@@ -829,18 +858,14 @@ export default function AdminAccountingScreen() {
               value={settings.payment_status}
               onChange={(payment_status) => setSettings({ ...settings, payment_status })}
             />
-            <ToggleRow
-              bordered={false}
+            <SettingToggle
               label={t('Case closed')}
               value={settings.case_closed}
               onValueChange={(case_closed) => setSettings({ ...settings, case_closed })}
             />
-            <GlassInput
-              label={t('Notes')}
+            <NotesField
               placeholder={t('Internal notes…')}
               value={settings.notes}
-              multiline
-              className="h-20"
               onChangeText={(notes) => setSettings({ ...settings, notes })}
             />
             <SubmitButton

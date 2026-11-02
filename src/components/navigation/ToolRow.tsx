@@ -30,7 +30,7 @@ export function ToolRow({
         <View className="h-9 w-9 items-center justify-center rounded-[9px] bg-black/[0.04] dark:bg-white/10">
           <Icon size={18} color={iconColor} />
         </View>
-        <AppText className="flex-1 font-gilroy-semibold text-[15px]">{label}</AppText>
+        <AppText className="flex-1 font-gilroy-semibold text-[15px] leading-5">{label}</AppText>
         <ChevronRight size={18} color={chevronColor} />
       </View>
     </PressableScale>
@@ -41,7 +41,7 @@ export function ToolSection({ title, children }: { title?: string; children: Rea
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   return (
     <View className="gap-2">
-      {title ? <AppText className="font-gilroy-semibold text-[18px]">{title}</AppText> : null}
+      {title ? <AppText className="font-gilroy-semibold text-[18px] leading-6">{title}</AppText> : null}
       <View className="rounded-[14px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
         {children}
       </View>

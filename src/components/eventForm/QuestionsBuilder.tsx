@@ -9,7 +9,8 @@ import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { QuestionType } from '@/types/api';
-import { AppText, Chip, DashedAddButton, GlassButton, GlassInput, PressableScale } from '@/components/ui';
+import { AppText, Chip, GlassButton, GlassInput, PressableScale } from '@/components/ui';
+import { FormAddButton } from './FormAddButton';
 
 export type QuestionConditionAction = 'continue' | 'skip' | 'end' | 'show_message';
 
@@ -120,7 +121,7 @@ function RequiredToggle({ value, onValueChange, label }: RequiredToggleProps) {
       accessibilityLabel={label}
       className="flex-row items-center justify-between rounded-[12px] border border-app-border bg-app-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface"
     >
-      <AppText className="font-gilroy-semibold text-[14px]">{label}</AppText>
+      <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{label}</AppText>
       <View className={cn('h-[26px] w-[44px] justify-center rounded-full p-[3px]', value ? 'bg-primary dark:bg-white' : 'bg-black/15 dark:bg-white/20')}>
         <View className={cn('h-5 w-5 rounded-full bg-white dark:bg-dark-bg', value && 'self-end')} />
       </View>
@@ -258,8 +259,8 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
         >
           <View className="flex-row items-start justify-between gap-3">
             <View className="flex-1">
-              <AppText className="font-gilroy-semibold text-[15px]">{question.question}</AppText>
-              <AppText className="mt-0.5 font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              <AppText className="font-gilroy-semibold text-[15px] leading-[20px]">{question.question}</AppText>
+              <AppText className="mt-0.5 font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                 {t(questionTypeLabel(question.type))}
                 {question.required ? ` · ${t('Required')}` : ''}
               </AppText>
@@ -301,14 +302,14 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
             </View>
           </View>
           {QUESTION_OPTION_TYPES.includes(question.type) && question.options.length > 0 ? (
-            <AppText numberOfLines={2} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+            <AppText numberOfLines={2} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
               {question.options.join(' · ')}
             </AppText>
           ) : null}
         </View>
       ))}
 
-      <DashedAddButton
+      <FormAddButton
         label={questions.length === 0 ? t('Add your first question') : t('Add Question')}
         onPress={openAdd}
       />
@@ -318,7 +319,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
           <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
             <Pressable onPress={(event) => event.stopPropagation()} className="max-h-[85%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
               <View className="mb-2 flex-row items-center justify-between px-5">
-                <AppText className="font-gilroy-bold text-[17px]">
+                <AppText className="font-gilroy-bold text-[17px] leading-[22px]">
                   {editIndex == null ? t('Add Question') : t('Edit Question')}
                 </AppText>
                 <PressableScale
@@ -349,7 +350,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
                   autoCapitalize="sentences"
                 />
                 <View className="gap-2">
-                  <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Question Type')}</AppText>
+                  <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Question Type')}</AppText>
                   <View className="flex-row flex-wrap gap-2">
                     {QUESTION_TYPE_LABELS.map((entry) => (
                       <Chip
@@ -368,7 +369,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
                   <View className="gap-2">
                     <View className="flex-row items-center gap-1.5">
                       <ListChecks size={15} color={mutedIcon} />
-                      <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Answer Options')}</AppText>
+                      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Answer Options')}</AppText>
                     </View>
                     {draft.options.map((option, index) => {
                       const condition = conditionFor(index);
@@ -396,10 +397,10 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
                               <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center gap-1.5">
                                   <GitBranch size={14} color={mutedIcon} />
-                                  <AppText className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">{t('Add Logic')}</AppText>
+                                  <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-muted dark:text-dark-muted">{t('Add Logic')}</AppText>
                                 </View>
                                 <PressableScale onPress={() => removeCondition(index)} accessibilityLabel={t('Remove')} hitSlop={8}>
-                                  <AppText className="font-gilroy-semibold text-[12px] text-danger">{t('Remove')}</AppText>
+                                  <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-danger">{t('Remove')}</AppText>
                                 </PressableScale>
                               </View>
                               <View className="flex-row flex-wrap gap-2">
@@ -422,7 +423,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
                               ) : null}
                               {condition.action === 'skip' ? (
                                 <View className="gap-1.5">
-                                  <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('Select question')}</AppText>
+                                  <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">{t('Select question')}</AppText>
                                   <View className="flex-row flex-wrap gap-2">
                                     {questions.map((target, targetIndex) => (
                                       <Chip
@@ -441,7 +442,7 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
                           ) : (
                             <PressableScale onPress={() => addCondition(index)} accessibilityLabel={t('Add Logic')} className="flex-row items-center gap-1 self-start pl-1">
                               <Plus size={13} color={colors.links} />
-                              <AppText className="font-gilroy-semibold text-[12px] text-links dark:text-dark-text">{t('Add Logic')}</AppText>
+                              <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-links dark:text-dark-text">{t('Add Logic')}</AppText>
                             </PressableScale>
                           )}
                         </View>
@@ -449,9 +450,9 @@ export function QuestionsBuilder({ questions, onChange }: QuestionsBuilderProps)
                     })}
                     <PressableScale onPress={addDraftOption} accessibilityLabel={t('Add an option')} className="flex-row items-center gap-1.5 self-start">
                       <Plus size={15} color={colors.links} />
-                      <AppText className="font-gilroy-semibold text-[13px] text-links dark:text-dark-text">{t('Add an option')}</AppText>
+                      <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-dark-text">{t('Add an option')}</AppText>
                     </PressableScale>
-                    {optionsError ? <AppText className="font-gilroy-medium text-xs text-danger">{optionsError}</AppText> : null}
+                    {optionsError ? <AppText className="font-gilroy-medium text-xs leading-[16px] text-danger">{optionsError}</AppText> : null}
                   </View>
                 ) : null}
                 <RequiredToggle

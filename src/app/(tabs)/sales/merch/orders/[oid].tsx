@@ -88,35 +88,36 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
       <View className="flex-row flex-wrap items-center gap-1.5">
         <StatusBadge label={order.payment_status} color={paymentColor(order.payment_status)} />
         <StatusBadge label={order.fulfillment_status} color={fulfillmentColor(order.fulfillment_status)} />
-        <AppText className="font-gilroy-medium text-[12px] text-muted">{formatDateTime(order.created_at, lang)}</AppText>
+        <AppText className="ml-auto font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
+          {formatDateTime(order.created_at, lang)}
+        </AppText>
       </View>
 
-      <View className="gap-2">
-        <SectionLabel>{t('Items')}</SectionLabel>
-        <Card className="px-4">
-          {order.items.map((item, index) => (
-            <View
-              key={item.id}
-              className={cn('flex-row items-center justify-between gap-3 py-3', index > 0 && 'border-t')}
-              style={index > 0 ? { borderColor: rowDivider } : undefined}
-            >
-              <AppText numberOfLines={2} className="flex-1 font-gilroy-medium text-[13px]">
-                {item.product_name_snapshot}
-                {item.variant_name_snapshot ? ` — ${item.variant_name_snapshot}` : ''} × {item.quantity}
-              </AppText>
-              <AppText className="font-gilroy-semibold text-[13px]">{money(item.line_total, order.currency)}</AppText>
-            </View>
-          ))}
-        </Card>
-      </View>
+      <Card className="px-4">
+        {order.items.map((item, index) => (
+          <View
+            key={item.id}
+            className={cn('flex-row items-center justify-between gap-3 py-3', index > 0 && 'border-t')}
+            style={index > 0 ? { borderColor: rowDivider } : undefined}
+          >
+            <AppText numberOfLines={2} className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">
+              {item.product_name_snapshot}
+              {item.variant_name_snapshot ? ` — ${item.variant_name_snapshot}` : ''} × {item.quantity}
+            </AppText>
+            <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">
+              {money(item.line_total, order.currency)}
+            </AppText>
+          </View>
+        ))}
+      </Card>
 
       <Card className="gap-1 p-4">
         <InfoRow label={t('Subtotal')} value={money(order.subtotal, order.currency)} />
         <InfoRow label={t('Shipping')} value={money(order.shipping_fee, order.currency)} />
         <View className="my-1 h-px" style={{ backgroundColor: rowDivider }} />
         <View className="flex-row items-center justify-between">
-          <AppText className="font-gilroy-bold text-[15px]">{t('Total')}</AppText>
-          <AppText className="font-gilroy-bold text-[15px]">{money(order.total, order.currency)}</AppText>
+          <AppText className="font-gilroy-bold text-[15px] leading-5">{t('Total')}</AppText>
+          <AppText className="font-gilroy-bold text-[15px] leading-5">{money(order.total, order.currency)}</AppText>
         </View>
       </Card>
 
@@ -134,11 +135,11 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
           <SectionLabel>{t('Shipping address')}</SectionLabel>
         </View>
         {address ? (
-          <AppText className="font-gilroy-medium text-[13px]">
+          <AppText className="font-gilroy-medium text-[13px] leading-[19px]">
             {[
               address.recipient_name,
               address.street,
-              [[address.city, address.region].filter(Boolean).join(', '), address.postal_code].filter(Boolean).join(' '),
+              [address.city, address.region, address.postal_code].filter(Boolean).join(', '),
               address.country,
               address.phone,
             ]
@@ -146,7 +147,7 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
               .join('\n')}
           </AppText>
         ) : (
-          <AppText className="font-gilroy-medium text-[13px] text-muted">—</AppText>
+          <AppText className="font-gilroy-medium text-[13px] leading-[19px] text-muted dark:text-dark-muted">—</AppText>
         )}
       </Card>
 
@@ -166,10 +167,12 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
       </Card>
 
       {hasFactura ? (
-        <Card className="gap-2.5 p-4">
-          <SectionLabel>{t('Factura')}</SectionLabel>
+        <Card className="gap-0.5 p-4">
+          <View className="mb-1">
+            <SectionLabel>{t('Factura')}</SectionLabel>
+          </View>
           {order.invoice_serial ? (
-            <AppText className="font-gilroy-semibold text-[13px]">{order.invoice_serial}</AppText>
+            <AppText className="mb-2.5 font-gilroy-semibold text-[13px] leading-[17px]">{order.invoice_serial}</AppText>
           ) : null}
           <FacturaActions order={order} />
         </Card>

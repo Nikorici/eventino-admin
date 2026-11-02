@@ -36,4 +36,13 @@ describe('linked organizer mocks', () => {
     expect(await linkedEmails()).not.toContain('contact@clujlive.ro');
     expect(await linkedEmails('mock-access-1002')).toContain('contact@clujlive.ro');
   });
+
+  it('signs in an unlinked organizer without events for the empty state', async () => {
+    const login = await resolveMock(call('POST', '/api/login/', { email: 'elena.rotaru@evenimente.md', password: 'x' }, ''));
+    expect('data' in login && login.data).toMatchObject({ access: 'mock-access-1007' });
+    const list = await resolveMock(call('POST', '/api/v1/statistics/event-list/', {}, 'mock-access-1007'));
+    expect('data' in list && list.data).toMatchObject({ events: [], total: 0 });
+    expect(await linkedEmails('mock-access-1007')).toEqual([]);
+    expect(await linkedEmails()).not.toContain('elena.rotaru@evenimente.md');
+  });
 });

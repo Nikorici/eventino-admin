@@ -69,7 +69,7 @@ export function sourceDisplayName(referrer: string, directLabel: string): string
 
 export function sharePercent(clicks: number, total: number): number {
   if (!total) return 0;
-  return Math.round((clicks / total) * 10000) / 100;
+  return Math.round((clicks / total) * 1000) / 10;
 }
 
 export interface Marker {
@@ -115,10 +115,16 @@ export interface MapLabel {
   anchor: 'start' | 'end';
 }
 
-export function placeLabels(markers: Marker[], width: number): MapLabel[] {
-  const placed: { left: number; right: number; top: number; bottom: number }[] = [];
+export function placeLabels(markers: Marker[], width: number, limit = markers.length): MapLabel[] {
+  const placed = markers.map((marker) => ({
+    left: marker.x - marker.r,
+    right: marker.x + marker.r,
+    top: marker.y - marker.r,
+    bottom: marker.y + marker.r,
+  }));
   const labels: MapLabel[] = [];
-  for (const marker of markers) {
+  for (const [index, marker] of markers.entries()) {
+    if (labels.length >= limit) break;
     const textWidth = marker.label.length * 5.2;
     const candidates: ('start' | 'end')[] = marker.x < width * 0.6 ? ['start', 'end'] : ['end', 'start'];
     for (const anchor of candidates) {
@@ -130,7 +136,12 @@ export function placeLabels(markers: Marker[], width: number): MapLabel[] {
         bottom: marker.y + 6,
       };
       const clashes = placed.some(
-        (other) => box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top,
+        (other, otherIndex) =>
+          otherIndex !== index &&
+          box.left < other.right &&
+          box.right > other.left &&
+          box.top < other.bottom &&
+          box.bottom > other.top,
       );
       if (clashes || box.left < 0 || box.right > width) continue;
       placed.push(box);

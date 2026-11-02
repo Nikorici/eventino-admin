@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { CalendarX2 } from 'lucide-react-native';
+import { CalendarX2, Trash2 } from 'lucide-react-native';
 
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/useToast';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { couponsApi, useGetEventCouponsQuery } from '@/store/api/couponsApi';
 import {
+  useDeleteEventMutation,
   useGetCategoriesQuery,
   useUpdateEventMutation,
   type EventMediaOrderEntry,
@@ -18,7 +19,11 @@ import {
 } from '@/store/api/eventsApi';
 import { useGetMyCompaniesQuery } from '@/store/api/usersApi';
 import { toUploadFile } from '@/lib/eventFormBody';
-import { EmptyState, GlassHeader, Screen, Skeleton } from '@/components/ui';
+import { EmptyState, GlassHeader, PressableScale, Screen, Skeleton } from '@/components/ui';
+import { confirmAction } from '@/components/dashboard/dashboardParts';
+import { extractApiError } from '@/lib/apiError';
+import { eventPermissions } from '@/lib/sections';
+import { colors } from '@/theme/colors';
 import { EventForm, type EventFormSubmit } from '@/components/eventForm/EventForm';
 import { buildEventInitialValues } from '@/components/eventForm/eventInitialValues';
 import { OwnerContextSection } from '@/components/eventForm/OwnerContextSection';
@@ -39,6 +44,7 @@ export default function EditEventScreen() {
   const coupons = useGetEventCouponsQuery(eventId ?? 0, { skip: eventId == null });
   const { data: companyGroups } = useGetMyCompaniesQuery(undefined, { skip: !user });
   const [updateEvent, { isLoading: updating }] = useUpdateEventMutation();
+  const [deleteEvent, { isLoading: deleting }] = useDeleteEventMutation();
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [serverErrors, setServerErrors] = useState<EventFormServerErrors | null>(null);
 
@@ -114,11 +120,46 @@ export default function EditEventScreen() {
     }
   };
 
+  const confirmDelete = () => {
+    if (!event) return;
+    confirmAction({
+      title: t('Delete event'),
+      message: t('This action cannot be undone. Are you sure?'),
+      confirmLabel: t('Delete'),
+      cancelLabel: t('Cancel'),
+      destructive: true,
+      onConfirm: () => {
+        void (async () => {
+          try {
+            await deleteEvent(event.id).unwrap();
+            haptics.success();
+            toast(t('Your event has been deleted'), 'success');
+            navigate.replace('selectEvent');
+          } catch (error) {
+            haptics.error();
+            toast(extractApiError(error) ?? t('Please try again.'), 'error');
+          }
+        })();
+      },
+    });
+  };
+
+  const deleteButton = (
+    <PressableScale
+      onPress={confirmDelete}
+      disabled={deleting}
+      accessibilityLabel={t('Delete event')}
+      className="h-10 w-10 items-center justify-center rounded-full bg-danger/10"
+    >
+      <Trash2 size={18} color={colors.danger} />
+    </PressableScale>
+  );
+
   if (isLoading || categoriesLoading || coupons.isLoading) {
     return (
       <Screen edges={[]}>
         <GlassHeader title={t('Edit event')} onBack={navigate.back} />
-        <View className="gap-4 px-5" style={{ paddingTop: padding.top + 4 }}>
+        <View className="gap-4 px-5" style={{ paddingTop: padding.top }}>
           <Skeleton className="h-52 w-full rounded-[14px]" />
           <Skeleton className="h-9 w-3/4 rounded-[10px]" />
           <Skeleton className="h-32 w-full rounded-[12px]" />
@@ -146,7 +187,11 @@ export default function EditEventScreen() {
 
   return (
     <Screen edges={[]}>
-      <GlassHeader title={t('Edit event')} onBack={navigate.back} />
+      <GlassHeader
+        title={t('Edit event')}
+        onBack={navigate.back}
+        right={eventPermissions(event, user).canDeleteEvent ? deleteButton : undefined}
+      />
       <EventForm
         key={event.id}
         mode="edit"

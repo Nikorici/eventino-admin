@@ -2,11 +2,11 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
-import { CalendarDays, LayoutDashboard, Search } from 'lucide-react-native';
+import { CalendarDays, LayoutDashboard, Plus, Search } from 'lucide-react-native';
 
 import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
 import { OrganizerEventRow, OrganizerEventRowSkeleton } from '@/components/events/OrganizerEventCard';
-import { AppText, DashedAddButton, EmptyState, GlassHeader, GlassInput, Screen } from '@/components/ui';
+import { AppText, DashedAddButton, EmptyState, GlassButton, GlassHeader, GlassInput, Screen } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectEvent, useSelectedEventId } from '@/hooks/useSelectedEvent';
@@ -34,8 +34,9 @@ const ListHeader = memo(function ListHeader({
 }) {
   const { t } = useTranslation();
   const searchIconColor = useThemeColor(colors.muted, colors.dark.textSecondary);
+  const plusColor = useThemeColor(colors.primary, colors.dark.text);
   return (
-    <View className="gap-3 px-4 pb-3 pt-3">
+    <View className="gap-3 px-4 pb-3">
       <GlassInput
         placeholder={t('Search events...')}
         value={search}
@@ -45,7 +46,12 @@ const ListHeader = memo(function ListHeader({
         returnKeyType="search"
         leftIcon={<Search size={18} color={searchIconColor} />}
       />
-      <DashedAddButton label={t('Create event')} onPress={navigate.createEvent} />
+      <DashedAddButton
+        size="sm"
+        label={t('Create event')}
+        onPress={navigate.createEvent}
+        icon={<Plus size={18} color={plusColor} />}
+      />
       {count != null ? (
         <View className="mt-2 flex-row items-center justify-between">
           <AppText className="font-gilroy-semibold text-[18px] leading-[24px]">{t('Your events')}</AppText>
@@ -63,6 +69,7 @@ export default function SelectEventScreen() {
   const selectedEventId = useSelectedEventId();
   const selectEvent = useSelectEvent();
   const spinnerColor = useThemeColor(colors.primary, colors.dark.text);
+  const createIconColor = useThemeColor(colors.white, colors.primary);
 
   const { data, isLoading, isError, refetch } = useGetOrganizerEventsQuery(undefined, { skip: !user });
   const [refreshing, setRefreshing] = useState(false);
@@ -123,12 +130,16 @@ export default function SelectEventScreen() {
   ) : search.trim() ? (
     <EmptyState icon={Search} title={t('No events match your search.')} />
   ) : (
-    <EmptyState
-      icon={CalendarDays}
-      title={t("You haven't created any events yet.")}
-      actionLabel={t('Create event')}
-      onAction={navigate.createEvent}
-    />
+    <View className="items-center px-4 pt-[84px]">
+      <EmptyState icon={CalendarDays} title={t("You haven't created any events yet.")} className="pb-0" />
+      <View className="mt-5 w-48">
+        <GlassButton
+          label={t('Create event')}
+          onPress={navigate.createEvent}
+          icon={<Plus size={18} color={createIconColor} />}
+        />
+      </View>
+    </View>
   );
 
   return (
@@ -151,7 +162,7 @@ export default function SelectEventScreen() {
         ListEmptyComponent={empty}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom }}
+        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={spinnerColor} colors={[spinnerColor]} />

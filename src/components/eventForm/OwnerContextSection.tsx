@@ -14,7 +14,8 @@ import {
   type CompanySummary,
   type OrganizationResult,
 } from '@/store/api/usersApi';
-import { AppText, Chip, DashedAddButton, EmptyState, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { AppText, Chip, EmptyState, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { FormAddButton } from './FormAddButton';
 import { UserAvatar, followUserName } from '@/components/social/UserRow';
 
 function delegatorDisplayName(delegator: AccountDelegator): string {
@@ -45,25 +46,25 @@ function OwnerOrganizationPicker({ selected, onSelect }: OwnerOrganizationPicker
 
   return (
     <View className="gap-3">
-      <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
         {t('Select the organizer this event will be published under.')}
       </AppText>
       {selected ? (
         <View className="flex-row items-center gap-3 rounded-[12px] border border-app-border bg-app-bg px-3 py-2.5 dark:border-dark-border dark:bg-dark-bg">
           <UserAvatar uri={selected.profile_image} name={followUserName(selected)} size={36} />
-          <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px]">
+          <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px] leading-[19px]">
             {followUserName(selected)}
           </AppText>
           <PressableScale onPress={() => onSelect(null)} accessibilityLabel={t('Remove')} hitSlop={8}>
-            <AppText className="font-gilroy-semibold text-[13px] text-danger">{t('Remove')}</AppText>
+            <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-danger">{t('Remove')}</AppText>
           </PressableScale>
         </View>
       ) : (
-        <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">
           {t('No organizer selected — the event will be created under your account')}
         </AppText>
       )}
-      <DashedAddButton
+      <FormAddButton
         label={selected ? t('Change Organizer') : t('Select Organizer')}
         onPress={() => {
           setSearch('');
@@ -75,7 +76,7 @@ function OwnerOrganizationPicker({ selected, onSelect }: OwnerOrganizationPicker
         <Pressable onPress={() => setOpen(false)} className="flex-1 justify-end bg-black/40">
           <Pressable onPress={(event) => event.stopPropagation()} className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
             <View className="mb-2 flex-row items-center justify-between px-5">
-              <AppText className="font-gilroy-bold text-[17px]">{t('Select Organizer')}</AppText>
+              <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Select Organizer')}</AppText>
               <PressableScale
                 onPress={() => setOpen(false)}
                 accessibilityLabel={t('Done')}
@@ -108,13 +109,13 @@ function OwnerOrganizationPicker({ selected, onSelect }: OwnerOrganizationPicker
                     <View className="flex-row items-center gap-3 rounded-[12px] border border-app-border bg-app-surface px-3 py-2.5 dark:border-dark-border dark:bg-dark-bg">
                       <UserAvatar uri={item.profile_image} name={followUserName(item)} size={40} />
                       <View className="flex-1">
-                        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+                        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
                           {followUserName(item)}
                         </AppText>
                         {item.is_organization ? (
                           <View className="mt-1 flex-row items-center gap-1">
                             <Building2 size={12} color={mutedIcon} />
-                            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{t('Organization')}</AppText>
+                            <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('Organization')}</AppText>
                           </View>
                         ) : null}
                       </View>
@@ -175,10 +176,10 @@ export function OwnerContextSection({
   if (!showCompanies && !showDelegators && !showOwner) return null;
 
   return (
-    <View className="mt-5 gap-5">
+    <View className="mt-6 gap-5">
       {showCompanies ? (
         <View className="gap-2">
-          <AppText className="font-gilroy-bold text-[17px]">{t('Company (SRL)')}</AppText>
+          <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Company (SRL)')}</AppText>
           <View className="flex-row flex-wrap gap-2">
             <Chip label={t('— use default —')} selected={selectedCompanyId == null} onPress={() => onSelectCompany(null)} />
             {companies.map((company) => (
@@ -194,7 +195,7 @@ export function OwnerContextSection({
       ) : null}
       {showDelegators && onSelectDelegator ? (
         <View className="gap-2">
-          <AppText className="font-gilroy-bold text-[17px]">{t('Acting on behalf of')}</AppText>
+          <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Acting on behalf of')}</AppText>
           <View className="flex-row flex-wrap gap-2">
             <Chip label={t('Myself')} selected={actingOnBehalfOfId == null} onPress={() => onSelectDelegator(null)} />
             {delegators.map((delegator) => (
@@ -210,7 +211,7 @@ export function OwnerContextSection({
       ) : null}
       {showOwner && onSelectOwnerOrganization ? (
         <View className="gap-2">
-          <AppText className="font-gilroy-bold text-[17px]">{t('Publish as organizer')}</AppText>
+          <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Publish as organizer')}</AppText>
           <OwnerOrganizationPicker selected={ownerOrganization} onSelect={onSelectOwnerOrganization} />
         </View>
       ) : null}

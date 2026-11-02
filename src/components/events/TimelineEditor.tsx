@@ -5,7 +5,8 @@ import { Clock, Trash2 } from 'lucide-react-native';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DashedAddButton, GlassInput, PressableScale } from '@/components/ui';
+import { GlassInput, PressableScale } from '@/components/ui';
+import { FormAddButton } from '@/components/eventForm/FormAddButton';
 
 import { EventFormDateTimeField } from './EventFormDateTimeField';
 
@@ -97,7 +98,7 @@ export function TimelineEditor({ items, onChange }: TimelineEditorProps) {
           </View>
         </View>
       ))}
-      <DashedAddButton
+      <FormAddButton
         label={items.length === 0 ? t('Add event timeline item') : t('Add more')}
         onPress={addItem}
       />

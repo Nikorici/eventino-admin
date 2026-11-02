@@ -3,7 +3,7 @@ import type { ImageStyle, StyleProp } from 'react-native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const WORDMARK_ASPECT = 200 / 624;
+const WORDMARK_ASPECT = 206 / 594;
 const MARK_ASPECT = 305 / 256;
 
 type BrandGlyphProps = {
@@ -18,12 +18,9 @@ export function Logo({ width = 132, height, style }: BrandGlyphProps) {
 
   return (
     <Image
-      source={
-        isDark
-          ? require('../../../assets/brand/halloween-logo-dark.png')
-          : require('../../../assets/brand/halloween-logo.png')
-      }
+      source={require('../../../assets/brand/logo.png')}
       contentFit="contain"
+      tintColor={isDark ? '#f9f9f9' : undefined}
       style={[{ width, height: resolvedHeight }, style]}
     />
   );

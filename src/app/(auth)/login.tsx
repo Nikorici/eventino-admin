@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 
-import { cn } from '@/lib/cn';
 import { extractApiError } from '@/lib/apiError';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -22,15 +21,7 @@ type LoginStep = 'email' | 'otp' | 'password';
 
 const MUTED = '#8a8d93';
 
-function TextLink({
-  label,
-  onPress,
-  tone = 'muted',
-}: {
-  label: string;
-  onPress: () => void;
-  tone?: 'muted' | 'strong';
-}) {
+function TextLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <PressableScale
       onPress={() => {
@@ -41,14 +32,7 @@ function TextLink({
       hitSlop={8}
       className="self-center py-1.5"
     >
-      <AppText
-        className={cn(
-          'font-gilroy-semibold text-[13px]',
-          tone === 'strong' ? 'text-primary dark:text-dark-text' : 'text-primary-light dark:text-dark-text/70',
-        )}
-      >
-        {label}
-      </AppText>
+      <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary dark:text-dark-text">{label}</AppText>
     </PressableScale>
   );
 }
@@ -182,7 +166,7 @@ export default function LoginScreen() {
       ? `${t('We sent a 6-digit code to')} ${email.trim()}`
       : step === 'password'
         ? t('Welcome back, enter your password')
-        : t('Welcome back. You’ve been missed');
+        : t('Log in or create an account to get your tickets');
 
   return (
     <Screen edges={[]}>
@@ -204,10 +188,7 @@ export default function LoginScreen() {
               <AppText className="text-center font-gilroy-bold text-[28px] leading-[34px] text-primary dark:text-dark-text">
                 {title}
               </AppText>
-              <AppText
-                numberOfLines={2}
-                className="max-w-[320px] text-center font-gilroy-medium text-[15px] leading-[22px] text-muted"
-              >
+              <AppText className="max-w-[320px] text-center font-gilroy-medium text-[15px] leading-[22px] text-primary dark:text-dark-text">
                 {subtitle}
               </AppText>
             </View>
@@ -232,9 +213,6 @@ export default function LoginScreen() {
                     onSubmitEditing={onContinueWithEmail}
                     leftIcon={<Mail size={18} color={MUTED} />}
                   />
-                  <AppText className="text-center font-gilroy-medium text-[13px] leading-[19px] text-muted">
-                    {t("Don't have an account? We'll create one for you automatically!")}
-                  </AppText>
                   <GlassButton
                     label={t('Continue with email')}
                     onPress={onContinueWithEmail}
@@ -299,7 +277,7 @@ export default function LoginScreen() {
                       onPress={() => {
                         if (!resendingOtp) void onResend();
                       }}
-                      tone="strong"
+                     
                     />
                     <View className="h-3 w-px bg-app-border dark:bg-dark-border" />
                     <TextLink label={t('Use a different email')} onPress={() => goToStep('email')} />
@@ -350,7 +328,7 @@ export default function LoginScreen() {
                     }
                   />
                   <View className="flex-row justify-end">
-                    <TextLink label={t('Forgot your password?')} onPress={navigate.forgotPassword} tone="strong" />
+                    <TextLink label={t('Forgot your password?')} onPress={navigate.forgotPassword} />
                   </View>
                   <GlassButton label={t('Log In')} onPress={onPasswordLogin} loading={loading} disabled={busy} />
                   <GlassButton
@@ -370,8 +348,8 @@ export default function LoginScreen() {
 
           {step !== 'otp' ? (
             <View className="mt-6 flex-row items-center justify-center gap-1.5">
-              <AppText className="font-gilroy-medium text-[13px] text-muted">{t("Don't have an account?")}</AppText>
-              <TextLink label={t('Sign Up')} onPress={navigate.register} tone="strong" />
+              <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary dark:text-dark-text">{t("Don't have an account?")}</AppText>
+              <TextLink label={t('Sign Up')} onPress={navigate.register} />
             </View>
           ) : null}
         </View>

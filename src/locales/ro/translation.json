@@ -4160,5 +4160,9 @@
   "Some coupons were rejected. Check the highlighted rows.": "Unele cupoane au fost respinse. Verifică rândurile evidențiate.",
   "One or more tickets were rejected by the server. See the highlighted rows.": "Unul sau mai multe bilete au fost respinse de server. Vezi rândurile evidențiate.",
   "Failed to save marketing tracking settings": "Nu s-au putut salva setările de marketing și tracking",
-  "Marketing tracking settings saved successfully": "Setările de marketing și tracking au fost salvate cu succes"
+  "Marketing tracking settings saved successfully": "Setările de marketing și tracking au fost salvate cu succes",
+  "We strongly recommend adding images in 16:9 format (for example, 1920 x 1080 or 1280 x 720).": "Vă recomandăm insistent să adăugați imagini în format 16:9 (de exemplu, 1920 x 1080 sau 1280 x 720).",
+  "Add discount tier": "Adaugă prag de reducere",
+  "1 printer": "1 imprimantă",
+  "{{count}} printers": "{{count}} imprimante"
 }

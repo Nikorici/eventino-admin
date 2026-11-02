@@ -31,11 +31,11 @@ export default function TrafficSourcesScreen() {
       <GlassHeader title={t('Traffic Sources')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.muted} />}
       >
         <View className="gap-3">
-          <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
             {t('Monitor where your event visitors are coming from')}
           </AppText>
           {eventLoading ? (

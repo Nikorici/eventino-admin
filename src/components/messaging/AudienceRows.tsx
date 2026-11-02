@@ -70,7 +70,7 @@ function IconTile({ children }: { children: ReactNode }) {
 
 function Subtitle({ children }: { children: string }) {
   return (
-    <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+    <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
       {children}
     </AppText>
   );
@@ -89,7 +89,7 @@ export function FollowerRow({ follower, selected, onToggle }: { follower: Messag
           {follower.profileImage ? (
             <Image source={{ uri: follower.profileImage }} contentFit="cover" style={{ width: '100%', height: '100%' }} />
           ) : (
-            <AppText className="font-gilroy-semibold text-[13px] text-muted">{initials(follower.name)}</AppText>
+            <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted dark:text-dark-muted">{initials(follower.name)}</AppText>
           )}
         </View>
       }
@@ -99,7 +99,7 @@ export function FollowerRow({ follower, selected, onToggle }: { follower: Messag
           className="h-6 flex-row items-center gap-1 rounded-[6px] bg-black/[0.04] px-2 dark:bg-white/10"
         >
           <CalendarDays size={12} color={tagTint} />
-          <AppText className="font-gilroy-semibold text-[12px] text-primary/80 dark:text-dark-text/80">
+          <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-primary/80 dark:text-dark-text/80">
             {String(follower.eventIds.length)}
           </AppText>
         </View>
@@ -107,7 +107,7 @@ export function FollowerRow({ follower, selected, onToggle }: { follower: Messag
     >
       <View className="flex-row items-center gap-1.5">
         {follower.isOrganization ? <Building2 size={13} color={colors.muted} /> : null}
-        <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px]">
+        <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px] leading-[19px]">
           {follower.name}
         </AppText>
       </View>
@@ -143,7 +143,7 @@ export function EventRow({
         </IconTile>
       }
     >
-      <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+      <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
         {event.title}
       </AppText>
       <Subtitle>{[`${event.attendeeCount} ${t('attendees')}`, event.category, dateLabel].filter(Boolean).join(' · ')}</Subtitle>
@@ -164,7 +164,7 @@ export function CategoryRow({ category, selected, onToggle }: { category: Messag
         </IconTile>
       }
     >
-      <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+      <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
         {category.name}
       </AppText>
       <Subtitle>
@@ -189,7 +189,7 @@ export function TicketHolderRow({ ticketType, selected, onToggle }: { ticketType
         </IconTile>
       }
     >
-      <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+      <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
         {ticketType.name}
       </AppText>
       <Subtitle>{`${ticketType.holder_count} ${t(ticketType.holder_count !== 1 ? 'holders' : 'holder')}`}</Subtitle>

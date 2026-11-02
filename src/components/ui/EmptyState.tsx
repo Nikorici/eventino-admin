@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { cn } from '@/lib/cn';
+import { colors } from '@/theme/colors';
 
 import { AppText } from './AppText';
 import { GlassButton } from './GlassButton';
@@ -20,10 +21,10 @@ export function EmptyState({ icon: Icon, title, message, actionLabel, onAction, 
     <View className={cn('items-center justify-center gap-3 px-8 py-16', className)}>
       {Icon ? (
         <View className="h-16 w-16 items-center justify-center rounded-full border border-app-border bg-card-sm dark:border-dark-border dark:bg-dark-elevated">
-          <Icon size={28} color="#8a8d93" />
+          <Icon size={28} color={colors.muted} />
         </View>
       ) : null}
-      <AppText className="text-center font-gilroy-semibold text-lg">{title}</AppText>
+      <AppText className="text-center font-gilroy-semibold text-lg leading-6">{title}</AppText>
       {message ? (
         <AppText className="text-center font-gilroy text-sm text-muted dark:text-dark-muted">{message}</AppText>
       ) : null}

@@ -103,9 +103,7 @@ export function ReleaseSeatPicker({ eventId, ticketTypeId, quantity, value, curr
           onSeatPress={onSeatPress}
         />
       </View>
-      <View className="-mx-4">
-        <SeatLegend categories={seatMap.categories} currency={currency} />
-      </View>
+      <SeatLegend categories={seatMap.categories} currency={currency} />
     </View>
   );
 }

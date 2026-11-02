@@ -158,7 +158,7 @@ function VariantsSection({ product, currency }: { product: MerchProductDetail; c
       </View>
 
       {product.variants.length === 0 && !draft ? (
-        <AppText className="font-gilroy-medium text-[13px] text-muted">{t('No variants yet.')}</AppText>
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('No variants yet.')}</AppText>
       ) : null}
 
       {product.variants.length > 0 ? (
@@ -171,12 +171,12 @@ function VariantsSection({ product, currency }: { product: MerchProductDetail; c
             >
               <View className="flex-1">
                 <View className="flex-row items-center gap-1.5">
-                  <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px]">
+                  <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px] leading-[19px]">
                     {variant.name}
                   </AppText>
                   {!variant.is_active ? <StatusBadge label={t('Hidden')} color={colors.muted} /> : null}
                 </View>
-                <AppText className="font-gilroy-medium text-[12px] text-muted">
+                <AppText className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
                   {money(variant.effective_price, currency)} · {t('Stock')}: {variant.stock}
                   {variant.sku ? ` · ${variant.sku}` : ''}
                 </AppText>
@@ -298,7 +298,7 @@ function ImageTile({ image, productId }: { image: MerchProductImage; productId: 
   };
 
   return (
-    <View className="w-[31%] gap-1.5">
+    <View className="w-[31.4%] gap-1.5">
       <View>
         <Image
           source={{ uri: image.image }}
@@ -307,15 +307,17 @@ function ImageTile({ image, productId }: { image: MerchProductImage; productId: 
           style={{ width: '100%', aspectRatio: 1, borderRadius: 10 }}
         />
         {image.is_main ? (
-          <View className="absolute left-1.5 top-1.5 rounded-full bg-primary px-2 py-0.5 dark:bg-white">
-            <AppText className="font-gilroy-semibold text-[10px] text-white dark:text-primary">{t('Main')}</AppText>
+          <View className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 dark:bg-white">
+            <AppText className="font-gilroy-semibold text-[11px] leading-[14px] text-white dark:text-primary">
+              {t('Main')}
+            </AppText>
           </View>
         ) : null}
       </View>
-      <View className="flex-row items-center justify-between">
+      <View className="min-h-8 flex-row items-center justify-between">
         {!image.is_main ? (
           <PressableScale onPress={() => void setMain()} disabled={setting} accessibilityLabel={t('Set main')}>
-            <AppText className="font-gilroy-semibold text-[13px]">{t('Set main')}</AppText>
+            <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Set main')}</AppText>
           </PressableScale>
         ) : (
           <View />
@@ -379,7 +381,7 @@ function ImagesSection({ product }: { product: MerchProductDetail }) {
     <View className="gap-2">
       <SectionLabel>{t('Images')}</SectionLabel>
       {product.images.length > 0 ? (
-        <View className="flex-row flex-wrap gap-[3.5%]" style={{ rowGap: 12 }}>
+        <View className="flex-row flex-wrap gap-[2.9%]" style={{ rowGap: 10 }}>
           {product.images.map((image) => (
             <ImageTile key={image.id} image={image} productId={product.id} />
           ))}
@@ -388,7 +390,7 @@ function ImagesSection({ product }: { product: MerchProductDetail }) {
       {uploading ? (
         <View className="h-12 flex-row items-center justify-center gap-2">
           <ActivityIndicator size="small" color={colors.muted} />
-          <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Uploading...')}</AppText>
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Uploading...')}</AppText>
         </View>
       ) : (
         <DashedAddButton
@@ -456,7 +458,7 @@ export default function MerchProductScreen() {
       );
     }
     return (
-      <View className="gap-6">
+      <View className="gap-4">
         <ProductInfoForm
           key={product.id}
           initial={{
@@ -469,8 +471,12 @@ export default function MerchProductScreen() {
           saving={saving}
           onSubmit={(values) => void onSave(values)}
         />
-        <VariantsSection product={product} currency={currency} />
-        <ImagesSection product={product} />
+        <View className="mt-2">
+          <VariantsSection product={product} currency={currency} />
+        </View>
+        <View className="mt-1">
+          <ImagesSection product={product} />
+        </View>
       </View>
     );
   };

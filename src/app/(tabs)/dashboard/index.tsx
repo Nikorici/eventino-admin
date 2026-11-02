@@ -12,6 +12,7 @@ import {
   DashboardStatsSkeleton,
 } from '@/components/dashboard/DashboardStats';
 import { EventActions, EventHeaderCard, EventHeaderCardSkeleton } from '@/components/dashboard/EventHeaderCard';
+import { EventTourSheet } from '@/components/dashboard/EventTourSheet';
 import { FacturaOrdersPanel, type FacturaTab } from '@/components/dashboard/FacturaOrdersPanel';
 import { FreeTicketRequestsPanel, SPECIAL_FREE_TICKET_EVENT_IDS } from '@/components/dashboard/FreeTicketRequestsPanel';
 import { PendingOrdersPanel } from '@/components/dashboard/PendingOrdersPanel';
@@ -53,7 +54,7 @@ function CancelledStats() {
           <AppText numberOfLines={2} className="mt-1.5 font-gilroy-semibold text-[12px] text-brand">
             {t(label)}
           </AppText>
-          <AppText className="mt-0.5 font-gilroy-medium text-[11px] text-muted">{`↗ - ${t('all time')}`}</AppText>
+          <AppText className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{`↗ - ${t('all time')}`}</AppText>
         </View>
       ))}
     </View>
@@ -68,6 +69,7 @@ export default function DashboardScreen() {
   const [tab, setTab] = useState<OrdersTab>('buyers');
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
 
   const permissions = eventPermissions(event, user);
   const isCancelled = Boolean(event?.is_cancelled);
@@ -138,10 +140,10 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          paddingTop: padding.top + 8,
+          paddingTop: padding.top,
           paddingBottom: padding.bottom,
           paddingHorizontal: 16,
-          gap: 24,
+          gap: 16,
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />
@@ -154,19 +156,17 @@ export default function DashboardScreen() {
           </>
         ) : (
           <>
-            <View className="gap-3">
-              <EventHeaderCard event={event} />
-              <EventActions event={event} permissions={permissions} isStaffUser={Boolean(user?.is_staff)} />
-            </View>
+            <EventHeaderCard event={event} onStartTour={() => setTourOpen(true)} />
+            <EventActions event={event} permissions={permissions} isStaffUser={Boolean(user?.is_staff)} />
 
             {permissions.canViewAnalytics ? (
               <View className="gap-3">
-                <SectionTitle>{t('Statistics')}</SectionTitle>
+                <SectionTitle className="leading-[24px]">{t('Statistics')}</SectionTitle>
                 {isCancelled ? (
-                  <>
+                  <View className="gap-4">
                     <CancelledStats />
                     <AnalyticsChart eventId={eventId} currencies={[eventCurrencyCode(event)]} />
-                  </>
+                  </View>
                 ) : (
                   <DashboardStatsSection eventId={eventId} />
                 )}
@@ -224,6 +224,7 @@ export default function DashboardScreen() {
             !isCancelled ? (
               <FreeTicketRequestsPanel eventId={eventId} refreshSignal={refreshSignal} />
             ) : null}
+            {tourOpen ? <EventTourSheet permissions={permissions} onClose={() => setTourOpen(false)} /> : null}
           </>
         )}
       </ScrollView>

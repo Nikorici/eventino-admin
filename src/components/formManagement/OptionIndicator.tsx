@@ -6,7 +6,7 @@ import type { QuestionType } from '@/types/api';
 
 export function OptionIndicator({ type, index }: { type: QuestionType; index: number }) {
   if (type === 'dropdown') {
-    return <AppText className="font-gilroy-semibold text-[11px] text-muted dark:text-dark-muted">{index + 1}.</AppText>;
+    return <AppText className="font-gilroy-semibold text-[11px] text-muted dark:text-dark-muted leading-[14px]">{index + 1}.</AppText>;
   }
   return (
     <View

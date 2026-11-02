@@ -1,12 +1,12 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronRight } from 'lucide-react-native';
+import { CalendarDays, Check, ChevronRight } from 'lucide-react-native';
 
 import { AppText, PressableScale, Skeleton } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { groupThousands } from '@/lib/currency';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
-import { BlurredPoster } from '@/components/events/BlurredPoster';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { getEventTimeStatus } from '@/lib/eventStatus';
 import { formatEventDay } from '@/lib/format';
@@ -39,6 +39,25 @@ function eventDateText(event: OrganizerEventListItem, lang: string): string {
   const startText = formatEventDay(event.start_date, lang);
   const endText = formatEventDay(event.end_date, lang);
   return startText && endText && endText !== startText ? `${startText} — ${endText}` : startText;
+}
+
+export function EventThumb({ uri, className, recyclingKey }: { uri: string | null; className: string; recyclingKey: string }) {
+  return (
+    <View className={cn('items-center justify-center overflow-hidden bg-card-sm dark:bg-dark-elevated', className)}>
+      {uri ? (
+        <Image
+          source={{ uri }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          recyclingKey={recyclingKey}
+          transition={250}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : (
+        <CalendarDays size={18} color={colors.muted} />
+      )}
+    </View>
+  );
 }
 
 export function OrganizerEventRow({
@@ -74,10 +93,10 @@ export function OrganizerEventRow({
         onPress={onPress}
         accessibilityLabel={selected ? `${event.name}, ${t('Selected event')}` : event.name}
         testID={`event-card-${event.id}`}
-        className={cn('flex-row items-center gap-3 p-3', selected && 'bg-checkout-indigo-bg dark:bg-brand/20')}
+        className={cn('flex-row items-center gap-3 p-3', selected && 'bg-checkout-indigo-bg dark:bg-brand/[0.18]')}
         style={first ? undefined : { borderTopWidth: 1, borderTopColor: rowDivider }}
       >
-        <BlurredPoster uri={event.image} className="h-14 w-14 rounded-[10px]" iconSize={20} recyclingKey={String(event.id)} />
+        <EventThumb uri={event.image} className="h-14 w-14 rounded-[10px]" recyclingKey={String(event.id)} />
         <View className="flex-1 gap-[3px]">
           <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px] leading-[20px]">
             {event.name}
@@ -90,7 +109,7 @@ export function OrganizerEventRow({
           <View className="flex-row items-center gap-2">
             {status ? (
               <View className="h-[18px] justify-center rounded-full px-[7px]" style={{ backgroundColor: status.color }}>
-                <AppText className="font-gilroy-bold text-[9px] uppercase tracking-wide text-white dark:text-white">
+                <AppText className="font-gilroy-bold text-[9px] uppercase tracking-[0.45px] text-white dark:text-white">
                   {status.label}
                 </AppText>
               </View>

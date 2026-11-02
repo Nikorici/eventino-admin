@@ -33,11 +33,11 @@ export function AccountCard() {
       <View className="flex-row items-center gap-3 py-4" style={{ borderBottomWidth: 1, borderBottomColor: cardBorder }}>
         <UserAvatar uri={user?.profile_image} name={name} size={52} />
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-bold text-[17px]">
+          <AppText numberOfLines={1} className="font-gilroy-bold text-[17px] leading-[22px]">
             {name}
           </AppText>
           {user?.email ? (
-            <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+            <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
               {user.email}
             </AppText>
           ) : null}

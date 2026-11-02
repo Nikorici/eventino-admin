@@ -57,19 +57,19 @@ function RequestRow({
           <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
             {name}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
             {request.email || '-'}
           </AppText>
         </View>
       </View>
       <View className="gap-1.5 pl-[52px]">
-        <AppText className="font-gilroy-medium text-[12px] text-muted">
+        <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
           {`${t('Submission date')}: ${formatDateTimeLabel(request.submission_date, i18n.language)}`}
         </AppText>
         {eventId === ORGANIZATION_COLUMN_EVENT_ID ? (
-          <AppText className="font-gilroy-medium text-[12px] text-muted">{`${t('Organizatia')}: ${request.organization_answer || '-'}`}</AppText>
+          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{`${t('Organizatia')}: ${request.organization_answer || '-'}`}</AppText>
         ) : eventId === COUPONLESS_FREE_EVENT_ID ? null : (
-          <AppText className="font-gilroy-medium text-[12px] text-muted">{`${t('Coupon code')}: ${request.coupon_code || '-'}`}</AppText>
+          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{`${t('Coupon code')}: ${request.coupon_code || '-'}`}</AppText>
         )}
         {(request.tickets ?? []).length > 0 ? (
           <View className="flex-row flex-wrap gap-1.5">

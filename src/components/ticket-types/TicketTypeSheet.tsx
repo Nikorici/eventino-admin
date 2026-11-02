@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { ScrollView, useWindowDimensions, View } from 'react-native';
+import { ScrollView, Switch, TextInput, useWindowDimensions, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react-native';
+import { Check, X } from 'lucide-react-native';
 
 import { AppText, GlassInput, PressableScale } from '@/components/ui';
-import { QuantityDiscountTiersEditor } from '@/components/eventForm/QuantityDiscountTiersEditor';
 import {
+  MAX_QUANTITY_DISCOUNT_TIERS,
+  nextQuantityDiscountRow,
   QUANTITY_DISCOUNT_ERROR_MESSAGES,
   validateQuantityDiscountTiers,
   type QuantityDiscountRow,
 } from '@/components/eventForm/eventFormRules';
-import { PrimaryButton, SheetModal, ToggleRow } from '@/components/merch/merchParts';
+import { PrimaryButton, SheetModal } from '@/components/merch/merchParts';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/lib/cn';
@@ -57,7 +58,7 @@ interface FormState {
 function formOf(ticketType: ManageTicketType | null): FormState {
   return {
     name: ticketType?.name ?? '',
-    price: ticketType ? String(ticketType.price ?? '') : '',
+    price: ticketType ? plainPrice(String(ticketType.price ?? '')) : '',
     quantity: ticketType?.quantity == null ? '' : String(ticketType.quantity),
     unlimited: ticketType ? ticketType.quantity == null : false,
     eventDay: ticketType?.event_day ?? '',
@@ -71,12 +72,113 @@ function formOf(ticketType: ManageTicketType | null): FormState {
   };
 }
 
+function plainPrice(price: string): string {
+  const value = Number(price);
+  return price.trim() === '' || !Number.isFinite(value) ? price : String(value);
+}
+
+function SwitchRow({ label, value, onValueChange }: { label: string; value: boolean; onValueChange: (next: boolean) => void }) {
+  const trackOn = useThemeColor(colors.primary, colors.accent);
+  const trackOff = useThemeColor('#d1d1d6', colors.dark.elevated);
+  return (
+    <View className="flex-row items-center justify-between">
+      <AppText className="flex-1 pr-3 font-gilroy-medium text-[15px] leading-[20px]">{label}</AppText>
+      <Switch
+        value={value}
+        accessibilityLabel={label}
+        onValueChange={(next) => {
+          haptics.selection();
+          onValueChange(next);
+        }}
+        trackColor={{ true: trackOn, false: trackOff }}
+        thumbColor={colors.white}
+      />
+    </View>
+  );
+}
+
+function TierInput({
+  value,
+  width,
+  accessibilityLabel,
+  onChangeText,
+}: {
+  value: string;
+  width: string;
+  accessibilityLabel: string;
+  onChangeText: (text: string) => void;
+}) {
+  return (
+    <TextInput
+      value={value}
+      onChangeText={(text) => onChangeText(text.replace(/[^0-9]/g, ''))}
+      keyboardType="number-pad"
+      maxLength={3}
+      accessibilityLabel={accessibilityLabel}
+      className={cn(
+        'h-12 rounded-[10px] border border-app-border bg-app-surface px-2 text-center font-gilroy text-[16px] text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-text',
+        width,
+      )}
+    />
+  );
+}
+
+function DiscountTiers({ value, onChange }: { value: QuantityDiscountRow[]; onChange: (rows: QuantityDiscountRow[]) => void }) {
+  const { t } = useTranslation();
+  const update = (index: number, patch: Partial<QuantityDiscountRow>) =>
+    onChange(value.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  return (
+    <View className="mt-0.5 gap-2">
+      {value.map((row, index) => (
+        <View key={index} className="flex-row items-center gap-1.5">
+          <TierInput
+            value={row.min_quantity}
+            width="w-14"
+            accessibilityLabel={t('Minimum number of tickets')}
+            onChangeText={(min_quantity) => update(index, { min_quantity })}
+          />
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px]">{t('or more tickets')}</AppText>
+          <TierInput
+            value={row.percent}
+            width="w-[52px]"
+            accessibilityLabel={t('Discount percent')}
+            onChangeText={(percent) => update(index, { percent })}
+          />
+          <AppText className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">{t('% off each')}</AppText>
+          <PressableScale
+            onPress={() => {
+              haptics.selection();
+              onChange(value.filter((_, i) => i !== index));
+            }}
+            accessibilityLabel={t('Remove discount tier')}
+            className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
+          >
+            <X size={16} color={colors.muted} />
+          </PressableScale>
+        </View>
+      ))}
+      {value.length < MAX_QUANTITY_DISCOUNT_TIERS ? (
+        <PressableScale
+          onPress={() => {
+            haptics.selection();
+            onChange([...value, nextQuantityDiscountRow(value)]);
+          }}
+          accessibilityLabel={t('+ Add discount tier')}
+          className="h-12 items-center justify-center rounded-[12px] border-[1.5px] border-dashed border-app-border dark:border-dark-border"
+        >
+          <AppText className="font-gilroy-semibold text-[15px] leading-[20px]">{t('+ Add discount tier')}</AppText>
+        </PressableScale>
+      ) : null}
+    </View>
+  );
+}
+
 function FieldLabel({ children }: { children: string }) {
-  return <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{children}</AppText>;
+  return <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70 leading-[17px]">{children}</AppText>;
 }
 
 function Hint({ children }: { children: string }) {
-  return <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{children}</AppText>;
+  return <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">{children}</AppText>;
 }
 
 export function TicketTypeSheet({
@@ -178,7 +280,7 @@ export function TicketTypeSheet({
       >
         <View className="gap-4 pb-2">
           {editing ? (
-            <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted leading-[17px]">
               {`${t('Sold')}: ${editing.sold_count} · ${
                 editing.quantity != null ? `${t('Remaining')}: ${editing.remaining ?? 0}` : t('Unlimited')
               }`}
@@ -199,8 +301,7 @@ export function TicketTypeSheet({
             keyboardType="decimal-pad"
             autoCapitalize="none"
           />
-          <ToggleRow
-            bordered={false}
+          <SwitchRow
             label={t('Unlimited')}
             value={form.unlimited}
             onValueChange={(unlimited) => patch({ unlimited })}
@@ -215,8 +316,7 @@ export function TicketTypeSheet({
               autoCapitalize="none"
             />
           )}
-          <ToggleRow
-            bordered={false}
+          <SwitchRow
             label={t('Live stream access')}
             value={form.isOnline}
             onValueChange={(isOnline) => patch({ isOnline })}
@@ -263,7 +363,7 @@ export function TicketTypeSheet({
                           : 'border-app-border bg-white dark:border-dark-border dark:bg-dark-surface',
                       )}
                     >
-                      <AppText className={cn('font-gilroy-medium text-[12px]', active && 'text-white dark:text-primary')}>
+                      <AppText className={cn('font-gilroy-medium text-[12px] leading-[16px]', active && 'text-white dark:text-primary')}>
                         {label}
                       </AppText>
                     </PressableScale>
@@ -318,22 +418,19 @@ export function TicketTypeSheet({
                 accessibilityLabel={t('Use automatic color')}
                 className="self-start py-1"
               >
-                <AppText className="font-gilroy-semibold text-[13px] text-links dark:text-dark-text">
+                <AppText className="font-gilroy-semibold text-[13px] text-links dark:text-dark-text leading-[17px]">
                   {t('Use automatic color')}
                 </AppText>
               </PressableScale>
             ) : null}
             <Hint>{t('Shown on the scanner when this ticket is scanned. Pick the wristband color to match it.')}</Hint>
           </View>
-          <View className="gap-2">
+          <View className="gap-1.5">
             <FieldLabel>{t('Quantity discounts')}</FieldLabel>
             <Hint>
               {t('Optional. Each ticket gets cheaper when a buyer takes several of this ticket type in one order.')}
             </Hint>
-            <QuantityDiscountTiersEditor
-              value={form.quantityDiscounts}
-              onChange={(quantityDiscounts) => patch({ quantityDiscounts })}
-            />
+            <DiscountTiers value={form.quantityDiscounts} onChange={(quantityDiscounts) => patch({ quantityDiscounts })} />
           </View>
           <PrimaryButton
             label={t('Save')}

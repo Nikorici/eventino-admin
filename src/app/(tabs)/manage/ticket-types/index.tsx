@@ -200,7 +200,7 @@ export default function TicketTypesScreen() {
         ItemSeparatorComponent={ItemSeparator}
         ListHeaderComponent={
           <View className="gap-3 pb-4">
-            <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted leading-[19px]">
               {t('Set how many tickets are available for each type.')}
             </AppText>
             <PressableScale
@@ -212,7 +212,7 @@ export default function TicketTypesScreen() {
               className="h-11 flex-row items-center justify-center gap-2 rounded-[10px] border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
             >
               <UserPen size={16} color={headerIconTint} />
-              <AppText className="font-gilroy-semibold text-[13px]">{t('Ticket names')}</AppText>
+              <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Ticket names')}</AppText>
             </PressableScale>
             {ready && ticketTypes.length > 0 ? (
               <SegmentedControl<StatusFilter>

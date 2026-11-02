@@ -72,7 +72,7 @@ export default function MarketingTrackingScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+          contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
           refreshControl={
             <RefreshControl
               refreshing={pixels.isFetching && !pixels.isLoading}
@@ -82,7 +82,7 @@ export default function MarketingTrackingScreen() {
           }
         >
           <View className="gap-3">
-            <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
               {t('Connect Meta and TikTok pixels to track conversions across all your events')}
             </AppText>
             {pixels.isLoading || userId == null ? (
@@ -114,7 +114,7 @@ export default function MarketingTrackingScreen() {
                       placeholder="123456789012345"
                       leftIcon={<MetaIcon color={metaTint} />}
                     />
-                    <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
+                    <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
                       {t('Find this in Meta Events Manager → Data Sources. Numeric ID only — paste just the digits, not the full snippet.')}
                     </AppText>
                   </View>
@@ -128,11 +128,11 @@ export default function MarketingTrackingScreen() {
                       placeholder="C4ABCDEFGHIJKLMNOP"
                       leftIcon={<TikTokIcon />}
                     />
-                    <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
+                    <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
                       {t('Find this in TikTok Events Manager → Web Events. Pixel code only (e.g. C4ABCDEFGHIJKLMNOP).')}
                     </AppText>
                   </View>
-                  <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                  <AppText className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
                     {t('Pixels apply automatically to every event you organize. Standard events fired: PageView, ViewContent, InitiateCheckout, Purchase / CompletePayment.')}
                   </AppText>
                 </View>

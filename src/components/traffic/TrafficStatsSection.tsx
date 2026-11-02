@@ -33,13 +33,15 @@ function MetricCard({ label, value, caption, wide }: { label: string; value: str
       className={`${wide ? 'w-full' : 'flex-1'} gap-1 rounded-[12px] border bg-white p-4 dark:bg-dark-surface`}
       style={{ borderColor: cardBorder }}
     >
-      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
         {label}
       </AppText>
-      <AppText numberOfLines={1} className="font-gilroy-bold text-[18px]">
+      <AppText numberOfLines={1} className="font-gilroy-bold text-[18px] leading-6">
         {value}
       </AppText>
-      {caption ? <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{caption}</AppText> : null}
+      {caption ? (
+        <AppText className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">{caption}</AppText>
+      ) : null}
     </View>
   );
 }
@@ -59,26 +61,26 @@ function TrafficSourceRow({ source, total, aggregate }: { source: GroupedSource;
           <Icon size={16} color={iconTint} />
         </View>
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
             {sourceDisplayName(source.referrer, t('Direct Traffic'))}
           </AppText>
           {source.embedSite ? (
-            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
               {t('via {{site}}', { site: source.embedSite })}
             </AppText>
           ) : null}
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
             {direct ? t('Direct / Bookmark') : source.referrer}
           </AppText>
         </View>
         <View className="items-end">
-          <AppText className="font-gilroy-bold text-[15px]">{source.totalClicks}</AppText>
-          <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
+          <AppText className="font-gilroy-bold text-[15px] leading-5">{source.totalClicks}</AppText>
+          <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
             {aggregate ? `${percent}% · ${t('clicks')}` : t('clicks')}
           </AppText>
         </View>
       </View>
-      <View className="h-1.5 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/10">
+      <View className="h-1.5 overflow-hidden rounded-full bg-black/[0.04] dark:bg-white/10">
         <View className="h-full rounded-full" style={{ width: `${Math.min(100, percent)}%`, backgroundColor: CLICKS_COLOR }} />
       </View>
     </View>
@@ -163,9 +165,11 @@ export function TrafficStatsSection({
           />
         )}
       </View>
-      <AppText className="mt-1 font-gilroy-bold text-[17px]">{t('Source Breakdown')}</AppText>
+      <AppText className={`font-gilroy-bold text-[17px] leading-[22px] ${aggregate ? '' : 'mt-1'}`}>
+        {t('Source Breakdown')}
+      </AppText>
       {sources.length > 0 ? (
-        <View className="gap-2.5">
+        <View className="mt-1 gap-2.5">
           {sources.map((source) => (
             <TrafficSourceRow key={source.key} source={source} total={totalClicks} aggregate={aggregate} />
           ))}

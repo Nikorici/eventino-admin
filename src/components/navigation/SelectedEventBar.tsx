@@ -34,10 +34,10 @@ export function SelectedEventBar() {
       <View className="flex-row items-center gap-3 rounded-[14px] border bg-white p-3 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
         <BlurredPoster uri={event.images[0] ?? null} className="h-11 w-11 rounded-[10px]" iconSize={18} recyclingKey={String(event.id)} />
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px] leading-5">
             {event.title}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted">
             {formatEventDay(event.start_date, i18n.language)}
           </AppText>
         </View>

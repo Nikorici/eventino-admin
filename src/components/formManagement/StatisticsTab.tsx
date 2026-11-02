@@ -22,10 +22,10 @@ const DONUT_RADIUS = 44;
 export function StatTile({ label, value, tint }: { label: string; value: string; tint?: string }) {
   return (
     <Card className="flex-1 items-center px-2 py-3">
-      <AppText numberOfLines={1} className="font-gilroy-bold text-[16px]" style={tint ? { color: tint } : undefined}>
+      <AppText numberOfLines={1} className="font-gilroy-bold text-[16px] leading-[21px]" style={tint ? { color: tint } : undefined}>
         {value}
       </AppText>
-      <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
+      <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted leading-[14px]">
         {label}
       </AppText>
     </Card>
@@ -38,10 +38,10 @@ function OptionBar({ option, count, maxCount, total }: { option: string; count: 
   return (
     <View className="gap-1.5">
       <View className="flex-row items-center justify-between">
-        <AppText numberOfLines={1} className="flex-1 pr-2 font-gilroy-medium text-[13px]">
+        <AppText numberOfLines={1} className="flex-1 pr-2 font-gilroy-medium text-[13px] leading-[17px]">
           {option}
         </AppText>
-        <AppText className="font-gilroy-bold text-[12px] text-muted dark:text-dark-muted">
+        <AppText className="font-gilroy-bold text-[12px] text-muted dark:text-dark-muted leading-[16px]">
           {count} · {percent}%
         </AppText>
       </View>
@@ -60,13 +60,13 @@ function QuestionStatsCard({ questionId, title, stats }: { questionId: string; t
     .map((item) => (Array.isArray(item) ? item.join(', ') : item))
     .filter((text) => text.trim() !== '');
   const extraSamples = Math.max(0, samples.length - SAMPLE_ANSWER_LIMIT);
-  const noAnswers = <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No answers recorded yet')}</AppText>;
+  const noAnswers = <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted leading-[17px]">{t('No answers recorded yet')}</AppText>;
 
   return (
     <Card className="gap-3 p-4">
       <View className="flex-row items-start justify-between gap-2">
-        <AppText className="flex-1 font-gilroy-semibold text-[15px]">{title}</AppText>
-        <AppText className="font-gilroy-bold text-[12px] text-muted dark:text-dark-muted">
+        <AppText className="flex-1 font-gilroy-semibold text-[15px] leading-[20px]">{title}</AppText>
+        <AppText className="font-gilroy-bold text-[12px] text-muted dark:text-dark-muted leading-[16px]">
           {stats.totalAnswers} {t('answers')}
         </AppText>
       </View>
@@ -85,16 +85,16 @@ function QuestionStatsCard({ questionId, title, stats }: { questionId: string; t
         )
       ) : samples.length > 0 ? (
         <View className="gap-2">
-          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('Sample responses')}</AppText>
+          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">{t('Sample responses')}</AppText>
           {samples.slice(0, SAMPLE_ANSWER_LIMIT).map((text, index) => (
             <View key={`${questionId}-sample-${index}`} className="rounded-[10px] bg-black/[0.04] px-3 py-2 dark:bg-white/10">
-              <AppText numberOfLines={3} className="font-gilroy-medium text-[13px]">
+              <AppText numberOfLines={3} className="font-gilroy-medium text-[13px] leading-[17px]">
                 {text}
               </AppText>
             </View>
           ))}
           {extraSamples > 0 ? (
-            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
               +{extraSamples} {t('more responses')}
             </AppText>
           ) : null}
@@ -116,7 +116,7 @@ function CompletionCard({ completed, pending }: { completed: number; pending: nu
   const center = DONUT_SIZE / 2;
   return (
     <Card className="gap-3 p-4">
-      <AppText className="font-gilroy-bold text-[16px]">{t('Completion progress')}</AppText>
+      <AppText className="font-gilroy-bold text-[16px] leading-[21px]">{t('Completion progress')}</AppText>
       <View className="flex-row items-center gap-5">
         <View style={{ width: DONUT_SIZE, height: DONUT_SIZE }}>
           <Svg width={DONUT_SIZE} height={DONUT_SIZE}>
@@ -136,20 +136,20 @@ function CompletionCard({ completed, pending }: { completed: number; pending: nu
             ) : null}
           </Svg>
           <View className="absolute inset-0 items-center justify-center">
-            <AppText className="font-gilroy-bold text-[20px]">{percent}%</AppText>
-            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{t('Completed')}</AppText>
+            <AppText className="font-gilroy-bold text-[20px] leading-[26px]">{percent}%</AppText>
+            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted leading-[14px]">{t('Completed')}</AppText>
           </View>
         </View>
         <View className="flex-1 gap-2.5">
           <View className="flex-row items-center gap-2">
             <View className="h-2 w-2 rounded-full" style={{ backgroundColor: ACCENT_BLUE }} />
-            <AppText className="flex-1 font-gilroy-medium text-[13px]">{t('Completed')}</AppText>
-            <AppText className="font-gilroy-bold text-[13px]">{completed}</AppText>
+            <AppText className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">{t('Completed')}</AppText>
+            <AppText className="font-gilroy-bold text-[13px] leading-[17px]">{completed}</AppText>
           </View>
           <View className="flex-row items-center gap-2">
             <View className="h-2 w-2 rounded-full" style={{ backgroundColor: pendingDot }} />
-            <AppText className="flex-1 font-gilroy-medium text-[13px]">{t('Pending')}</AppText>
-            <AppText className="font-gilroy-bold text-[13px]">{pending}</AppText>
+            <AppText className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">{t('Pending')}</AppText>
+            <AppText className="font-gilroy-bold text-[13px] leading-[17px]">{pending}</AppText>
           </View>
         </View>
       </View>

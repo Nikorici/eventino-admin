@@ -10,7 +10,7 @@ import { haptics } from '@/lib/haptics';
 import { AppText } from './AppText';
 import { PressableScale } from './PressableScale';
 
-export type GlassButtonVariant = 'primary' | 'secondary' | 'light' | 'ghost' | 'accent' | 'glass' | 'danger';
+export type GlassButtonVariant = 'primary' | 'secondary' | 'light' | 'ghost' | 'accent' | 'glass' | 'danger' | 'social';
 export type GlassButtonSize = 'md' | 'sm';
 
 export interface GlassButtonProps {
@@ -26,13 +26,14 @@ export interface GlassButtonProps {
 }
 
 const containerByVariant: Record<GlassButtonVariant, string> = {
-  primary: 'bg-primary dark:bg-white',
+  primary: 'border border-transparent bg-primary dark:bg-white',
   secondary: 'border border-primary bg-transparent dark:border-white/30',
   light: 'border border-primary bg-transparent dark:border-white/30',
   ghost: 'border border-primary bg-transparent dark:border-white/30',
-  accent: 'bg-accent',
+  accent: 'border border-transparent bg-accent',
   glass: '',
-  danger: 'bg-danger',
+  danger: 'border border-transparent bg-danger',
+  social: 'border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface',
 };
 
 const textByVariant: Record<GlassButtonVariant, string> = {
@@ -43,6 +44,7 @@ const textByVariant: Record<GlassButtonVariant, string> = {
   accent: 'text-primary dark:text-primary',
   glass: 'text-primary dark:text-dark-text',
   danger: 'text-white dark:text-white',
+  social: 'text-primary dark:text-dark-text',
 };
 
 export function GlassButton({
@@ -58,7 +60,7 @@ export function GlassButton({
 }: GlassButtonProps) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
-  const heightClass = size === 'sm' ? 'h-10 px-4' : 'h-12 px-6';
+  const heightClass = size === 'sm' ? 'h-10' : 'h-12';
   const isDisabled = disabled || loading;
 
   const spinnerColor =
@@ -75,13 +77,13 @@ export function GlassButton({
             : '#2b3a44';
 
   const inner = (
-    <View className={cn('flex-row items-center justify-center gap-2', heightClass)}>
+    <View className={cn('flex-1 flex-row items-center justify-center gap-2', size === 'sm' ? 'px-4' : 'px-6')}>
       {loading ? (
         <ActivityIndicator color={spinnerColor} />
       ) : (
         <>
           {icon}
-          <AppText className={cn('font-gilroy-semibold', size === 'sm' ? 'text-sm' : 'text-base', textByVariant[variant])}>
+          <AppText className={cn('text-center font-gilroy-semibold', size === 'sm' ? 'text-sm leading-[19px]' : 'text-base leading-[21px]', textByVariant[variant])}>
             {label}
           </AppText>
         </>
@@ -103,6 +105,7 @@ export function GlassButton({
         accessibilityLabel={label}
         className={cn(
           'overflow-hidden rounded-[10px] border',
+          heightClass,
           isDark ? 'border-white/15' : 'border-white/40',
           fullWidth && 'w-full',
           isDisabled && 'opacity-70',
@@ -126,7 +129,7 @@ export function GlassButton({
       onPress={handlePress}
       disabled={isDisabled}
       accessibilityLabel={label}
-      className={cn('rounded-[10px]', fullWidth && 'w-full', containerByVariant[variant], isDisabled && 'opacity-70', className)}
+      className={cn('rounded-[10px]', heightClass, fullWidth && 'w-full', containerByVariant[variant], isDisabled && 'opacity-70', className)}
     >
       {inner}
     </PressableScale>

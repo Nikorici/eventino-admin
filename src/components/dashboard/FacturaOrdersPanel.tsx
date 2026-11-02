@@ -2,24 +2,20 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
-import { Download, FileCode, FileSpreadsheet, FileText, Pencil, X } from 'lucide-react-native';
+import { ChevronUp, Download, Ellipsis, FileCode, FileCodeCorner, FileSpreadsheet, FileText, Pencil, Ticket, X } from 'lucide-react-native';
 
 import { AppText, GlassInput, PressableScale, ToastHost } from '@/components/ui';
+import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import {
   ACCENT_GREEN,
   ACCENT_ORANGE,
   ACCENT_RED,
-  Avatar,
-  FooterCount,
   ListSkeleton,
   PDF_SHARE,
-  PanelCard,
   PanelError,
   PanelMessage,
   Pill,
-  RowDivider,
   SearchField,
-  SectionTitle,
   SmallAction,
   XLSX_SHARE,
   XML_SHARE,
@@ -217,6 +213,33 @@ function SerialEditSheet({ order, onClose }: { order: FacturaOrder; onClose: () 
   );
 }
 
+function RoundIconAction({
+  icon: Icon,
+  label,
+  loading,
+  onPress,
+}: {
+  icon: typeof FileText;
+  label: string;
+  loading?: boolean;
+  onPress: () => void;
+}) {
+  const tint = useThemeColor(colors.primary, colors.dark.text);
+  return (
+    <PressableScale
+      onPress={() => {
+        void haptics.selection();
+        onPress();
+      }}
+      disabled={loading}
+      accessibilityLabel={label}
+      className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
+    >
+      {loading ? <ActivityIndicator size="small" color={tint} /> : <Icon size={16} color={tint} />}
+    </PressableScale>
+  );
+}
+
 function FacturaRow({
   order,
   currency,
@@ -233,14 +256,23 @@ function FacturaRow({
   onEditSerial?: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
   const pencilTint = useThemeColor(colors.primary, colors.dark.text);
+  const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
+  const divider = useThemeColor('#f0f2f8', colors.dark.border);
   const name = personName(order.user, t('Unknown'));
   const tickets = ticketSummary(order.tickets);
+  const ticketCount = order.tickets?.length ?? 0;
   const spv = spvStatus(order.order_date, downloaded, t);
+  const meta = [`${t('No.')} ${order.invoice_serial || '-'}`, order.payment_method, ticketCount > 0 ? `${ticketCount} ×` : null]
+    .filter(Boolean)
+    .join(' · ');
+  const busyLabel = (kind: DownloadKind, label: string) =>
+    busyKey === `${order.id}-${kind}` ? t('Downloading...') : t(label);
+  const [pdf, spvXml, ...extraDownloads] = DOWNLOADS;
   return (
-    <View className="gap-2 py-3">
-      <View className="flex-row items-center gap-3">
-        <Avatar name={name} />
+    <View className="gap-2 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
+      <View className="flex-row items-start gap-3">
         <View className="flex-1">
           <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
             {name}
@@ -248,19 +280,28 @@ function FacturaRow({
           <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
             {order.user?.email || '-'}
           </AppText>
+          {order.user?.company_name ? (
+            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              {order.user.company_name}
+            </AppText>
+          ) : null}
         </View>
         <View className="items-end">
           <AppText className="font-gilroy-bold text-[14px]">{moneyLabel(order.total_price, currency)}</AppText>
           <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
             {formatDateTimeLabel(order.order_date, i18n.language)}
           </AppText>
+          <AppText className="font-gilroy-semibold text-[11px]" style={{ color: spv.color }}>
+            {`${t('SPV')}: ${spv.label}`}
+          </AppText>
         </View>
       </View>
-      <View className="gap-1.5 pl-[52px]">
-        <View className="flex-row items-center gap-1.5">
-          <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">
-            {`${t('No.')} ${order.invoice_serial || '-'} · #${order.id}`}
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="flex-1 flex-row items-center gap-1 overflow-hidden">
+          <AppText numberOfLines={1} className="shrink font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+            {meta}
           </AppText>
+          {ticketCount > 0 ? <Ticket size={12} color={colors.muted} /> : null}
           {onEditSerial ? (
             <PressableScale
               onPress={() => {
@@ -268,39 +309,55 @@ function FacturaRow({
                 onEditSerial();
               }}
               accessibilityLabel={t('Edit serial number')}
-              className="h-7 w-7 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
+              className="ml-1 h-7 w-7 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
             >
               <Pencil size={12} color={pencilTint} />
             </PressableScale>
           ) : null}
         </View>
-        {tickets ? (
-          <AppText numberOfLines={2} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
-            {tickets}
-          </AppText>
-        ) : null}
-        <View className="flex-row flex-wrap items-center gap-1.5">
-          {order.payment_method ? <Pill label={order.payment_method} color={colors.primaryLight} /> : null}
-          {order.payment_status ? <Pill label={order.payment_status} color={ACCENT_GREEN} /> : null}
-          <Pill label={`${t('SPV')}: ${spv.label}`} color={spv.color} />
+        <View className="flex-row gap-2">
+          {pdf ? (
+            <RoundIconAction
+              icon={FileText}
+              label={busyLabel(pdf.kind, pdf.label)}
+              loading={busyKey === `${order.id}-${pdf.kind}`}
+              onPress={() => onDownload(pdf.kind)}
+            />
+          ) : null}
+          {spvXml ? (
+            <RoundIconAction
+              icon={FileCodeCorner}
+              label={busyLabel(spvXml.kind, spvXml.label)}
+              loading={busyKey === `${order.id}-${spvXml.kind}`}
+              onPress={() => onDownload(spvXml.kind)}
+            />
+          ) : null}
+          <RoundIconAction icon={expanded ? ChevronUp : Ellipsis} label={t('More')} onPress={() => setExpanded((open) => !open)} />
         </View>
       </View>
-      <View className="flex-row flex-wrap items-center gap-2 pl-[52px]">
-        <AppText className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">{t('Factura')}</AppText>
-        {DOWNLOADS.map((download) => {
-          const key = `${order.id}-${download.kind}`;
-          return (
-            <SmallAction
-              key={download.kind}
-              icon={Download}
-              label={download.short}
-              accessibilityLabel={busyKey === key ? t('Downloading...') : t(download.label)}
-              onPress={() => onDownload(download.kind)}
-              loading={busyKey === key}
-            />
-          );
-        })}
-      </View>
+      {expanded ? (
+        <View className="gap-2 border-t pt-2" style={{ borderColor: divider }}>
+          {tickets ? (
+            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{tickets}</AppText>
+          ) : null}
+          <View className="flex-row flex-wrap items-center gap-1.5">
+            <AppText className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">{`#${order.id}`}</AppText>
+            {order.payment_status ? <Pill label={order.payment_status} color={ACCENT_GREEN} /> : null}
+          </View>
+          <View className="flex-row flex-wrap items-center gap-2">
+            {extraDownloads.map((download) => (
+              <SmallAction
+                key={download.kind}
+                icon={Download}
+                label={download.short}
+                accessibilityLabel={busyLabel(download.kind, download.label)}
+                onPress={() => onDownload(download.kind)}
+                loading={busyKey === `${order.id}-${download.kind}`}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -341,24 +398,6 @@ export function FacturaOrdersPanel({
     if (refreshSignal > 0 && !isCancelled) void refetch();
   }, [refreshSignal, isCancelled, refetch]);
 
-  const copy: Record<FacturaTab, { title: string; subtitle: string; footer: string }> = {
-    bank_transfers: {
-      title: t('Bank transfers'),
-      subtitle: t('Bank transfer orders with invoice sent'),
-      footer: t('Total bank transfer invoices sent'),
-    },
-    persoane_juridice: {
-      title: t('Persoane juridice (Online payment)'),
-      subtitle: t('Online paid orders from legal entities'),
-      footer: t('Total online facturi sent'),
-    },
-    persoane_fizice: {
-      title: t('Persoane fizice (Online payment)'),
-      subtitle: t('Online paid orders from individuals'),
-      footer: t('Total online facturi sent'),
-    },
-  };
-
   const orders = query.data ?? [];
   const filtered = orders.filter((order) =>
     matchesQuery(search, [personName(order.user, t('Unknown')), order.user?.email, order.id]),
@@ -385,8 +424,10 @@ export function FacturaOrdersPanel({
 
   return (
     <View className="gap-3">
-      <SectionTitle subtitle={copy[tab].subtitle}>{copy[tab].title}</SectionTitle>
       <SearchField value={search} onChange={setSearch} placeholder={t('Search by name or email...')} />
+      {orders.length > 0 ? (
+        <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{`${t('Total')}: ${orders.length}`}</AppText>
+      ) : null}
       {query.isError && !query.data ? (
         <PanelError onRetry={() => void refetch()} />
       ) : query.isLoading || (query.isFetching && !query.data) ? (
@@ -394,22 +435,20 @@ export function FacturaOrdersPanel({
       ) : filtered.length === 0 ? (
         <PanelMessage text={search.trim() ? t('No results match your search') : t('No orders to show here yet.')} />
       ) : (
-        <PanelCard>
-          {filtered.map((order, index) => (
-            <RowDivider key={order.id} index={index}>
-              <FacturaRow
-                order={order}
-                currency={currency}
-                downloaded={Boolean(order.factura_downloaded) || downloadedIds.has(order.id)}
-                busyKey={busyKey}
-                onDownload={(kind) => void onDownload(order, kind)}
-                onEditSerial={canEditSerial ? () => setEditingOrder(order) : undefined}
-              />
-            </RowDivider>
+        <View className="gap-2.5">
+          {filtered.map((order) => (
+            <FacturaRow
+              key={order.id}
+              order={order}
+              currency={currency}
+              downloaded={Boolean(order.factura_downloaded) || downloadedIds.has(order.id)}
+              busyKey={busyKey}
+              onDownload={(kind) => void onDownload(order, kind)}
+              onEditSerial={canEditSerial ? () => setEditingOrder(order) : undefined}
+            />
           ))}
-        </PanelCard>
+        </View>
       )}
-      {orders.length > 0 ? <FooterCount label={copy[tab].footer} count={orders.length} /> : null}
       {editingOrder ? (
         <SerialEditSheet key={editingOrder.id} order={editingOrder} onClose={() => setEditingOrder(null)} />
       ) : null}

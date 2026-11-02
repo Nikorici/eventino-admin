@@ -86,7 +86,7 @@ function StatPill({ label, value }: { label: string; value: string }) {
 function StatusPill({ active, t }: { active: boolean; t: TFunction }) {
   const tint = active ? ACCENT_GREEN : colors.muted;
   return (
-    <View className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: `${tint}1f` }}>
+    <View className="h-5 justify-center rounded-full px-2.5" style={{ backgroundColor: `${tint}1f` }}>
       <AppText className="font-gilroy-semibold text-[11px]" style={{ color: tint }}>
         {active ? t('Active') : t('Inactive')}
       </AppText>
@@ -113,20 +113,20 @@ function ZoneRow({ zone, mapping, currency, t }: { zone: VenueZone; mapping: Eve
             <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{zone.template_slot_id}</AppText>
           ) : null}
         </View>
-        <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
+        <View className="flex-row flex-wrap items-center gap-2">
           <View className="flex-row items-center gap-1">
             <Armchair size={13} color={colors.muted} />
             <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{zone.capacity}</AppText>
           </View>
           {ticketTypeName ? (
-            <View className="flex-row items-center gap-1 rounded-full px-2 py-0.5" style={{ backgroundColor: `${ACCENT_BLUE}18` }}>
+            <View className="h-5 flex-row items-center gap-1 rounded-full px-2.5" style={{ backgroundColor: `${ACCENT_BLUE}1a` }}>
               <Ticket size={12} color={ACCENT_BLUE} />
               <AppText numberOfLines={1} className="font-gilroy-semibold text-[11px]" style={{ color: ACCENT_BLUE }}>
                 {ticketTypeName}
               </AppText>
             </View>
           ) : (
-            <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: `${colors.muted}18` }}>
+            <View className="h-5 justify-center rounded-full px-2.5" style={{ backgroundColor: `${colors.muted}1a` }}>
               <AppText className="font-gilroy-semibold text-[11px] text-muted dark:text-dark-muted">{t('Not configured')}</AppText>
             </View>
           )}
@@ -297,8 +297,8 @@ function ZoneEditSheet({ eventId, eventVenueId, zone, mapping, ticketTypes, curr
                   <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Colour')}</AppText>
                   <View className="flex-row flex-wrap gap-2">
                     {[zone.color, ...CATEGORY_PALETTE.filter((hex) => hex !== zone.color)].map((hex) => (
-                      <PressableScale key={hex} onPress={() => setColor(hex)} accessibilityLabel={hex} className={cn('h-8 w-8 rounded-full', color === hex && 'border-2 border-primary dark:border-white')} style={{ backgroundColor: hex }}>
-                        <View />
+                      <PressableScale key={hex} onPress={() => setColor(hex)} accessibilityLabel={hex} className="h-8 w-8 rounded-full" style={{ backgroundColor: hex }}>
+                        {color === hex ? <View className="absolute -inset-1 rounded-full border-2 border-primary dark:border-white" /> : <View />}
                       </PressableScale>
                     ))}
                   </View>
@@ -536,7 +536,7 @@ export default function VenuePricingScreen() {
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={zone.name}
-                  className={cn('flex-row items-center gap-2', index > 0 && 'border-t')}
+                  className={cn('flex-row items-center gap-3', index > 0 && 'border-t')}
                   style={index > 0 ? { borderColor: rowDivider } : undefined}
                 >
                   <View className="flex-1">

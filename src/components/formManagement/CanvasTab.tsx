@@ -5,12 +5,12 @@ import { Maximize, Minus, Pencil, Plus, Square, Trash2, X } from 'lucide-react-n
 import Svg, { Circle, Defs, Path, Pattern, Rect } from 'react-native-svg';
 
 import { AppText, PressableScale } from '@/components/ui';
-import { PrimaryButton, SecondaryButton } from '@/components/merch/merchParts';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/colors';
 
+import { FormButton } from './FormButton';
 import {
   buildCanvasEdges,
   connectQuestions,
@@ -25,7 +25,7 @@ import { OptionIndicator } from './OptionIndicator';
 const CANVAS_HEIGHT = 600;
 const NODE_WIDTH = 252;
 const TOP = 28;
-const GAP = 84;
+const GAP = 48;
 const OPTION_ROW = 26;
 const OPTION_GAP = 6;
 const LANE_OFFSET = 40;
@@ -148,7 +148,7 @@ function QuestionNode({
       }}
     >
       <Handle highlighted={isTarget} style={{ top: -6, left: NODE_WIDTH / 2 - (isTarget ? 7 : 5) }} />
-      <View className="flex-row items-start gap-1.5 border-b border-app-border px-3 py-2.5 dark:border-dark-border">
+      <View className="flex-row items-start gap-1.5 border-b border-[#f0f2f8] px-3 py-2.5 dark:border-dark-border">
         <View className="flex-1 flex-row flex-wrap gap-1.5">
           <View
             className="h-5 justify-center rounded-[6px] border px-2"
@@ -157,18 +157,18 @@ function QuestionNode({
               borderColor: `${typeConfig.color}30`,
             }}
           >
-            <AppText className="font-gilroy-semibold text-[11px]" style={{ color: typeConfig.color }}>
+            <AppText className="font-gilroy-semibold text-[11px] leading-[14px]" style={{ color: typeConfig.color }}>
               {t(typeConfig.label)}
             </AppText>
           </View>
           {question.required ? (
             <View className="h-5 justify-center rounded-[6px] bg-danger/10 px-2">
-              <AppText className="font-gilroy-semibold text-[11px] text-danger dark:text-danger">{t('Required')}</AppText>
+              <AppText className="font-gilroy-semibold text-[11px] text-danger dark:text-danger leading-[14px]">{t('Required')}</AppText>
             </View>
           ) : null}
           {terminal ? (
             <View className="h-5 justify-center rounded-[6px] bg-danger/10 px-2">
-              <AppText className="font-gilroy-semibold text-[11px] text-danger dark:text-danger">{t('End')}</AppText>
+              <AppText className="font-gilroy-semibold text-[11px] text-danger dark:text-danger leading-[14px]">{t('End')}</AppText>
             </View>
           ) : null}
         </View>
@@ -179,7 +179,7 @@ function QuestionNode({
               onEdit();
             }}
             accessibilityLabel={t('Edit')}
-            className="h-6 w-6 items-center justify-center rounded-[6px] bg-black/[0.05] dark:bg-white/10"
+            className="h-6 w-6 items-center justify-center rounded-[6px] bg-black/[0.04] dark:bg-white/10"
           >
             <Pencil size={13} color={iconColor} />
           </PressableScale>
@@ -197,12 +197,12 @@ function QuestionNode({
       </View>
       <View className="gap-1.5 px-3 pt-2.5">
         {question.question ? (
-          <AppText className="font-gilroy-semibold text-[13px]">{question.question}</AppText>
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{question.question}</AppText>
         ) : (
-          <AppText className="font-gilroy-medium text-[13px] italic text-muted dark:text-dark-muted">{t('Untitled question')}</AppText>
+          <AppText className="font-gilroy-medium text-[13px] italic text-muted dark:text-dark-muted leading-[17px]">{t('Untitled question')}</AppText>
         )}
         {question.description ? (
-          <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{question.description}</AppText>
+          <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted leading-[14px]">{question.description}</AppText>
         ) : null}
       </View>
       {isChoice && question.options.length > 0 ? (
@@ -221,12 +221,12 @@ function QuestionNode({
                 style={{ height: OPTION_ROW }}
               >
                 <OptionIndicator type={question.type} index={optionIndex} />
-                <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[12px]">
+                <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[12px] leading-[16px]">
                   {option}
                 </AppText>
                 {route?.action === 'end' ? (
                   <View className="h-[18px] justify-center rounded-[5px] bg-danger/10 px-1.5">
-                    <AppText className="font-gilroy-bold text-[10px] text-danger dark:text-danger">{t('End')}</AppText>
+                    <AppText className="font-gilroy-bold text-[10px] text-danger dark:text-danger leading-[13px]">{t('End')}</AppText>
                   </View>
                 ) : null}
                 {route?.action === 'skip' ? (
@@ -234,7 +234,7 @@ function QuestionNode({
                     className="h-[18px] justify-center rounded-[5px] px-1.5"
                     style={{ backgroundColor: `${CONDITION}1a` }}
                   >
-                    <AppText className="font-gilroy-bold text-[10px]" style={{ color: CONDITION }}>
+                    <AppText className="font-gilroy-bold text-[10px] leading-[13px]" style={{ color: CONDITION }}>
                       {t('Skip')}
                     </AppText>
                   </View>
@@ -258,7 +258,7 @@ function QuestionNode({
       {terminal ? (
         <View className="mt-3 flex-row items-center gap-1.5 border-t border-app-border px-3 py-2 dark:border-dark-border">
           <Square size={12} color={colors.muted} />
-          <AppText className="font-gilroy-semibold text-[11px] text-muted dark:text-dark-muted">{t('Form ends here')}</AppText>
+          <AppText className="font-gilroy-semibold text-[11px] text-muted dark:text-dark-muted leading-[14px]">{t('Form ends here')}</AppText>
         </View>
       ) : (
         <View className="h-3.5" />
@@ -326,7 +326,7 @@ function EdgeLabel({
       <View className="rounded-[4px] px-[7px] py-px" style={{ backgroundColor: pillBg, maxWidth: 110 }}>
         <AppText
           numberOfLines={1}
-          className={cn('text-[11px]', condition ? 'font-gilroy-semibold' : 'font-gilroy-medium')}
+          className={cn('text-[11px] leading-[14px]', condition ? 'font-gilroy-semibold' : 'font-gilroy-medium')}
           style={{ color: condition ? CONDITION : SEQUENTIAL }}
         >
           {label}
@@ -450,7 +450,7 @@ export function CanvasTab({
       };
     }
     const laneX = laneStart + lane * LANE_STEP;
-    const approach = targetY - 18;
+    const approach = targetY - 12;
     if (edge.optionIndex != null) {
       const startX = nodeX + NODE_WIDTH;
       const startY = source.y + source.optionsY + edge.optionIndex * (OPTION_ROW + OPTION_GAP) + OPTION_ROW / 2;
@@ -499,24 +499,15 @@ export function CanvasTab({
       <View className="gap-2">
         <View className="flex-row gap-3">
           <View className="flex-1">
-            <SecondaryButton
-              label={t('Add Question')}
-              onPress={() => onAdd(null)}
-              icon={<Plus size={15} color={iconColor} />}
-            />
+            <FormButton label={t('Add Question')} onPress={() => onAdd(null)} icon={<Plus size={16} color={iconColor} />} />
           </View>
           {questions.length > 0 ? (
             <View className="flex-1">
-              <PrimaryButton
-                compact
-                label={saving ? t('Saving...') : t('Save Changes')}
-                loading={saving}
-                onPress={onSave}
-              />
+              <FormButton primary label={saving ? t('Saving...') : t('Save Changes')} loading={saving} onPress={onSave} />
             </View>
           ) : null}
         </View>
-        <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+        <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
           {t('Tap a handle, then a question to connect · Per-option handles on the right')}
         </AppText>
       </View>
@@ -640,7 +631,7 @@ export function CanvasTab({
             >
               <Plus size={24} color={colors.muted} />
             </PressableScale>
-            <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted leading-[17px]">
               {t('Click to add your first question')}
             </AppText>
           </View>
@@ -664,10 +655,10 @@ export function CanvasTab({
             label={t('Zoom out')}
             onPress={() => setScale((s) => Math.max(MIN_ZOOM, Math.round((s - 0.25) * 100) / 100))}
           >
-            <Minus size={14} color={iconColor} />
+            <Minus size={15} color={iconColor} />
           </ZoomButton>
           <ZoomButton label={t('Fit view')} onPress={fitView}>
-            <Maximize size={13} color={iconColor} />
+            <Maximize size={14} color={iconColor} />
           </ZoomButton>
         </View>
       </View>

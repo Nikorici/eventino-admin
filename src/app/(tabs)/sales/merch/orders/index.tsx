@@ -48,18 +48,18 @@ function OrderCard({ order, lang }: { order: MerchOrder; lang: string }) {
       <Card className="gap-2 p-4">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+            <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
               #{order.id} · {order.customer_name || '—'}
             </AppText>
             {order.customer_email ? (
-              <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+              <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
                 {order.customer_email}
               </AppText>
             ) : null}
           </View>
           <View className="items-end">
-            <AppText className="font-gilroy-bold text-[14px]">{money(order.total, order.currency)}</AppText>
-            <AppText className="font-gilroy-medium text-[11px] text-muted">
+            <AppText className="font-gilroy-bold text-[14px] leading-[19px]">{money(order.total, order.currency)}</AppText>
+            <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
               {formatDateTime(order.created_at, lang)}
             </AppText>
           </View>
@@ -68,7 +68,7 @@ function OrderCard({ order, lang }: { order: MerchOrder; lang: string }) {
           <StatusBadge label={order.payment_status} color={paymentColor(order.payment_status)} />
           <StatusBadge label={order.fulfillment_status} color={fulfillmentColor(order.fulfillment_status)} />
           {order.invoice_serial ? (
-            <AppText className="font-gilroy-medium text-[12px] text-muted">{order.invoice_serial}</AppText>
+            <AppText className="ml-auto font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">{order.invoice_serial}</AppText>
           ) : null}
         </View>
       </Card>
@@ -167,6 +167,7 @@ export default function MerchOrdersScreen() {
             onPress={exportOrders}
             loading={busyKey === 'export'}
             icon={<FileSpreadsheet size={16} color={iconTint} />}
+            radius={10}
           />
           <View className="flex-row flex-wrap gap-2">
             {STATUS_FILTERS.map((value) => (

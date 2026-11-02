@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Switch, useWindowDimensions, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
@@ -110,7 +110,7 @@ function UserAvatar({ user, size }: { user: StaffUserDetails; size: number }) {
       {user.profile_image ? (
         <Image source={{ uri: user.profile_image }} contentFit="cover" style={{ width: '100%', height: '100%' }} />
       ) : (
-        <AppText className="font-gilroy-bold text-[14px] text-primary dark:text-dark-text">
+        <AppText className="font-gilroy-bold text-[14px] text-primary dark:text-dark-text leading-[19px]">
           {label.slice(0, 1).toUpperCase()}
         </AppText>
       )}
@@ -126,7 +126,7 @@ function PermissionEditor({ value, onChange }: { value: StaffPermissions; onChan
   return (
     <View className="gap-3">
       <View className="gap-1.5">
-        <AppText className="font-gilroy-semibold text-[14px]">{t('Access Level')}</AppText>
+        <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Access Level')}</AppText>
         <SegmentedControl
           options={[
             { value: 'full', label: t('Full Access') },
@@ -145,7 +145,7 @@ function PermissionEditor({ value, onChange }: { value: StaffPermissions; onChan
               index > 0 && 'border-t border-app-border dark:border-dark-border',
             )}
           >
-            <AppText className="flex-1 pr-3 font-gilroy-medium text-[14px]">{t(field.label)}</AppText>
+            <AppText className="flex-1 pr-3 font-gilroy-medium text-[14px] leading-[19px]">{t(field.label)}</AppText>
             <Switch
               value={value[field.key]}
               accessibilityLabel={t(field.label)}
@@ -185,19 +185,19 @@ function StaffRow({
     <View className="flex-row items-center gap-3 py-3">
       <UserAvatar user={staff.user_details} size={40} />
       <View className="flex-1">
-        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
           {staffUserLabel(staff.user_details)}
         </AppText>
         {staff.user_details.email ? (
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
             {staff.user_details.email}
           </AppText>
         ) : null}
         <View
-          className="mt-1 self-start rounded-full px-2.5 py-0.5"
+          className="mt-1 h-5 justify-center self-start rounded-full px-2.5"
           style={{ backgroundColor: isFull ? `${ACCENT_GREEN}22` : `${ACCENT_BLUE}22` }}
         >
-          <AppText className="font-gilroy-semibold text-[11px]" style={{ color: isFull ? ACCENT_GREEN : ACCENT_BLUE }}>
+          <AppText className="font-gilroy-semibold text-[11px] leading-[14px]" style={{ color: isFull ? ACCENT_GREEN : ACCENT_BLUE }}>
             {permissionSummary(permissionsOf(staff), t)}
           </AppText>
         </View>
@@ -238,7 +238,7 @@ function SheetModal({ visible, onClose, title, children }: { visible: boolean; o
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px]">{title}</AppText>
+              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">{title}</AppText>
               <Pressable
                 onPress={onClose}
                 accessibilityLabel={t('Close')}
@@ -285,7 +285,7 @@ function SheetSubmitButton({
       ) : (
         <>
           <Icon size={18} color={tint} />
-          <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">{label}</AppText>
+          <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary leading-[21px]">{label}</AppText>
         </>
       )}
     </PressableScale>
@@ -311,6 +311,7 @@ export default function EventStaffScreen() {
   const { t } = useTranslation();
   const padding = useScreenPadding();
   const toast = useToast();
+  const { height } = useWindowDimensions();
   const user = useAppSelector((s) => s.auth.user);
   const { eventId, data: event, isLoading: eventLoading } = useSelectedEvent();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
@@ -456,7 +457,7 @@ export default function EventStaffScreen() {
         }
       >
         <View className="gap-4">
-          <AppText className="font-gilroy-medium text-[14px] text-muted">
+          <AppText className="font-gilroy-medium text-[14px] text-muted leading-[19px]">
             {canManage || isCancelled
               ? t('Manage who can access and manage your event dashboard')
               : t('Only the event owner can manage staff members.')}
@@ -498,7 +499,7 @@ export default function EventStaffScreen() {
             />
           ) : (
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted">
+              <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-[0.52px] text-muted leading-[17px]">
                 {`${staffList.length} ${staffList.length === 1 ? t('Staff Member') : t('Staff Members')}`}
               </AppText>
               <View className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
@@ -524,7 +525,7 @@ export default function EventStaffScreen() {
       </ScrollView>
 
       <SheetModal visible={addOpen} onClose={() => setAddOpen(false)} title={t('Add Staff')}>
-        <ScrollView style={{ maxHeight: 560 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView style={{ maxHeight: height * 0.72 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View className="gap-4">
             <View className="gap-2">
               <GlassInput
@@ -556,11 +557,11 @@ export default function EventStaffScreen() {
                       >
                         <UserAvatar user={result} size={36} />
                         <View className="flex-1">
-                          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+                          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
                             {staffUserLabel(result)}
                           </AppText>
                           {result.email ? (
-                            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
                               {result.email}
                             </AppText>
                           ) : null}
@@ -572,12 +573,12 @@ export default function EventStaffScreen() {
                 </View>
               ) : null}
               {search.length >= 2 && !searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted">{t('No users found')}</AppText>
+                <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted leading-[17px]">{t('No users found')}</AppText>
               ) : null}
             </View>
 
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[14px]">{t('Permissions for new staff member')}</AppText>
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Permissions for new staff member')}</AppText>
               <PermissionEditor value={newPermissions} onChange={setNewPermissions} />
             </View>
           </View>
@@ -596,7 +597,7 @@ export default function EventStaffScreen() {
       <SheetModal visible={editingStaff != null} onClose={() => setEditingStaff(null)} title={t('Edit Staff Permissions')}>
         {editingStaff ? (
           <>
-            <ScrollView style={{ maxHeight: 560 }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ maxHeight: height * 0.72 }} showsVerticalScrollIndicator={false}>
               <View className="gap-4">
                 <View
                   className="flex-row items-center gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
@@ -604,11 +605,11 @@ export default function EventStaffScreen() {
                 >
                   <UserAvatar user={editingStaff.user_details} size={40} />
                   <View className="flex-1">
-                    <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+                    <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
                       {staffUserLabel(editingStaff.user_details)}
                     </AppText>
                     {editingStaff.user_details.email ? (
-                      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted leading-[16px]">
                         {editingStaff.user_details.email}
                       </AppText>
                     ) : null}
@@ -616,7 +617,7 @@ export default function EventStaffScreen() {
                 </View>
 
                 <View className="gap-2">
-                  <AppText className="font-gilroy-semibold text-[14px]">{t('Update permissions')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Update permissions')}</AppText>
                   <PermissionEditor value={editPermissions} onChange={setEditPermissions} />
                 </View>
               </View>

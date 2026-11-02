@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Printer as PrinterIcon } from 'lucide-react-native';
 import { format } from 'date-fns';
 
 import { AppText } from '@/components/ui';
-import { PanelCard, RowDivider, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { PanelCard, RowDivider } from '@/components/dashboard/dashboardParts';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
 import {
@@ -18,7 +19,7 @@ import {
 
 import { LabelEditor } from './LabelEditor';
 import { REFRESH_MS, editsBody, printerLabel, printingErrorText, splitByPrinter, type LabelChanges } from './printingLogic';
-import { ErrorText, SelectField, SmallButton, StaleNote } from './printingParts';
+import { ErrorText, SectionHeading, SelectField, SmallButton, StaleNote } from './printingParts';
 import { useBusyKeys } from './useBusyKeys';
 
 const WAITING_PAGE_SIZE = 200;
@@ -96,9 +97,10 @@ export function WaitingPanel({
 
   return (
     <View className="gap-3">
-      <SectionTitle subtitle={t('Scanned tickets wait here until you print or skip them. The next person is at the top.')}>
-        {t('Waiting for approval')}
-      </SectionTitle>
+      <SectionHeading
+        title={t('Waiting for approval')}
+        subtitle={t('Scanned tickets wait here until you print or skip them. The next person is at the top.')}
+      />
       {filterPrinters.length > 1 ? (
         <SelectField
           label={t('This desk shows')}
@@ -117,8 +119,8 @@ export function WaitingPanel({
             <RowDivider key={job.uuid} index={index}>
               <View className="gap-2.5 py-3.5">
                 <View className="gap-0.5">
-                  <AppText className="font-gilroy-semibold text-[15px]">{job.holder_name || t('(no name)')}</AppText>
-                  <AppText className="font-gilroy-medium text-[12px] text-muted">
+                  <AppText className="font-gilroy-semibold text-[15px] leading-[20px]">{job.holder_name || t('(no name)')}</AppText>
+                  <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                     {[job.ticket_type, printerOf(job), timeOf(job)].filter(Boolean).join(' · ')}
                   </AppText>
                 </View>
@@ -128,7 +130,7 @@ export function WaitingPanel({
                     disabled={isBusy(job.uuid)}
                     onPress={() => toggleEditor(job)}
                   />
-                  <SmallButton label={t('Print')} primary disabled={isBusy(job.uuid)} onPress={() => void act(job, 'approve')} />
+                  <SmallButton label={t('Print')} primary icon={PrinterIcon} disabled={isBusy(job.uuid)} onPress={() => void act(job, 'approve')} />
                   <SmallButton label={t('Skip')} disabled={isBusy(job.uuid)} onPress={() => void act(job, 'skip')} />
                 </View>
                 {edits[job.uuid] ? (
@@ -157,7 +159,7 @@ export function WaitingPanel({
         </PanelCard>
       )}
       {hidden > 0 ? (
-        <AppText className="font-gilroy-medium text-[13px] text-muted">
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted">
           {t('{{count}} more waiting at other printers.', { count: hidden })}
         </AppText>
       ) : null}

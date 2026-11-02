@@ -98,7 +98,9 @@ export function ProductInfoForm({
         value={form.is_active}
         onValueChange={(next) => update('is_active', next)}
       />
-      <PrimaryButton label={t('Save')} onPress={submit} loading={saving} />
+      <View className="mt-1">
+        <PrimaryButton label={t('Save')} onPress={submit} loading={saving} />
+      </View>
     </View>
   );
 }

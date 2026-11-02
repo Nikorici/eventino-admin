@@ -33,13 +33,13 @@ export function SegmentedControl<T extends string>({ options, value, onChange, c
                 onChange(option.value);
               }}
               accessibilityLabel={option.label}
-              className={cn('w-full items-center justify-center rounded-full py-1.5', active && 'bg-primary dark:bg-white')}
+              className={cn('h-[34px] w-full items-center justify-center rounded-full', active && 'bg-primary dark:bg-white')}
             >
               <AppText
                 numberOfLines={1}
                 className={cn(
                   'font-gilroy-semibold',
-                  compact ? 'text-[13px]' : 'text-sm',
+                  compact ? 'text-[13px] leading-[17px]' : 'text-sm leading-[19px]',
                   active ? 'text-white dark:text-primary' : 'text-primary/70 dark:text-dark-text/70',
                 )}
               >

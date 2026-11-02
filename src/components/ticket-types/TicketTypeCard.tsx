@@ -93,7 +93,7 @@ export function TicketTypeCard({
               style={{ backgroundColor: ticketType.effective_scan_color }}
             />
           ) : null}
-          <AppText numberOfLines={1} className="shrink font-gilroy-bold text-[16px]">
+          <AppText numberOfLines={1} className="shrink font-gilroy-bold text-[16px] leading-[21px]">
             {ticketType.name}
           </AppText>
           {ticketType.is_online ? (
@@ -118,7 +118,7 @@ export function TicketTypeCard({
         />
       </View>
 
-      <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+      <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
         {[
           unlimited ? t('Unlimited') : `${t('Limit')}: ${ticketType.quantity}`,
           `${t('Sold')}: ${sold}`,
@@ -132,10 +132,10 @@ export function TicketTypeCard({
             <View className="h-full rounded-full bg-primary dark:bg-white" style={{ width: `${pct}%` }} />
           </View>
           <View className="flex-row items-center justify-between">
-            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
+            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted leading-[14px]">
               {t('Remaining')}: {ticketType.remaining ?? 0}
             </AppText>
-            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{pct}%</AppText>
+            <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted leading-[14px]">{pct}%</AppText>
           </View>
         </View>
       )}
@@ -144,7 +144,7 @@ export function TicketTypeCard({
         <View className="flex-1 flex-row flex-wrap gap-1.5">
           {tiers.map((tier) => (
             <View key={tier.min_quantity} className="rounded-full bg-black/5 px-2.5 py-1 dark:bg-white/10">
-              <AppText className="font-gilroy-medium text-[11px]">
+              <AppText className="font-gilroy-medium text-[11px] leading-[14px]">
                 {t('{{count}} Tickets - {{percent}}% discount', { count: tier.min_quantity, percent: tier.percent })}
               </AppText>
             </View>

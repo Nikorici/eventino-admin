@@ -29,10 +29,10 @@ export function ProgressStatCard({
   return (
     <View className="rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
       <View className="flex-row items-center justify-between gap-2">
-        <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[15px]">
+        <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[15px] leading-[20px]">
           {title}
         </AppText>
-        <AppText className="font-gilroy-bold text-[14px]" style={{ color: ACCENT_GREEN }}>
+        <AppText className="font-gilroy-bold text-[14px] leading-[19px]" style={{ color: ACCENT_GREEN }}>
           {badge}
         </AppText>
       </View>
@@ -48,13 +48,13 @@ export function ProgressStatCard({
 
       <View className="mt-2 flex-row justify-between gap-2">
         {first ? (
-          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+          <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
             {`${first.label}: `}
             <AppText className="font-gilroy-bold text-[12px] text-primary dark:text-dark-text">{first.value}</AppText>
           </AppText>
         ) : null}
         {rest.map((stat) => (
-          <AppText key={stat.label} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+          <AppText key={stat.label} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
             {`${stat.label}: ${stat.value}`}
           </AppText>
         ))}

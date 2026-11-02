@@ -116,7 +116,7 @@ function ScannerAvatar({
   const label = scannerUserLabel(user);
   return (
     <View
-      className="items-center justify-center overflow-hidden rounded-full bg-brand/20 dark:bg-dark-elevated"
+      className="items-center justify-center overflow-hidden rounded-full bg-brand/20"
       style={{ width: size, height: size }}
     >
       {user.profile_image ? (
@@ -153,7 +153,7 @@ function ScopePicker({
         className="flex-row items-center justify-between rounded-[12px] border bg-white px-4 py-2.5 dark:bg-dark-surface"
         style={{ borderColor: cardBorder }}
       >
-        <AppText className="flex-1 pr-3 font-gilroy-medium text-[14px]">
+        <AppText className="flex-1 pr-3 font-gilroy-medium text-[14px] leading-[19px]">
           {t("Scan all ticket types")}
         </AppText>
         <Switch
@@ -224,7 +224,7 @@ function ScannerRow({
         <View className="flex-row flex-wrap items-center gap-1.5">
           <AppText
             numberOfLines={1}
-            className="shrink font-gilroy-semibold text-[14px]"
+            className="shrink font-gilroy-semibold text-[14px] leading-[19px]"
           >
             {scannerUserLabel(scanner.user_details)}
           </AppText>
@@ -234,7 +234,7 @@ function ScannerRow({
               style={{ backgroundColor: `${ACCENT_ORANGE}22` }}
             >
               <AppText
-                className="font-gilroy-semibold text-[10px]"
+                className="font-gilroy-semibold text-[10px] leading-[13px]"
                 style={{ color: ACCENT_ORANGE }}
               >
                 {t("Pending invite")}
@@ -245,7 +245,7 @@ function ScannerRow({
         {email ? (
           <AppText
             numberOfLines={1}
-            className="font-gilroy-medium text-[12px] text-muted"
+            className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
           >
             {email}
           </AppText>
@@ -267,7 +267,7 @@ function ScannerRow({
               style={{ backgroundColor: `${chipColor}22` }}
             >
               <AppText
-                className="font-gilroy-semibold text-[11px]"
+                className="font-gilroy-semibold text-[11px] leading-[14px]"
                 style={{ color: chipColor }}
               >
                 {label}
@@ -321,7 +321,7 @@ function SheetModal({
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px]">
+              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
                 {title}
               </AppText>
               <Pressable
@@ -630,19 +630,9 @@ export default function TicketScannersScreen() {
         }
       >
         <View className="gap-4">
-          <View className="gap-1">
-            {event?.title ? (
-              <AppText
-                numberOfLines={2}
-                className="font-gilroy-semibold text-[16px]"
-              >
-                {event.title}
-              </AppText>
-            ) : null}
-            <AppText className="font-gilroy-medium text-[14px] text-muted">
-              {t("Manage who can scan tickets at your event")}
-            </AppText>
-          </View>
+          <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted">
+            {t("Manage who can scan tickets at your event")}
+          </AppText>
 
           {isCancelled ? (
             <EmptyState
@@ -686,7 +676,7 @@ export default function TicketScannersScreen() {
             />
           ) : (
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted">
+              <AppText className="font-gilroy-semibold text-[13px] uppercase leading-[17px] tracking-[0.52px] text-muted">
                 {`${scannerList.length} ${scannerList.length === 1 ? t("Scanner") : t("Scanners")}`}
               </AppText>
               <View
@@ -767,14 +757,14 @@ export default function TicketScannersScreen() {
                         <View className="flex-1">
                           <AppText
                             numberOfLines={1}
-                            className="font-gilroy-semibold text-[14px]"
+                            className="font-gilroy-semibold text-[14px] leading-[19px]"
                           >
                             {availableUserLabel(user)}
                           </AppText>
                           {user.email ? (
                             <AppText
                               numberOfLines={1}
-                              className="font-gilroy-medium text-[12px] text-muted"
+                              className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
                             >
                               {user.email}
                             </AppText>
@@ -807,7 +797,7 @@ export default function TicketScannersScreen() {
               className="h-11 flex-row items-center justify-center gap-2 rounded-[12px] border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
             >
               <Mail size={16} color={headerIconTint} />
-              <AppText className="font-gilroy-semibold text-[14px]">
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">
                 {t("Invite by email")}
               </AppText>
             </PressableScale>
@@ -912,14 +902,14 @@ export default function TicketScannersScreen() {
                   <View className="flex-1">
                     <AppText
                       numberOfLines={1}
-                      className="font-gilroy-semibold text-[14px]"
+                      className="font-gilroy-semibold text-[14px] leading-[19px]"
                     >
                       {scannerUserLabel(editingScanner.user_details)}
                     </AppText>
                     {editingScanner.user_details.email ? (
                       <AppText
                         numberOfLines={1}
-                        className="font-gilroy-medium text-[12px] text-muted"
+                        className="font-gilroy-medium text-[12px] leading-[16px] text-muted"
                       >
                         {editingScanner.user_details.email}
                       </AppText>

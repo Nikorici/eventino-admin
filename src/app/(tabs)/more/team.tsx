@@ -56,13 +56,13 @@ function UserAvatar({ user, size }: { user: DelegateUserDetails; size: number })
   const label = delegateUserLabel(user);
   return (
     <View
-      className="items-center justify-center overflow-hidden rounded-full bg-brand/20 dark:bg-dark-elevated"
+      className="items-center justify-center overflow-hidden rounded-full bg-brand/20"
       style={{ width: size, height: size }}
     >
       {user.profile_image ? (
         <Image source={{ uri: user.profile_image }} contentFit="cover" style={{ width: '100%', height: '100%' }} />
       ) : (
-        <AppText className="font-gilroy-bold text-[14px] text-primary dark:text-dark-text">
+        <AppText className="font-gilroy-bold text-[14px] leading-[19px] text-primary dark:text-dark-text">
           {label.slice(0, 1).toUpperCase()}
         </AppText>
       )}
@@ -75,17 +75,17 @@ function UserIdentity({ user }: { user: DelegateUserDetails }) {
   return (
     <>
       <View className="flex-row items-center gap-1.5">
-        <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px]">
+        <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px] leading-[19px]">
           {delegateUserLabel(user)}
         </AppText>
         {user.is_organization ? (
           <View className="h-[18px] justify-center rounded-[6px] bg-black/[0.04] px-1.5 dark:bg-white/10">
-            <AppText className="font-gilroy-semibold text-[10px] text-primary/80 dark:text-dark-text/80">{t('Org')}</AppText>
+            <AppText className="font-gilroy-semibold text-[10px] leading-[13px] text-primary/80 dark:text-dark-text/80">{t('Org')}</AppText>
           </View>
         ) : null}
       </View>
       {user.email ? (
-        <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+        <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
           {user.email}
         </AppText>
       ) : null}
@@ -108,7 +108,7 @@ function PermissionEditor({ value, onChange }: { value: DelegatePermissionFlags;
             index > 0 && 'border-t border-app-border dark:border-dark-border',
           )}
         >
-          <AppText className="flex-1 pr-3 font-gilroy-medium text-[14px]">{t(field.label)}</AppText>
+          <AppText className="flex-1 pr-3 font-gilroy-medium text-[14px] leading-[19px]">{t(field.label)}</AppText>
           <Switch
             value={value[field.key]}
             accessibilityLabel={t(field.label)}
@@ -131,7 +131,7 @@ function PermissionChips({ delegate }: { delegate: AccountDelegate }) {
   if (active.length === 0) {
     return (
       <View className="mt-1 self-start rounded-full bg-black/[0.06] px-2.5 py-0.5 dark:bg-white/10">
-        <AppText className="font-gilroy-semibold text-[11px] text-muted">{t('No permissions')}</AppText>
+        <AppText className="font-gilroy-semibold text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('No permissions')}</AppText>
       </View>
     );
   }
@@ -146,7 +146,7 @@ function PermissionChips({ delegate }: { delegate: AccountDelegate }) {
             style={{ backgroundColor: `${field.tone}22` }}
           >
             <Icon size={11} color={field.tone} />
-            <AppText className="font-gilroy-semibold text-[11px]" style={{ color: field.tone }}>
+            <AppText className="font-gilroy-semibold text-[11px] leading-[14px]" style={{ color: field.tone }}>
               {t(field.short)}
             </AppText>
           </View>
@@ -352,7 +352,7 @@ export default function TeamScreen() {
         }
       >
         <View className="gap-4">
-          <AppText className="font-gilroy-medium text-[14px] text-muted">
+          <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">
             {t('Add a delegate to let them post, edit, or delete your events on your behalf.')}
           </AppText>
 
@@ -386,7 +386,7 @@ export default function TeamScreen() {
             />
           ) : (
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted">
+              <AppText className="font-gilroy-semibold text-[13px] leading-[17px] uppercase tracking-[0.52px] text-muted dark:text-dark-muted">
                 {`${delegateList.length} ${delegateList.length === 1 ? t('team member') : t('team members')}`}
               </AppText>
               <View className="rounded-[12px] border bg-white px-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
@@ -414,12 +414,12 @@ export default function TeamScreen() {
         <ScrollView style={{ maxHeight: 520 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View className="gap-4">
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[14px]">{t('Step 1 — pick permissions')}</AppText>
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Step 1 — pick permissions')}</AppText>
               <PermissionEditor value={newPermissions} onChange={setNewPermissions} />
             </View>
 
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[14px]">{t('Step 2 — pick a user to add')}</AppText>
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Step 2 — pick a user to add')}</AppText>
               <GlassInput
                 placeholder={t('Search users by name or email...')}
                 accessibilityLabel={t('Search users by name or email...')}
@@ -458,10 +458,10 @@ export default function TeamScreen() {
                 </View>
               ) : null}
               {search.length >= 2 && searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted">{t('Searching...')}</AppText>
+                <AppText className="py-2 text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Searching...')}</AppText>
               ) : null}
               {search.length >= 2 && !searching && results.length === 0 ? (
-                <AppText className="py-2 text-center font-gilroy-medium text-[13px] text-muted">{t('No users found')}</AppText>
+                <AppText className="py-2 text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('No users found')}</AppText>
               ) : null}
             </View>
           </View>

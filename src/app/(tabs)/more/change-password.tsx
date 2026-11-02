@@ -80,7 +80,7 @@ export default function ChangePasswordScreen() {
         contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
       >
         <View className="gap-4">
-          <AppText className="font-gilroy-medium text-[14px] leading-[20px] text-muted dark:text-dark-muted">
+          <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">
             {t('Enter your current password and choose a new one.')}
           </AppText>
 
@@ -128,7 +128,7 @@ export default function ChangePasswordScreen() {
             accessibilityLabel={t('Forgot your password?')}
             className="self-end"
           >
-            <AppText className="font-gilroy-semibold text-[14px] underline">{t('Forgot your password?')}</AppText>
+            <AppText className="font-gilroy-semibold text-[14px] leading-[19px] underline">{t('Forgot your password?')}</AppText>
           </PressableScale>
 
           <View className="mt-2">

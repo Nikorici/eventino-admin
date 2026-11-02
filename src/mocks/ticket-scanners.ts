@@ -227,15 +227,15 @@ export const handlers: MockHandler[] = [
     return scanner;
   }),
   mock("PATCH", "/api/v1/event_scanners/:id/", (request) => {
-    const scanner = scanners.find(
+    const index = scanners.findIndex(
       (item) => item.id === Number(request.params.id),
     );
-    if (!scanner) return mockError(404, { detail: "Not found." });
-    Object.assign(
-      scanner,
-      normalizedScope(bodyOf<ScannerBody>(request), scanner.event),
-    );
-    return scanner;
+    if (index < 0) return mockError(404, { detail: "Not found." });
+    scanners[index] = {
+      ...scanners[index],
+      ...normalizedScope(bodyOf<ScannerBody>(request), scanners[index].event),
+    };
+    return scanners[index];
   }),
   mock("DELETE", "/api/v1/event_scanners/:id/", ({ params }) => {
     const index = scanners.findIndex(

@@ -155,11 +155,11 @@ export function useFileAction() {
   return { busyKey, run };
 }
 
-export function SectionTitle({ children, subtitle }: { children: string; subtitle?: string }) {
+export function SectionTitle({ children, subtitle, className }: { children: string; subtitle?: string; className?: string }) {
   return (
     <View className="gap-0.5">
-      <AppText className="font-gilroy-bold text-[18px]">{children}</AppText>
-      {subtitle ? <AppText className="font-gilroy-medium text-[13px] text-muted">{subtitle}</AppText> : null}
+      <AppText className={cn('font-gilroy-bold text-[18px]', className)}>{children}</AppText>
+      {subtitle ? <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{subtitle}</AppText> : null}
     </View>
   );
 }
@@ -316,11 +316,7 @@ export function HeaderAction({
               numberOfLines={1}
               className={cn(
                 'shrink font-gilroy-semibold text-[13px]',
-                variant === 'danger'
-                  ? 'text-danger'
-                  : outline
-                    ? 'text-primary dark:text-dark-text'
-                    : 'text-white dark:text-primary',
+                outline ? 'text-primary dark:text-dark-text' : 'text-white dark:text-primary',
               )}
             >
               {label}
@@ -352,7 +348,7 @@ export function ListSkeleton({ rows = 3 }: { rows?: number }) {
 }
 
 export function PanelMessage({ text }: { text: string }) {
-  return <AppText className="py-4 text-center font-gilroy-medium text-[14px] text-muted">{text}</AppText>;
+  return <AppText className="py-4 text-center font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">{text}</AppText>;
 }
 
 export function PanelError({ onRetry }: { onRetry: () => void }) {
@@ -361,7 +357,7 @@ export function PanelError({ onRetry }: { onRetry: () => void }) {
     <PanelCard className="items-center gap-2 py-6">
       <AlertTriangle size={22} color={colors.muted} />
       <AppText className="text-center font-gilroy-semibold text-[15px]">{t('Something went wrong.')}</AppText>
-      <AppText className="text-center font-gilroy-medium text-[13px] text-muted">{t('Please try again.')}</AppText>
+      <AppText className="text-center font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('Please try again.')}</AppText>
       <GlassButton label={t('Try again')} variant="secondary" size="sm" onPress={onRetry} className="mt-1" />
     </PanelCard>
   );
@@ -369,7 +365,7 @@ export function PanelError({ onRetry }: { onRetry: () => void }) {
 
 export function FooterCount({ label, count }: { label: string; count: number }) {
   return (
-    <AppText className="px-1 font-gilroy-medium text-[13px] text-muted">
+    <AppText className="px-1 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
       {label}: <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{count}</AppText>
     </AppText>
   );

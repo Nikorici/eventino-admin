@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Ban, Ticket } from 'lucide-react-native';
 
 import { AppText, EmptyState, GlassHeader, Screen } from '@/components/ui';
-import { PanelCard, SectionTitle, moneyLabel } from '@/components/dashboard/dashboardParts';
+import { PanelCard, moneyLabel } from '@/components/dashboard/dashboardParts';
 import { ProgressStatCard, ProgressStatCardSkeleton } from '@/components/sales-reports/ProgressStatCard';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
@@ -85,8 +85,8 @@ export default function TicketTypeSalesScreen() {
     }
     return (
       <>
-        <PanelCard className="flex-row items-center justify-between gap-3 py-3">
-          <AppText className="flex-1 font-gilroy-semibold text-[14px]">{t('Exclude orders with total 0')}</AppText>
+        <PanelCard className="flex-row items-center justify-between gap-3 py-4">
+          <AppText className="flex-1 font-gilroy-semibold text-[14px] leading-[19px]">{t('Exclude orders with total 0')}</AppText>
           <Switch
             value={excludeZeroOrders}
             onValueChange={(next) => {
@@ -100,7 +100,7 @@ export default function TicketTypeSalesScreen() {
         </PanelCard>
         {ticketTypes.length > 0 ? (
           <View className="gap-3">
-            <SectionTitle>{t('Ticket sales')}</SectionTitle>
+            <AppText className="font-gilroy-bold text-[18px] leading-[24px]">{t('Ticket sales')}</AppText>
             {ticketTypes.map((ticketType) => {
               const sold = soldOf(ticketType, excludeZeroOrders);
               const total = ticketType.total_quantity;
@@ -133,7 +133,7 @@ export default function TicketTypeSalesScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: padding.top + 8,
+          paddingTop: padding.top,
           paddingBottom: padding.bottom,
           paddingHorizontal: 16,
           gap: 16,

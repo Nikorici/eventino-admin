@@ -70,13 +70,13 @@ function MetricCard({ label, value }: { label: string; value: string }) {
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   return (
     <View
-      className="w-[48.5%] gap-1 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
+      className="w-[48.6%] gap-1 rounded-[12px] border bg-white p-4 dark:bg-dark-surface"
       style={{ borderColor: cardBorder }}
     >
-      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+      <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
         {label}
       </AppText>
-      <AppText numberOfLines={1} className="font-gilroy-bold text-[18px]">
+      <AppText numberOfLines={1} className="font-gilroy-bold text-[18px] leading-6">
         {value}
       </AppText>
     </View>
@@ -101,7 +101,7 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <View className="flex-row items-center gap-1.5">
       <View className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-      <AppText className="font-gilroy-medium text-[11px] text-muted">{label}</AppText>
+      <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{label}</AppText>
     </View>
   );
 }
@@ -127,7 +127,7 @@ function TimelineChart({
 
   return (
     <View className="gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-      <AppText className="font-gilroy-semibold text-[15px]">{t('Clicks & Conversions')}</AppText>
+      <AppText className="font-gilroy-semibold text-[15px] leading-5">{t('Clicks & Conversions')}</AppText>
       <SegmentedControl<ReferralInterval>
         value={interval}
         onChange={onIntervalChange}
@@ -165,7 +165,7 @@ function TimelineChart({
               return (
                 <View key={point.date} className="flex-1 items-center">
                   {showLabel ? (
-                    <AppText className="w-12 text-center font-gilroy-medium text-[9px] text-muted">
+                    <AppText className="w-12 text-center font-gilroy-medium text-[9px] leading-3 text-muted dark:text-dark-muted">
                       {format(parsed, 'd MMM', { locale })}
                     </AppText>
                   ) : null}
@@ -176,7 +176,7 @@ function TimelineChart({
         </View>
       ) : (
         <View className="items-center justify-center" style={{ height: CHART_HEIGHT }}>
-          <AppText className="font-gilroy-medium text-[13px] text-muted">{t('No chart data available')}</AppText>
+          <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No chart data available')}</AppText>
         </View>
       )}
       <View className="flex-row gap-4">
@@ -212,18 +212,18 @@ function PromoterCard({
     <View className="gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
             {promoter.name}
           </AppText>
           {promoter.email ? (
-            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
               {promoter.email}
             </AppText>
           ) : null}
         </View>
         <View className="flex-row items-center gap-1.5">
           <View className="h-2 w-2 rounded-full" style={{ backgroundColor: badgeColor }} />
-          <AppText className="font-gilroy-semibold text-[12px]" style={{ color: badgeColor }}>
+          <AppText className="font-gilroy-semibold text-[12px] leading-4" style={{ color: badgeColor }}>
             {convRate.toFixed(1)}%
           </AppText>
         </View>
@@ -231,16 +231,16 @@ function PromoterCard({
 
       <View className="flex-row">
         <View className="flex-1">
-          <AppText className="font-gilroy-medium text-[11px] text-muted">{t('Clicks')}</AppText>
-          <AppText className="font-gilroy-bold text-[14px]">{promoter.clicks || 0}</AppText>
+          <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('Clicks')}</AppText>
+          <AppText className="font-gilroy-bold text-[14px] leading-[19px]">{promoter.clicks || 0}</AppText>
         </View>
         <View className="flex-1">
-          <AppText className="font-gilroy-medium text-[11px] text-muted">{t('Orders')}</AppText>
-          <AppText className="font-gilroy-bold text-[14px]">{promoter.orders || 0}</AppText>
+          <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('Orders')}</AppText>
+          <AppText className="font-gilroy-bold text-[14px] leading-[19px]">{promoter.orders || 0}</AppText>
         </View>
         <View className="flex-1">
-          <AppText className="font-gilroy-medium text-[11px] text-muted">{t('Revenue')}</AppText>
-          <AppText numberOfLines={1} className="font-gilroy-bold text-[14px]">
+          <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{t('Revenue')}</AppText>
+          <AppText numberOfLines={1} className="font-gilroy-bold text-[14px] leading-[19px]">
             {currencySymbol(currency)} {formatMoney(toMoneyNumber(promoter.revenue))}
           </AppText>
         </View>
@@ -248,8 +248,8 @@ function PromoterCard({
 
       <View className="flex-row items-center justify-between gap-2">
         <View className="flex-1 flex-row items-center gap-1.5">
-          <View className="shrink rounded-[6px] bg-black/[0.04] px-2 py-1 dark:bg-white/10">
-            <AppText numberOfLines={1} className="font-gilroy-semibold text-[12px]">
+          <View className="h-6 shrink justify-center rounded-[6px] bg-black/[0.04] px-2 dark:bg-white/10">
+            <AppText numberOfLines={1} className="font-gilroy-semibold text-[12px] leading-4">
               {code || '—'}
             </AppText>
           </View>
@@ -283,7 +283,7 @@ function PromoterCard({
             <CircleCheck size={12} color={CONVERSIONS_COLOR} />
           )}
           <AppText
-            className="font-gilroy-semibold text-[12px]"
+            className="font-gilroy-semibold text-[12px] leading-4"
             style={{ color: promoter.is_active ? colors.danger : CONVERSIONS_COLOR }}
           >
             {promoter.is_active ? t('Deactivate') : t('Activate')}
@@ -326,7 +326,7 @@ function HeaderSkeleton() {
     <View className="gap-2.5">
       <View className="flex-row flex-wrap justify-between gap-y-2.5">
         {[0, 1, 2, 3].map((key) => (
-          <Skeleton key={key} className="h-[74px] w-[48.5%] rounded-[12px]" />
+          <Skeleton key={key} className="h-[74px] w-[48.6%] rounded-[12px]" />
         ))}
       </View>
       <Skeleton className="h-[220px] w-full rounded-[12px]" />
@@ -384,7 +384,7 @@ function AddPromoterModal({
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="font-gilroy-bold text-[20px]">{t('Add New Promoter')}</AppText>
+              <AppText className="font-gilroy-bold text-[20px] leading-[26px]">{t('Add New Promoter')}</AppText>
               <Pressable
                 onPress={onClose}
                 accessibilityLabel={t('Close')}
@@ -417,12 +417,12 @@ function AddPromoterModal({
                   }}
                   disabled={isLoading || !name.trim()}
                   accessibilityLabel={t('Create')}
-                  className="mt-2 h-[52px] w-full items-center justify-center rounded-[12px] bg-primary dark:bg-white"
+                  className="mt-2 h-12 w-full items-center justify-center rounded-[10px] bg-primary dark:bg-white"
                 >
                   {isLoading ? (
                     <ActivityIndicator color={submitTint} />
                   ) : (
-                    <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">
+                    <AppText className="font-gilroy-semibold text-[16px] leading-[21px] text-white dark:text-primary">
                       {t('Create')}
                     </AppText>
                   )}
@@ -431,9 +431,9 @@ function AddPromoterModal({
             ) : (
               <View className="gap-4">
                 <View className="gap-2 rounded-[12px] bg-black/[0.04] p-4 dark:bg-white/10">
-                  <AppText className="font-gilroy-semibold text-[13px]">{t('Referral link is ready')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Referral link is ready')}</AppText>
                   <View className="flex-row items-center gap-2">
-                    <AppText numberOfLines={2} className="flex-1 font-gilroy-medium text-[12px] text-muted">
+                    <AppText numberOfLines={2} className="flex-1 font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
                       {createdLink}
                     </AppText>
                     <PressableScale
@@ -442,16 +442,16 @@ function AddPromoterModal({
                       className="h-9 flex-row items-center gap-1.5 rounded-full border border-app-border px-3 dark:border-dark-border"
                     >
                       <Copy size={12} color={copyTint} />
-                      <AppText className="font-gilroy-semibold text-[12px]">{t('Copy')}</AppText>
+                      <AppText className="font-gilroy-semibold text-[12px] leading-4">{t('Copy')}</AppText>
                     </PressableScale>
                   </View>
                 </View>
                 <PressableScale
                   onPress={onClose}
                   accessibilityLabel={t('Close')}
-                  className="h-[52px] w-full items-center justify-center rounded-[12px] border border-app-border dark:border-dark-border"
+                  className="h-12 w-full items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border"
                 >
-                  <AppText className="font-gilroy-bold text-[16px]">{t('Close')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[16px] leading-[21px]">{t('Close')}</AppText>
                 </PressableScale>
               </View>
             )}
@@ -567,7 +567,7 @@ export default function ReferralTrackingScreen() {
         ItemSeparatorComponent={ItemSeparator}
         ListHeaderComponent={
           <View className="gap-3 pb-4">
-            <AppText className="font-gilroy-medium text-[13px] text-muted">
+            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
               {t('Track promoter performance and referral conversions')}
             </AppText>
             {statsQuery.isLoading ? (
@@ -583,7 +583,7 @@ export default function ReferralTrackingScreen() {
                   lang={i18n.language}
                 />
                 <View className="flex-row items-center justify-between">
-                  <AppText className="font-gilroy-bold text-[17px]">{t('Promoters')}</AppText>
+                  <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Promoters')}</AppText>
                   <PressableScale
                     onPress={openAddModal}
                     disabled={!canAddPromoter}
@@ -591,7 +591,7 @@ export default function ReferralTrackingScreen() {
                     className={`h-9 flex-row items-center gap-1.5 rounded-full bg-primary px-3.5 dark:bg-white ${canAddPromoter ? '' : 'opacity-40'}`}
                   >
                     <Plus size={14} color={scheme === 'dark' ? colors.primary : colors.white} />
-                    <AppText className="font-gilroy-semibold text-[13px] text-white dark:text-primary">
+                    <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-white dark:text-primary">
                       {t('Add Promoter')}
                     </AppText>
                   </PressableScale>
@@ -633,7 +633,7 @@ export default function ReferralTrackingScreen() {
             />
           )
         }
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

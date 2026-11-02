@@ -13,7 +13,7 @@ export interface BadgeProps {
 export function Badge({ label, className, textClassName }: BadgeProps) {
   return (
     <View className={cn('self-start rounded-[4px] px-2 py-1', className)}>
-      <AppText className={cn('font-gilroy-bold text-[12px] uppercase tracking-wide', textClassName)}>{label}</AppText>
+      <AppText className={cn('font-gilroy-bold text-[12px] uppercase tracking-[0.48px]', textClassName)}>{label}</AppText>
     </View>
   );
 }

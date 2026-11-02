@@ -51,25 +51,25 @@ function PendingOrderRow({
           <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
             {name}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
             {order.user?.email || '-'}
           </AppText>
         </View>
         <View className="items-end">
           <AppText className="font-gilroy-bold text-[14px]">{moneyLabel(order.total_price, currency)}</AppText>
-          <AppText className="font-gilroy-medium text-[11px] text-muted">
+          <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
             {formatDateTimeLabel(order.order_date, i18n.language)}
           </AppText>
         </View>
       </View>
       {tickets ? (
-        <AppText numberOfLines={2} className="pl-[52px] font-gilroy-medium text-[12px] text-muted">
+        <AppText numberOfLines={2} className="pl-[52px] font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
           {tickets}
         </AppText>
       ) : null}
       <View className="flex-row items-center justify-between gap-2 pl-[52px]">
         <View className="flex-row items-center gap-1.5">
-          <AppText className="font-gilroy-semibold text-[12px] text-muted">{`#${order.id}`}</AppText>
+          <AppText className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">{`#${order.id}`}</AppText>
           {order.payment_method ? <Pill label={order.payment_method} color={colors.primaryLight} /> : null}
         </View>
         {order.payment_method === 'INVOICE' ? (

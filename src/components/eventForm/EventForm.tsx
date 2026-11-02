@@ -74,7 +74,6 @@ import { useLazyGetStripeVerificationQuery } from '@/store/api/usersApi';
 import type { Category, EventType, QuantityDiscountTier } from '@/types/api';
 import {
   AppText,
-  DashedAddButton,
   EmptyState,
   GlassButton,
   GlassInput,
@@ -85,6 +84,7 @@ import {
   Stepper,
   ToastHost,
 } from '@/components/ui';
+import { FormAddButton } from './FormAddButton';
 
 import { EventFormDateTimeField } from '@/components/events/EventFormDateTimeField';
 import { LocationAutocompleteField } from '@/components/events/LocationAutocompleteField';
@@ -161,6 +161,7 @@ export interface EventFormInitialTicket {
 
 export interface EventFormCoupon extends EventCouponInput {
   usage_count?: number;
+  removed?: boolean;
 }
 
 export interface EventFormInitialValues {
@@ -404,7 +405,7 @@ const DEFAULT_TICKET: FormValues['tickets'][number] = {
 };
 
 const EVENT_TYPE_DESCRIPTIONS: Record<EventType, string> = {
-  PUBLIC: 'The event is visible to all users of the Eventino application.',
+  PUBLIC: 'Public events are discoverable by everyone. Personal events are shared privately.',
   PERSONAL: 'Visible only to people subscribed to you.',
   PRIVATE: 'Unlisted. Only people with the link can register.',
 };
@@ -546,7 +547,7 @@ function ControlledTextInput({
           autoCapitalize={autoCapitalize}
           containerClassName={containerClassName}
           editable={editable}
-          className={cn(multiline && 'h-full py-1', editable === false && 'opacity-60')}
+          className={cn('min-w-0', multiline && 'h-full py-1', editable === false && 'opacity-60')}
         />
       )}
     />
@@ -556,8 +557,8 @@ function ControlledTextInput({
 function SectionTitle({ children, required }: { children: string; required?: boolean }) {
   return (
     <View className="mb-3 flex-row items-center">
-      <AppText className="font-gilroy-bold text-[17px]">{children}</AppText>
-      {required ? <AppText className="ml-0.5 font-gilroy-bold text-[17px] text-danger">*</AppText> : null}
+      <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{children}</AppText>
+      {required ? <AppText className="ml-0.5 font-gilroy-bold text-[17px] leading-[22px] text-danger">*</AppText> : null}
     </View>
   );
 }
@@ -581,12 +582,12 @@ function FormSection({ icon: Icon, title, subtitle, required, action, children, 
           <Icon size={16} color={isDark ? colors.dark.text : colors.links} />
         </View>
         <View className="flex-1 flex-row items-center">
-          <AppText className="font-gilroy-bold text-[16px]">{title}</AppText>
-          {required ? <AppText className="ml-0.5 font-gilroy-bold text-[16px] text-danger">*</AppText> : null}
+          <AppText className="font-gilroy-bold text-[16px] leading-[21px]">{title}</AppText>
+          {required ? <AppText className="ml-0.5 font-gilroy-bold text-[16px] leading-[21px] text-danger">*</AppText> : null}
         </View>
         {action}
       </View>
-      {subtitle ? <AppText className="-mt-2 mb-3 font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{subtitle}</AppText> : null}
+      {subtitle ? <AppText className="-mt-2 mb-3 font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">{subtitle}</AppText> : null}
       {children}
     </View>
   );
@@ -622,9 +623,9 @@ function ToggleRow({ label, description, value, onValueChange, icon, disabled }:
       <View className="flex-1 flex-row items-center gap-2.5 pr-3">
         {icon}
         <View className="flex-1">
-          <AppText className="font-gilroy-semibold text-[14px]">{label}</AppText>
+          <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{label}</AppText>
           {description ? (
-            <AppText className="mt-0.5 font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{description}</AppText>
+            <AppText className="mt-0.5 font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">{description}</AppText>
           ) : null}
         </View>
       </View>
@@ -709,8 +710,8 @@ function MediaStrip({ media, error, onAddImages, onAddVideo, onRemove, onMove }:
             <View className="h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(97,133,157,0.14)' }}>
               <ImagePlus size={28} color="#61859d" />
             </View>
-            <AppText className="font-gilroy-semibold text-[16px] text-primary dark:text-dark-text">{t('Upload images')}</AppText>
-            <AppText className="font-gilroy-medium text-[12px] text-muted">{t('PNG, JPG, WEBP - max 10MB each')}</AppText>
+            <AppText className="font-gilroy-semibold text-[16px] leading-[21px] text-primary dark:text-dark-text">{t('Upload images')}</AppText>
+            <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">{t('PNG, JPG, WEBP - max 10MB each')}</AppText>
           </View>
         </PressableScale>
       ) : (
@@ -725,12 +726,12 @@ function MediaStrip({ media, error, onAddImages, onAddVideo, onRemove, onMove }:
               ) : (
                 <View className="h-full w-full items-center justify-center gap-1.5 bg-black/80">
                   <Video size={26} color={colors.white} />
-                  <AppText className="font-gilroy-semibold text-[11px] text-white">{t('Video')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[11px] leading-[14px] text-white">{t('Video')}</AppText>
                 </View>
               )}
               {index === firstImageIndex ? (
                 <View className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5">
-                  <AppText className="font-gilroy-semibold text-[10px] text-white">{t('Cover')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[10px] leading-[13px] text-white">{t('Cover')}</AppText>
                 </View>
               ) : null}
               <View className="absolute right-2 top-2">
@@ -770,7 +771,7 @@ function MediaStrip({ media, error, onAddImages, onAddVideo, onRemove, onMove }:
                 style={{ borderColor: isDark ? '#5aa9e6' : '#4a90e2' }}
               >
                 <Plus size={22} color={colors.muted} />
-                <AppText className="font-gilroy-medium text-[12px] text-muted">{t('Add')}</AppText>
+                <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">{t('Add')}</AppText>
               </View>
             </PressableScale>
           ) : null}
@@ -779,10 +780,10 @@ function MediaStrip({ media, error, onAddImages, onAddVideo, onRemove, onMove }:
       {hasVideo ? null : (
         <PressableScale onPress={onAddVideo} accessibilityLabel={t('Add video')} className="flex-row items-center gap-1.5 self-start">
           <Video size={15} color={colors.links} />
-          <AppText className="font-gilroy-semibold text-[13px] text-links dark:text-dark-text">{t('Add video')}</AppText>
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-dark-text">{t('Add video')}</AppText>
         </PressableScale>
       )}
-      {error ? <AppText className="font-gilroy-medium text-xs text-danger">{error}</AppText> : null}
+      {error ? <AppText className="font-gilroy-medium text-xs leading-[16px] text-danger">{error}</AppText> : null}
     </View>
   );
 }
@@ -816,7 +817,7 @@ function CurrencyPill({ currency, onSelect }: CurrencyPillProps) {
         accessibilityLabel={t('Currency')}
         className="flex-row items-center gap-1 rounded-full bg-black/[0.05] px-2.5 py-1 dark:bg-white/10"
       >
-        <AppText className="font-gilroy-semibold text-[13px] text-primary dark:text-dark-text">
+        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary dark:text-dark-text">
           {CURRENCY_SYMBOLS[currency] ?? currency}
         </AppText>
         <ChevronDown size={14} color={mutedIcon} />
@@ -826,7 +827,7 @@ function CurrencyPill({ currency, onSelect }: CurrencyPillProps) {
         <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
           <Pressable onPress={(event) => event.stopPropagation()} className="rounded-t-[20px] bg-app-bg pb-9 pt-3 dark:bg-dark-surface">
             <View className="mb-2 flex-row items-center justify-between px-5">
-              <AppText className="font-gilroy-bold text-[17px]">{t('Currency')}</AppText>
+              <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Currency')}</AppText>
               <PressableScale
                 onPress={() => setModalOpen(false)}
                 accessibilityLabel={t('Cancel')}
@@ -851,10 +852,10 @@ function CurrencyPill({ currency, onSelect }: CurrencyPillProps) {
                     )}
                   >
                     <View className="flex-row items-center gap-3">
-                      <AppText className="w-9 font-gilroy-bold text-[16px] text-primary dark:text-dark-text">
+                      <AppText className="w-9 font-gilroy-bold text-[16px] leading-[21px] text-primary dark:text-dark-text">
                         {CURRENCY_SYMBOLS[code] ?? code}
                       </AppText>
-                      <AppText className="font-gilroy-semibold text-[14px]">{code}</AppText>
+                      <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{code}</AppText>
                     </View>
                     {active ? <Check size={18} color={isDark ? colors.dark.text : colors.links} /> : null}
                   </PressableScale>
@@ -886,7 +887,7 @@ function ServerErrorLines({ lines }: { lines?: string[] }) {
   return (
     <View className="gap-1">
       {lines.map((line) => (
-        <AppText key={line} className="font-gilroy-medium text-xs text-danger">
+        <AppText key={line} className="font-gilroy-medium text-xs leading-[16px] text-danger">
           {line}
         </AppText>
       ))}
@@ -898,6 +899,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
   const { t, i18n } = useTranslation();
   const isDark = useColorScheme() === 'dark';
   const mutedIcon = isDark ? colors.dark.textSecondary : colors.muted;
+  const onIcon = isDark ? colors.dark.text : colors.primary;
   const isFree = Boolean(useWatch({ control, name: `tickets.${index}.isFree` }));
   const isTable = Boolean(useWatch({ control, name: `tickets.${index}.isTable` }));
   const { errors } = useFormState({ control, name: `tickets.${index}` });
@@ -912,10 +914,10 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
     <View className="gap-3 rounded-2xl border border-app-border bg-app-bg p-4 dark:border-dark-border dark:bg-dark-bg">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 flex-row items-center gap-2 pr-3">
-          <AppText className="font-gilroy-semibold text-sm text-primary/70 dark:text-dark-text/70">{`${t('Ticket type')} ${index + 1}`}</AppText>
+          <AppText className="font-gilroy-semibold text-sm leading-[19px] text-primary/70 dark:text-dark-text/70">{`${t('Ticket type')} ${index + 1}`}</AppText>
           {isTable ? (
             <View className="rounded-full bg-links/10 px-2 py-0.5 dark:bg-white/10">
-              <AppText className="font-gilroy-semibold text-[10px] text-links dark:text-dark-text">{t('Table')}</AppText>
+              <AppText className="font-gilroy-semibold text-[10px] leading-[13px] text-links dark:text-dark-text">{t('Table')}</AppText>
             </View>
           ) : null}
         </View>
@@ -951,7 +953,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
                 field.onChange(next);
                 if (next) setValue(`tickets.${index}.price`, '0');
               }}
-              icon={<TicketIcon size={16} color={field.value ? colors.primary : colors.muted} />}
+              icon={<TicketIcon size={16} color={field.value ? onIcon : colors.muted} />}
             />
           )}
         />
@@ -983,7 +985,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
       </View>
 
       {locked ? (
-        <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+        <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
           {t('To change ticket prices, consider turning off visibility for this ticket and creating a new one instead.')}
         </AppText>
       ) : null}
@@ -997,7 +999,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
       />
 
       <View className="gap-1.5">
-        <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Sales window (optional)')}</AppText>
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Sales window (optional)')}</AppText>
         <View className="flex-row gap-2">
           <Controller
             control={control}
@@ -1059,12 +1061,12 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
           />
         </View>
         {saleWindowError ? (
-          <AppText className="font-gilroy-medium text-xs text-danger">{t(saleWindowError)}</AppText>
+          <AppText className="font-gilroy-medium text-xs leading-[16px] text-danger">{t(saleWindowError)}</AppText>
         ) : null}
       </View>
 
       <View className="gap-2.5 border-t border-app-border pt-3 dark:border-dark-border">
-        <AppText className="font-gilroy-semibold text-[11px] uppercase tracking-wide text-muted dark:text-dark-muted">
+        <AppText className="font-gilroy-semibold text-[11px] leading-[14px] uppercase tracking-wide text-muted dark:text-dark-muted">
           {t('Advanced')}
         </AppText>
         {locked ? null : (
@@ -1077,7 +1079,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
                 description={t('Turn off to hide this ticket from buyers.')}
                 value={field.value}
                 onValueChange={field.onChange}
-                icon={<Eye size={16} color={field.value ? colors.primary : colors.muted} />}
+                icon={<Eye size={16} color={field.value ? onIcon : colors.muted} />}
               />
             )}
           />
@@ -1090,7 +1092,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
               label={t('Table ticket')}
               value={field.value}
               onValueChange={field.onChange}
-              icon={<Users size={16} color={field.value ? colors.primary : colors.muted} />}
+              icon={<Users size={16} color={field.value ? onIcon : colors.muted} />}
             />
           )}
         />
@@ -1112,9 +1114,9 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
           render={({ field }) => (
             <View className="flex-row items-center justify-between rounded-[12px] border border-app-border bg-app-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface">
               <View className="flex-1 pr-3">
-                <AppText className="font-gilroy-semibold text-[14px]">{t('QR codes per ticket')}</AppText>
+                <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('QR codes per ticket')}</AppText>
                 {field.value > 1 ? (
-                  <AppText className="mt-0.5 font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                  <AppText className="mt-0.5 font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                     {t('Buy 1 ticket, get {{qrCount}} QR codes', { qrCount: field.value })}
                   </AppText>
                 ) : null}
@@ -1129,8 +1131,8 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
             name={`tickets.${index}.eventDay`}
             render={({ field }) => (
               <View className="gap-2 rounded-[12px] border border-app-border bg-app-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface">
-                <AppText className="font-gilroy-semibold text-[14px]">{t('Event day')}</AppText>
-                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Event day')}</AppText>
+                <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                   {t('Optional. Pick the day this ticket is for and the ticket and email will show that day instead of the first day of the event.')}
                 </AppText>
                 <View className="flex-row flex-wrap gap-2">
@@ -1161,8 +1163,8 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
           name={`tickets.${index}.quantityDiscounts`}
           render={({ field, fieldState }) => (
             <View className="gap-2 rounded-[12px] border border-app-border bg-app-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface">
-              <AppText className="font-gilroy-semibold text-[14px]">{t('Quantity discounts')}</AppText>
-              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Quantity discounts')}</AppText>
+              <AppText className="-mt-1 font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                 {t('Optional. Each ticket gets cheaper when a buyer takes several of this ticket type in one order.')}
               </AppText>
               <QuantityDiscountTiersEditor
@@ -1250,7 +1252,7 @@ function CategorySelect({ value, onChange, categories, loading }: CategorySelect
         <Pressable onPress={() => setModalOpen(false)} className="flex-1 justify-end bg-black/40">
           <Pressable onPress={(event) => event.stopPropagation()} className="h-[80%] rounded-t-[20px] bg-app-bg pt-3 dark:bg-dark-surface">
             <View className="mb-2 flex-row items-center justify-between px-5">
-              <AppText className="font-gilroy-bold text-[17px]">{t('Category')}</AppText>
+              <AppText className="font-gilroy-bold text-[17px] leading-[22px]">{t('Category')}</AppText>
               <PressableScale
                 onPress={() => setModalOpen(false)}
                 accessibilityLabel={t('Cancel')}
@@ -1329,6 +1331,7 @@ function parseCouponMaxUses(raw: string): number {
 
 function CouponsBuilder({ coupons, onChange, showUsage, serverErrors }: CouponsBuilderProps) {
   const { t } = useTranslation();
+  const onIcon = useColorScheme() === 'dark' ? colors.dark.text : colors.primary;
 
   const addCoupon = () => {
     haptics.selection();
@@ -1339,7 +1342,7 @@ function CouponsBuilder({ coupons, onChange, showUsage, serverErrors }: CouponsB
     haptics.selection();
     onChange(
       coupons[index]?.id != null
-        ? coupons.map((coupon, i) => (i === index ? { ...coupon, is_active: false } : coupon))
+        ? coupons.map((coupon, i) => (i === index ? { ...coupon, removed: true } : coupon))
         : coupons.filter((_, i) => i !== index),
     );
   };
@@ -1351,7 +1354,7 @@ function CouponsBuilder({ coupons, onChange, showUsage, serverErrors }: CouponsB
   return (
     <View className="gap-3">
       {coupons.map((coupon, index) =>
-        coupon.is_active ? (
+        !coupon.removed ? (
           <View
             key={coupon.id != null ? `coupon-${coupon.id}` : `coupon-new-${index}`}
             className="gap-3 rounded-2xl border border-app-border bg-app-bg p-4 dark:border-dark-border dark:bg-dark-bg"
@@ -1394,8 +1397,17 @@ function CouponsBuilder({ coupons, onChange, showUsage, serverErrors }: CouponsB
                 />
               </View>
             </View>
+            {coupon.id != null ? (
+              <ToggleRow
+                label={t('Coupon active')}
+                description={t('Turn off to disable this code without deleting it.')}
+                value={coupon.is_active}
+                onValueChange={(next) => updateCoupon(index, { is_active: next })}
+                icon={<Tag size={16} color={coupon.is_active ? onIcon : colors.muted} />}
+              />
+            ) : null}
             {showUsage && coupon.id != null ? (
-              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                 {`${t('Usage')}: ${coupon.usage_count ?? 0} / ${coupon.max_uses > 0 ? coupon.max_uses : '∞'}`}
               </AppText>
             ) : null}
@@ -1403,7 +1415,7 @@ function CouponsBuilder({ coupons, onChange, showUsage, serverErrors }: CouponsB
           </View>
         ) : null,
       )}
-      <DashedAddButton label={t('Add coupon')} onPress={addCoupon} />
+      <FormAddButton label={t('Add coupon')} onPress={addCoupon} />
     </View>
   );
 }
@@ -1470,6 +1482,7 @@ export function EventForm({
   const address = watch('address');
   const meetingPlatform = detectMeetingPlatform(watch('meetingLink').trim());
 
+  const [titleHeight, setTitleHeight] = useState(34);
   const [media, setMedia] = useState<EventFormMediaItem[]>(initialValues?.media ?? []);
   const [imagesError, setImagesError] = useState<string | undefined>(undefined);
   const [questions, setQuestions] = useState<EventFormQuestion[]>(initialValues?.questions ?? []);
@@ -1484,6 +1497,7 @@ export function EventForm({
   const [checkingPayments, setCheckingPayments] = useState(false);
 
   const mutedIcon = isDark ? colors.dark.textSecondary : colors.muted;
+  const onIcon = isDark ? colors.dark.text : colors.primary;
   const payIconColor = isDark ? colors.primary : colors.white;
 
   const compressPickedImage = async (asset: ImagePicker.ImagePickerAsset): Promise<EventFormImage> => {
@@ -1620,7 +1634,7 @@ export function EventForm({
       code: coupon.code.trim(),
       discount: coupon.discount,
       max_uses: coupon.max_uses,
-      is_active: coupon.is_active,
+      is_active: coupon.removed ? false : coupon.is_active,
     })),
     questions: questions.map((question, index) => {
       const supportsOptions = QUESTION_OPTION_TYPES.includes(question.type);
@@ -1730,14 +1744,15 @@ export function EventForm({
   };
 
   const submitButton = (
-    <GlassButton
-      label={submitLabel ?? (mode === 'create' ? t('Create Event') : t('Save changes'))}
-      variant="primary"
-      onPress={submit}
-      loading={submitting || checkingPayments}
-      icon={<TicketIcon size={18} color={payIconColor} />}
-      className="rounded-[12px]"
-    />
+    <View className="overflow-hidden rounded-[12px]">
+      <GlassButton
+        label={submitLabel ?? (mode === 'create' ? t('Create Event') : t('Save changes'))}
+        variant="primary"
+        onPress={submit}
+        loading={submitting || checkingPayments}
+        icon={<TicketIcon size={18} color={payIconColor} />}
+      />
+    </View>
   );
 
   return (
@@ -1747,15 +1762,15 @@ export function EventForm({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          paddingTop: padding.top + 4,
-          paddingBottom: stickySubmit ? insets.bottom + 160 : padding.bottom + 24,
+          paddingTop: padding.top,
+          paddingBottom: stickySubmit ? insets.bottom + 160 : padding.bottom + 72,
           paddingHorizontal: 20,
         }}
       >
         {headerNotice}
 
         <SectionTitle required>{t('Event media')}</SectionTitle>
-        <AppText className="-mt-2 mb-3 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+        <AppText className="-mt-2 mb-3 font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
           {t('Add up to 6 images and 1 video')}
         </AppText>
         <MediaStrip
@@ -1767,7 +1782,7 @@ export function EventForm({
           onMove={moveMedia}
         />
         <AppText className="mt-2 font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">
-          {t('* We strongly recommend adding images in 16:9 format (for example, 1920 x 1080 or 1280 x 720).')}
+          {t('We strongly recommend adding images in 16:9 format (for example, 1920 x 1080 or 1280 x 720).')}
         </AppText>
 
         <View className="mt-6">
@@ -1781,12 +1796,14 @@ export function EventForm({
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
                   placeholder={t('Event Name')}
-                  placeholderTextColor={isDark ? 'rgba(249,249,249,0.4)' : 'rgba(43,58,68,0.42)'}
+                  placeholderTextColor={isDark ? 'rgba(249,249,249,0.4)' : '#757575'}
                   multiline
-                  className="font-gilroy-bold text-[28px] leading-[34px] text-primary dark:text-dark-text"
+                  onContentSizeChange={(event) => setTitleHeight(Math.max(34, event.nativeEvent.contentSize.height))}
+                  style={{ height: titleHeight }}
+                  className="p-0 font-gilroy-bold text-[28px] leading-[34px] text-primary dark:text-dark-text"
                 />
                 {fieldState.error ? (
-                  <AppText className="mt-1 font-gilroy-medium text-xs text-danger">
+                  <AppText className="mt-1 font-gilroy-medium text-xs leading-[16px] text-danger">
                     {fieldState.error.message ? t(fieldState.error.message) : null}
                   </AppText>
                 ) : null}
@@ -1795,34 +1812,79 @@ export function EventForm({
           />
         </View>
 
-        {contextSection}
-
         <Controller
           control={control}
           name="description"
           render={({ field, fieldState }) => (
             <View className="mt-5 gap-1.5">
-              <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Description')}</AppText>
+              <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Description')}</AppText>
               <TextInput
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholder={t('Add Description')}
-                placeholderTextColor="#8a8d93"
+                placeholderTextColor={isDark ? colors.muted : '#757575'}
                 multiline
                 textAlignVertical="top"
                 autoCapitalize="sentences"
                 className={cn(
-                  'min-h-[112px] rounded-[10px] border bg-app-surface px-3 py-3 font-gilroy text-base text-primary dark:bg-dark-surface dark:text-dark-text',
+                  'min-h-[105px] rounded-[10px] border bg-app-surface px-3 py-3 font-gilroy text-base leading-[22px] text-primary dark:bg-dark-surface dark:text-dark-text',
                   fieldState.error ? 'border-danger' : 'border-app-border dark:border-dark-border',
                 )}
               />
               {fieldState.error?.message ? (
-                <AppText className="font-gilroy-medium text-xs text-danger">{t(fieldState.error.message)}</AppText>
+                <AppText className="font-gilroy-medium text-xs leading-[16px] text-danger">{t(fieldState.error.message)}</AppText>
               ) : null}
             </View>
           )}
         />
+
+        {contextSection}
+
+        <FormSection icon={Tag} title={t('Category')}>
+          <Controller
+            control={control}
+            name="category"
+            render={({ field, fieldState }) => (
+              <>
+                <CategorySelect
+                  value={typeof field.value === 'number' ? field.value : null}
+                  onChange={field.onChange}
+                  categories={categories ?? []}
+                  loading={categoriesLoading}
+                />
+                {fieldState.error ? (
+                  <AppText className="mt-2 font-gilroy-medium text-xs leading-[16px] text-danger">
+                    {fieldState.error.message ? t(fieldState.error.message) : null}
+                  </AppText>
+                ) : null}
+              </>
+            )}
+          />
+        </FormSection>
+
+        <FormSection icon={Eye} title={t('Event type')}>
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <View className="gap-2">
+                <SegmentedControl
+                  options={[
+                    { value: 'PUBLIC', label: t('Public') },
+                    { value: 'PERSONAL', label: t('Personal') },
+                    { value: 'PRIVATE', label: t('Private') },
+                  ]}
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                />
+                <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
+                  {t(EVENT_TYPE_DESCRIPTIONS[field.value])}
+                </AppText>
+              </View>
+            )}
+          />
+        </FormSection>
 
         <FormSection icon={CalendarDays} title={t('Date and time')}>
           <View className="flex-row gap-3">
@@ -1833,7 +1895,7 @@ export function EventForm({
             </View>
             <View className="flex-1 gap-4">
               <View className="gap-1.5">
-                <AppText className="font-gilroy-semibold text-[13px] text-muted dark:text-dark-muted">{t('Start')}</AppText>
+                <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Start')}</AppText>
                 <View className="flex-row gap-2">
                   <Controller
                     control={control}
@@ -1864,7 +1926,7 @@ export function EventForm({
                 </View>
               </View>
               <View className="gap-1.5">
-                <AppText className="font-gilroy-semibold text-[13px] text-muted dark:text-dark-muted">{t('End')}</AppText>
+                <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('End')}</AppText>
                 <View className="flex-row gap-2">
                   <Controller
                     control={control}
@@ -1896,13 +1958,13 @@ export function EventForm({
                   description={t('Hide the hour on the event page, tickets and emails')}
                   value={field.value}
                   onValueChange={field.onChange}
-                  icon={<Clock size={16} color={field.value ? colors.primary : colors.muted} />}
+                  icon={<Clock size={16} color={field.value ? onIcon : colors.muted} />}
                 />
               )}
             />
           </View>
           {errors.startDate || errors.startTime || errors.endDate || errors.endTime ? (
-            <AppText className="mt-1.5 font-gilroy-medium text-xs text-danger">
+            <AppText className="mt-1.5 font-gilroy-medium text-xs leading-[16px] text-danger">
               {t(
                 errors.startDate?.message ??
                   errors.startTime?.message ??
@@ -1933,13 +1995,13 @@ export function EventForm({
                   keyboardType="url"
                   leftIcon={<Link2 size={16} color={mutedIcon} />}
                 />
-                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                   {t('Enter a link to your virtual meeting (Zoom, Google Meet, etc.)')}
                 </AppText>
                 {meetingPlatform === 'other' ? null : (
                   <View className="flex-row items-center gap-1.5 self-start rounded-full bg-links/10 px-3 py-1.5 dark:bg-white/10">
                     <Check size={13} color={mutedIcon} />
-                    <AppText className="font-gilroy-semibold text-[12px] text-primary dark:text-dark-text">
+                    <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-primary dark:text-dark-text">
                       {meetingPlatform === 'zoom' ? t('Zoom meeting link detected') : t('Google Meet link detected')}
                     </AppText>
                   </View>
@@ -1964,7 +2026,7 @@ export function EventForm({
                     description={t('Hide the exact address; show only the city.')}
                     value={field.value}
                     onValueChange={field.onChange}
-                    icon={<Clock size={16} color={field.value ? colors.primary : colors.muted} />}
+                    icon={<Clock size={16} color={field.value ? onIcon : colors.muted} />}
                   />
                 )}
               />
@@ -1991,11 +2053,11 @@ export function EventForm({
               {locationTba && (region || country) ? (
                 <View className="flex-row flex-wrap items-center gap-2 self-start rounded-full bg-black/[0.04] px-3 py-1.5 dark:bg-white/[0.08]">
                   <View className="rounded-full bg-primary px-2 py-0.5 dark:bg-white">
-                    <AppText className="font-gilroy-bold text-[10px] text-white dark:text-primary">{t('TBA')}</AppText>
+                    <AppText className="font-gilroy-bold text-[10px] leading-[13px] text-white dark:text-primary">{t('TBA')}</AppText>
                   </View>
-                  <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                  <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                     {`${t('Attendees will see:')} `}
-                    <AppText className="font-gilroy-semibold text-[12px] text-primary dark:text-dark-text">
+                    <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-primary dark:text-dark-text">
                       {`${region || t('TBA')}${country ? `, ${country}` : ''}`}
                     </AppText>
                   </AppText>
@@ -2003,7 +2065,7 @@ export function EventForm({
               ) : region || country ? (
                 <View className="flex-row items-center gap-2 self-start rounded-[10px] bg-links/10 px-3 py-2 dark:bg-white/[0.08]">
                   <MapPin size={14} color={mutedIcon} />
-                  <AppText className="font-gilroy-semibold text-[13px] text-primary/80 dark:text-dark-text/80">
+                  <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary/80 dark:text-dark-text/80">
                     {[region, country].filter(Boolean).join(', ')}
                   </AppText>
                 </View>
@@ -2014,38 +2076,6 @@ export function EventForm({
             <MapPreview coordinates={coordinates} onChange={setCoordinates} />
           ) : null}
         </FormSection>
-
-        <FormSection icon={Clock} title={t('Event Timeline')}>
-          <TimelineEditor items={timelines} onChange={setTimelines} />
-        </FormSection>
-
-        <FormSection icon={Tag} title={t('Category')}>
-          <Controller
-            control={control}
-            name="category"
-            render={({ field, fieldState }) => (
-              <>
-                <CategorySelect
-                  value={typeof field.value === 'number' ? field.value : null}
-                  onChange={field.onChange}
-                  categories={categories ?? []}
-                  loading={categoriesLoading}
-                />
-                {fieldState.error ? (
-                  <AppText className="mt-2 font-gilroy-medium text-xs text-danger">
-                    {fieldState.error.message ? t(fieldState.error.message) : null}
-                  </AppText>
-                ) : null}
-              </>
-            )}
-          />
-        </FormSection>
-
-        {couponsEditable ? (
-          <FormSection icon={Tag} title={t('Coupons')} subtitle={t('Offer discount codes buyers can apply at checkout.')}>
-            <CouponsBuilder coupons={coupons} onChange={setCoupons} showUsage={mode === 'edit'} serverErrors={serverErrors?.coupons} />
-          </FormSection>
-        ) : null}
 
         <FormSection icon={TicketIcon} title={t('Tickets')} required>
           <Controller
@@ -2073,9 +2103,9 @@ export function EventForm({
               </View>
             )}
           />
-          {ticketsError ? <AppText className="mt-3 font-gilroy-medium text-xs text-danger">{t(ticketsError)}</AppText> : null}
+          {ticketsError ? <AppText className="mt-3 font-gilroy-medium text-xs leading-[16px] text-danger">{t(ticketsError)}</AppText> : null}
           {serverErrors?.tickets ? (
-            <AppText className="mt-3 font-gilroy-medium text-xs text-danger">
+            <AppText className="mt-3 font-gilroy-medium text-xs leading-[16px] text-danger">
               {t('One or more tickets were rejected by the server. See the highlighted rows.')}
             </AppText>
           ) : null}
@@ -2085,31 +2115,8 @@ export function EventForm({
             className="mt-3 flex-row items-center gap-1.5 self-start"
           >
             <Plus size={16} color={colors.links} />
-            <AppText className="font-gilroy-semibold text-[14px] text-links dark:text-dark-text">{t('Add more tickets')}</AppText>
+            <AppText className="font-gilroy-semibold text-[14px] leading-[19px] text-links dark:text-dark-text">{t('Add more tickets')}</AppText>
           </PressableScale>
-        </FormSection>
-
-        <FormSection icon={Eye} title={t('Event type')}>
-          <Controller
-            control={control}
-            name="type"
-            render={({ field }) => (
-              <View className="gap-2">
-                <SegmentedControl
-                  options={[
-                    { value: 'PUBLIC', label: t('Public') },
-                    { value: 'PERSONAL', label: t('Personal') },
-                    { value: 'PRIVATE', label: t('Private') },
-                  ]}
-                  value={field.value}
-                  onChange={(value) => field.onChange(value)}
-                />
-                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
-                  {t(EVENT_TYPE_DESCRIPTIONS[field.value])}
-                </AppText>
-              </View>
-            )}
-          />
         </FormSection>
 
         <FormSection
@@ -2120,6 +2127,10 @@ export function EventForm({
           <QuestionsBuilder questions={questions} onChange={setQuestions} />
         </FormSection>
 
+        <FormSection icon={Clock} title={t('Event Timeline')}>
+          <TimelineEditor items={timelines} onChange={setTimelines} />
+        </FormSection>
+
         <FormSection
           icon={Users}
           title={t('Event Organizers')}
@@ -2127,6 +2138,12 @@ export function EventForm({
         >
           <OrganizerPicker selected={organizers} onChange={setOrganizers} excludeUserId={currentUserId} />
         </FormSection>
+
+        {couponsEditable ? (
+          <FormSection icon={Tag} title={t('Coupons')} subtitle={t('Offer discount codes buyers can apply at checkout.')}>
+            <CouponsBuilder coupons={coupons} onChange={setCoupons} showUsage={mode === 'edit'} serverErrors={serverErrors?.coupons} />
+          </FormSection>
+        ) : null}
 
         {mode === 'edit' && (
           <FormSection icon={FileText} title={t('Visibility')}>
@@ -2136,17 +2153,16 @@ export function EventForm({
               value={saveAsDraft}
               onValueChange={setSaveAsDraft}
               disabled={isOrganization === false}
-              icon={<FileText size={16} color={saveAsDraft ? colors.primary : colors.muted} />}
+              icon={<FileText size={16} color={saveAsDraft ? onIcon : colors.muted} />}
             />
             {isOrganization === false ? (
-              <AppText className="mt-2 font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              <AppText className="mt-2 font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                 {t('Only organization accounts can publish events. Your event will be saved as a draft.')}
               </AppText>
             ) : null}
           </FormSection>
         )}
 
-        {stickySubmit ? null : <View className="mt-6">{submitButton}</View>}
       </KeyboardAwareScrollView>
 
       {stickySubmit ? (
@@ -2157,7 +2173,19 @@ export function EventForm({
             </GlassSurface>
           </KeyboardStickyView>
         </View>
-      ) : null}
+      ) : (
+        <View
+          className="absolute left-5 right-5"
+          style={{ bottom: padding.bottom - 12 }}
+          onLayout={(event) => setSubmitBarHeight(event.nativeEvent.layout.height)}
+        >
+          <KeyboardStickyView offset={{ opened: padding.bottom - 24 }}>
+            <View className="rounded-[12px]" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              {submitButton}
+            </View>
+          </KeyboardStickyView>
+        </View>
+      )}
 
       <PaymentSetupSheet kind={paymentSetup} onClose={() => setPaymentSetup(null)} onContractSigned={() => setContractSigned(true)} />
     </View>

@@ -3,12 +3,11 @@ import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { File, Paths } from 'expo-file-system';
-import { ArrowUpDown, ChevronDown, ChevronUp, Download, Users } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, Download, Search, Users } from 'lucide-react-native';
 
-import { AppText, Chip, EmptyState } from '@/components/ui';
-import { Card, SecondaryButton } from '@/components/merch/merchParts';
+import { AppText, Chip, EmptyState, GlassInput } from '@/components/ui';
+import { Card } from '@/components/merch/merchParts';
 import { OptionSheet } from '@/components/dashboard/OptionSheet';
-import { SearchBar } from '@/components/shared/SearchBar';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/lib/cn';
@@ -17,6 +16,7 @@ import { haptics } from '@/lib/haptics';
 import type { FormRespondent } from '@/store/api/formsApi';
 import { colors } from '@/theme/colors';
 
+import { FormButton } from './FormButton';
 import type { FormQuestion } from './formQuestions';
 import { ACCENT_BLUE, ACCENT_GREEN, ACCENT_ORANGE, StatTile } from './StatisticsTab';
 
@@ -57,17 +57,17 @@ function AnswerValue({ answer }: { answer: string | string[] | null | undefined 
     return (
       <View className="flex-row flex-wrap gap-1.5">
         {answer.map((item, index) => (
-          <View key={`${item}-${index}`} className="rounded-full bg-black/[0.05] px-2.5 py-1 dark:bg-white/10">
-            <AppText className="font-gilroy-medium text-[12px]">{item}</AppText>
+          <View key={`${item}-${index}`} className="h-6 justify-center rounded-full bg-black/[0.05] px-2.5 dark:bg-white/10">
+            <AppText className="font-gilroy-medium text-[11px] leading-[14px]">{item}</AppText>
           </View>
         ))}
       </View>
     );
   }
   if (typeof answer === 'string' && answer.trim() !== '') {
-    return <AppText className="font-gilroy-medium text-[13px]">{answer}</AppText>;
+    return <AppText className="font-gilroy-medium text-[13px] leading-[17px]">{answer}</AppText>;
   }
-  return <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No answer')}</AppText>;
+  return <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted leading-[17px]">{t('No answer')}</AppText>;
 }
 
 function RespondentRow({
@@ -99,21 +99,21 @@ function RespondentRow({
           {respondent.user.profile_image ? (
             <Image source={{ uri: respondent.user.profile_image }} contentFit="cover" style={{ width: '100%', height: '100%' }} />
           ) : (
-            <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">
+            <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text leading-[17px]">
               {initials(respondent.user.name)}
             </AppText>
           )}
         </View>
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
             {respondent.user.name}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
             {respondent.user.email}
           </AppText>
         </View>
-        <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: `${statusColor}22` }}>
-          <AppText className="font-gilroy-bold text-[11px]" style={{ color: statusColor }}>
+        <View className="h-6 justify-center rounded-full px-2.5" style={{ backgroundColor: `${statusColor}22` }}>
+          <AppText className="font-gilroy-bold text-[11px] leading-[14px]" style={{ color: statusColor }}>
             {respondent.has_answered ? t('Completed') : t('Pending')}
           </AppText>
         </View>
@@ -124,7 +124,7 @@ function RespondentRow({
           {respondent.has_answered ? (
             questions.map((question) => (
               <View key={question.id} className="gap-1">
-                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+                <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
                   {question.question}
                   {question.required ? ' *' : ''}
                 </AppText>
@@ -133,8 +133,8 @@ function RespondentRow({
             ))
           ) : (
             <View className="gap-0.5">
-              <AppText className="font-gilroy-semibold text-[13px]">{t('Form not submitted yet')}</AppText>
-              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+              <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Form not submitted yet')}</AppText>
+              <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
                 {t('Waiting for this participant to complete the form')}
               </AppText>
             </View>
@@ -215,7 +215,17 @@ export function ResponsesTab({ responses, questions }: { responses: FormResponde
       </View>
 
       <View className="gap-3">
-        <SearchBar value={search} onChangeText={setSearch} placeholder={t('Search by name or email')} />
+        <GlassInput
+          variant="search"
+          value={search}
+          onChangeText={setSearch}
+          placeholder={t('Search by name or email')}
+          accessibilityLabel={t('Search by name or email')}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+          leftIcon={<Search size={18} color={colors.muted} />}
+        />
         <View className="flex-row flex-wrap gap-2">
           {(['all', 'completed', 'pending'] as const).map((value) => (
             <Chip
@@ -226,26 +236,22 @@ export function ResponsesTab({ responses, questions }: { responses: FormResponde
             />
           ))}
         </View>
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <SecondaryButton
-              label={sortOptions.find((option) => option.value === sortBy)?.label ?? t('Sort by Name')}
-              onPress={() => {
-                haptics.selection();
-                setSortOpen(true);
-              }}
-              icon={<ArrowUpDown size={15} color={iconColor} />}
-            />
-          </View>
-          <View className="flex-1">
-            <SecondaryButton
-              label={t('Export')}
-              loading={exporting}
-              disabled={responses.length === 0 || questions.length === 0}
-              onPress={() => void onExport()}
-              icon={<Download size={15} color={iconColor} />}
-            />
-          </View>
+        <View className="flex-row items-center justify-between">
+          <FormButton
+            label={sortOptions.find((option) => option.value === sortBy)?.label ?? t('Sort by Name')}
+            onPress={() => {
+              haptics.selection();
+              setSortOpen(true);
+            }}
+            trailing={<ChevronDown size={16} color={iconColor} />}
+          />
+          <FormButton
+            label={t('Export')}
+            loading={exporting}
+            disabled={responses.length === 0 || questions.length === 0}
+            onPress={() => void onExport()}
+            icon={<Download size={16} color={iconColor} />}
+          />
         </View>
       </View>
 
@@ -264,7 +270,7 @@ export function ResponsesTab({ responses, questions }: { responses: FormResponde
           {filtered.map((respondent, index) => {
             const key = String(respondent.user.id);
             return (
-              <View key={key} className={cn(index > 0 && 'border-t border-app-border dark:border-dark-border')}>
+              <View key={key} className={cn(index > 0 && 'border-t border-[#f0f2f8] dark:border-dark-border')}>
                 <RespondentRow
                   respondent={respondent}
                   questions={questions}

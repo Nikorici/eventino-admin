@@ -61,10 +61,10 @@ function ProductCard({ product, currency }: { product: MerchProductListItem; cur
           </View>
         )}
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px] leading-5">
             {product.name}
           </AppText>
-          <AppText className="font-gilroy-medium text-[13px] text-muted">
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
             {t('from {{price}}', { price: money(product.min_price, currency) })}
           </AppText>
           <View className="mt-1 flex-row gap-1.5">

@@ -145,14 +145,14 @@ function ScannedTicketCard({ ticket, onGenerate }: { ticket: ScannedTicket; onGe
   return (
     <View className="gap-3 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
       <View className="gap-0.5">
-        <AppText numberOfLines={1} className="font-gilroy-bold text-[16px]">
+        <AppText numberOfLines={1} className="font-gilroy-bold text-[16px] leading-[21px]">
           {ticket.attendee_name || t('Attendee')}
         </AppText>
-        <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] text-muted">
+        <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] leading-[17px] text-muted">
           {ticket.event_title}
           {ticket.ticket_type ? ` · ${ticket.ticket_type}` : ''}
         </AppText>
-        <AppText className="font-gilroy-medium text-[12px] text-muted">{formatScanDate(ticket.scan_date, i18n.language)}</AppText>
+        <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">{formatScanDate(ticket.scan_date, i18n.language)}</AppText>
       </View>
       <PressableScale
         onPress={onGenerate}
@@ -160,7 +160,7 @@ function ScannedTicketCard({ ticket, onGenerate }: { ticket: ScannedTicket; onGe
         className="h-11 flex-row items-center justify-center gap-2 rounded-[12px] border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
       >
         <Printer size={16} color={buttonTint} />
-        <AppText className="font-gilroy-semibold text-[14px]">{t('Print sticker')}</AppText>
+        <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Print sticker')}</AppText>
       </PressableScale>
     </View>
   );
@@ -188,7 +188,7 @@ function StickerSheet({ visible, title, onClose, children }: { visible: boolean;
         <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
           <Pressable className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg" onPress={(event) => event.stopPropagation()}>
             <View className="mb-4 flex-row items-center justify-between">
-              <AppText numberOfLines={1} className="flex-1 pr-3 font-gilroy-bold text-[20px]">
+              <AppText numberOfLines={1} className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
                 {title}
               </AppText>
               <Pressable
@@ -222,6 +222,7 @@ function StickerConfigForm({ ticket, onClose }: { ticket: ScannedTicket; onClose
   const { t } = useTranslation();
   const toast = useToast();
   const submitTint = useThemeColor(colors.white, colors.primary);
+  const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const [fetchProfile] = useLazyGetStickerNetworkingProfileQuery();
 
   const [name, setName] = useState(ticket.attendee_name ?? '');
@@ -274,18 +275,18 @@ function StickerConfigForm({ ticket, onClose }: { ticket: ScannedTicket; onClose
   return (
     <View className="gap-4">
       <View className="gap-1.5">
-        <AppText className="font-gilroy-semibold text-[13px] text-muted">{t('Name')}</AppText>
+        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Name')}</AppText>
         <GlassInput placeholder={t('Attendee name')} value={name} onChangeText={setName} autoCapitalize="words" />
         <DefaultHint value={ticket.attendee_name} />
       </View>
 
-      <View className="rounded-[12px] border border-app-border bg-white px-4 py-2.5 dark:border-dark-border dark:bg-dark-surface">
+      <View className="rounded-[12px] border bg-white px-4 py-2.5 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
         <ToggleRow label={t('Show ticket type')} value={showTicketType} onChange={setShowTicketType} />
       </View>
 
       {!hideCompany ? (
         <View className="gap-1.5">
-          <AppText className="font-gilroy-semibold text-[13px] text-muted">{t('Company')}</AppText>
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Company')}</AppText>
           <GlassInput
             placeholder={t('Company name (optional)')}
             value={company}
@@ -300,7 +301,7 @@ function StickerConfigForm({ ticket, onClose }: { ticket: ScannedTicket; onClose
       ) : null}
 
       <View className="gap-1.5">
-        <AppText className="font-gilroy-semibold text-[13px] text-muted">{t('Sticker size')}</AppText>
+        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted">{t('Sticker size')}</AppText>
         <SegmentedControl<StickerSize>
           value={size}
           onChange={setSize}
@@ -377,7 +378,7 @@ export default function StickersScreen() {
         renderItem={({ item }) => <ScannedTicketCard ticket={item} onGenerate={() => setActiveTicket(item)} />}
         ItemSeparatorComponent={ItemSeparator}
         ListHeaderComponent={
-          <AppText className="pb-4 font-gilroy-medium text-[14px] text-muted">
+          <AppText className="pb-4 font-gilroy-medium text-[14px] leading-[19px] text-muted">
             {t('Print name stickers for attendees as their tickets are scanned.')}
           </AppText>
         }

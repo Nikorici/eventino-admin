@@ -190,7 +190,7 @@ export default function FormManagementScreen() {
               trailing={
                 entry.value === 'responses' && respondents.length > 0 ? (
                   <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1">
-                    <AppText className="font-gilroy-bold text-[10px] text-white">{respondents.length}</AppText>
+                    <AppText className="font-gilroy-bold text-[10px] text-white leading-[13px]">{respondents.length}</AppText>
                   </View>
                 ) : undefined
               }
@@ -219,7 +219,7 @@ export default function FormManagementScreen() {
         }
       >
         <View className="gap-4">
-          <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">
+          <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted leading-[19px]">
             {t('Manage your event registration form')}
           </AppText>
           {renderBody()}

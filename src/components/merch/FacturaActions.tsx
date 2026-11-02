@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { FileSpreadsheet, FileText, FileCode } from 'lucide-react-native';
+import { Download } from 'lucide-react-native';
 
 import { PDF_SHARE, XLSX_SHARE, XML_SHARE, useFileAction } from '@/components/dashboard/dashboardParts';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -68,12 +68,6 @@ const FACTURA_FORMATS: Record<FacturaFormat, FacturaSpec> = {
 const BASE_FORMATS: FacturaFormat[] = ['pdf', 'xml', 'sagaXml', 'xlsx'];
 const STORNO_FORMATS: FacturaFormat[] = ['stornoPdf', 'stornoXml'];
 
-function facturaIcon(ext: string) {
-  if (ext === 'xlsx') return FileSpreadsheet;
-  if (ext === 'xml') return FileCode;
-  return FileText;
-}
-
 export function FacturaActions({ order }: { order: MerchOrder }) {
   const { t } = useTranslation();
   const iconTint = useThemeColor(colors.primary, colors.dark.text);
@@ -96,18 +90,18 @@ export function FacturaActions({ order }: { order: MerchOrder }) {
   };
 
   return (
-    <View className="flex-row flex-wrap justify-between gap-y-2.5">
+    <View className="flex-row flex-wrap justify-between gap-y-2">
       {formats.map((format) => {
         const spec = FACTURA_FORMATS[format];
-        const Icon = facturaIcon(spec.ext);
         return (
-          <View key={format} className="w-[48.5%]">
+          <View key={format} className="w-[48.75%]">
             <SecondaryButton
+              compact
               label={busyKey === format ? t('Downloading...') : t(spec.label)}
               onPress={() => download(format)}
               loading={busyKey === format}
               disabled={busyKey !== null && busyKey !== format}
-              icon={<Icon size={16} color={iconTint} />}
+              icon={<Download size={16} color={iconTint} />}
             />
           </View>
         );

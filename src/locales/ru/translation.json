@@ -4236,5 +4236,9 @@
   "Some coupons were rejected. Check the highlighted rows.": "Некоторые купоны отклонены. Проверьте выделенные строки.",
   "One or more tickets were rejected by the server. See the highlighted rows.": "Сервер отклонил один или несколько билетов. Смотрите выделенные строки.",
   "Failed to save marketing tracking settings": "Не удалось сохранить настройки маркетинга и отслеживания",
-  "Marketing tracking settings saved successfully": "Настройки маркетинга и отслеживания успешно сохранены"
+  "Marketing tracking settings saved successfully": "Настройки маркетинга и отслеживания успешно сохранены",
+  "We strongly recommend adding images in 16:9 format (for example, 1920 x 1080 or 1280 x 720).": "Мы настоятельно рекомендуем добавлять изображения в формате 16:9 (например, 1920 x 1080 или 1280 x 720).",
+  "Add discount tier": "Добавить уровень скидки",
+  "1 printer": "1 принтер",
+  "{{count}} printers": "Принтеров: {{count}}"
 }

@@ -207,11 +207,11 @@ export default function ForgotPasswordScreen() {
             <AppText className="text-center font-gilroy-bold text-[28px] leading-[34px] text-primary dark:text-dark-text">
               {heroTitle}
             </AppText>
-            <AppText className="max-w-[320px] text-center font-gilroy-medium text-[15px] leading-[22px] text-muted">
+            <AppText className="max-w-[320px] text-center font-gilroy-medium text-[15px] leading-[22px] text-primary dark:text-dark-text">
               {heroSubtitle}
             </AppText>
             {step === 'otp' ? (
-              <AppText className="mt-1 font-gilroy-bold text-[14px] text-primary dark:text-dark-text">{email}</AppText>
+              <AppText className="mt-1 font-gilroy-bold text-[14px] leading-[19px] text-primary dark:text-dark-text">{email}</AppText>
             ) : null}
           </View>
         </View>
@@ -236,7 +236,7 @@ export default function ForgotPasswordScreen() {
                 label={t('Email')}
                 value={email}
                 onChangeText={setEmail}
-                placeholder={t('you@email.com')}
+                placeholder={t('you@example.com')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -286,7 +286,7 @@ export default function ForgotPasswordScreen() {
                   setNewPassword(value);
                   if (newPasswordError) setNewPasswordError('');
                 }}
-                placeholder={t('at least 8 characters')}
+                placeholder={t('New password')}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoComplete="password-new"
@@ -341,7 +341,7 @@ export default function ForgotPasswordScreen() {
 
         {step === 'otp' ? (
           <View className="mt-5 flex-row items-center justify-center gap-1.5">
-            <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Wrong email?')}</AppText>
+            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Wrong email?')}</AppText>
             <PressableScale
               onPress={() => {
                 haptics.selection();
@@ -351,14 +351,15 @@ export default function ForgotPasswordScreen() {
               }}
               accessibilityLabel={t('Change email')}
               hitSlop={8}
+              className="py-1.5"
             >
-              <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{t('Change email')}</AppText>
+              <AppText className="font-gilroy-bold text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Change email')}</AppText>
             </PressableScale>
           </View>
         ) : (
-          <View className="mt-5 gap-3">
+          <View className="mt-5">
             <View className="flex-row items-center justify-center gap-1.5">
-              <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Remember your password?')}</AppText>
+              <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Remember your password?')}</AppText>
               <PressableScale
                 onPress={() => {
                   haptics.selection();
@@ -366,13 +367,14 @@ export default function ForgotPasswordScreen() {
                 }}
                 accessibilityLabel={t('Log In')}
                 hitSlop={8}
+                className="py-1.5"
               >
-                <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{t('Log In')}</AppText>
+                <AppText className="font-gilroy-bold text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Log In')}</AppText>
               </PressableScale>
             </View>
             {step === 'email' ? (
               <View className="flex-row items-center justify-center gap-1.5">
-                <AppText className="font-gilroy-medium text-[13px] text-muted">{t("Don't have an account?")}</AppText>
+                <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary dark:text-dark-text">{t("Don't have an account?")}</AppText>
                 <PressableScale
                   onPress={() => {
                     haptics.selection();
@@ -380,8 +382,9 @@ export default function ForgotPasswordScreen() {
                   }}
                   accessibilityLabel={t('Sign up')}
                   hitSlop={8}
+                  className="py-1.5"
                 >
-                  <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{t('Sign up')}</AppText>
+                  <AppText className="font-gilroy-bold text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Sign up')}</AppText>
                 </PressableScale>
               </View>
             ) : null}

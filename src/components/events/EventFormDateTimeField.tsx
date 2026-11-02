@@ -89,10 +89,10 @@ export function EventFormDateTimeField({ value, mode, onChange, placeholder, ico
             <Pressable onPress={(event) => event.stopPropagation()} className="rounded-t-[20px] bg-app-bg pb-8 pt-3 dark:bg-dark-surface">
               <View className="mb-1 flex-row items-center justify-between px-5">
                 <PressableScale onPress={() => setOpen(false)} accessibilityLabel={t('Cancel')}>
-                  <AppText className="font-gilroy-medium text-[15px] text-muted dark:text-dark-muted">{t('Cancel')}</AppText>
+                  <AppText className="font-gilroy-medium text-[15px] leading-[20px] text-muted dark:text-dark-muted">{t('Cancel')}</AppText>
                 </PressableScale>
                 <PressableScale onPress={confirm} accessibilityLabel={t('Done')}>
-                  <AppText className="font-gilroy-semibold text-[15px] text-links dark:text-dark-text">{t('Done')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[15px] leading-[20px] text-links dark:text-dark-text">{t('Done')}</AppText>
                 </PressableScale>
               </View>
               <DateTimePicker

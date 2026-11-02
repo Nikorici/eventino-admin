@@ -69,7 +69,7 @@ function mailPermissionKey(userId: number): string {
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <AppText className="px-1 pb-1 font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted dark:text-dark-muted">
+    <AppText className="px-1 pb-1 font-gilroy-semibold text-[13px] leading-[17px] uppercase tracking-[0.52px] text-muted dark:text-dark-muted">
       {children}
     </AppText>
   );
@@ -102,7 +102,7 @@ function SettingsRow({
       <View className="h-9 w-9 items-center justify-center rounded-[9px]" style={{ backgroundColor: `${color}14` }}>
         <Icon size={18} color={color} />
       </View>
-      <AppText className={cn('flex-1 font-gilroy-medium text-[15px]', danger && 'text-danger dark:text-danger')}>
+      <AppText className={cn('flex-1 font-gilroy-medium text-[15px] leading-[20px]', danger && 'text-danger dark:text-danger')}>
         {label}
       </AppText>
       {right ?? <ChevronRight size={18} color={colors.muted} />}
@@ -129,7 +129,7 @@ function ProfileHeader({ profile }: { profile: User }) {
   const name = displayNameOf(profile);
   return (
     <View className="w-full flex-row items-center gap-3.5 rounded-[16px] bg-app-surface p-4 dark:bg-dark-surface">
-      <View className="h-14 w-14 overflow-hidden rounded-full bg-primary dark:bg-dark-elevated">
+      <View className="h-14 w-14 overflow-hidden rounded-full bg-primary">
         {profile.profile_image ? (
           <Image source={{ uri: profile.profile_image }} contentFit="cover" style={{ width: '100%', height: '100%' }} />
         ) : (
@@ -139,10 +139,10 @@ function ProfileHeader({ profile }: { profile: User }) {
         )}
       </View>
       <View className="flex-1">
-        <AppText numberOfLines={1} className="font-gilroy-bold text-[17px]">
+        <AppText numberOfLines={1} className="font-gilroy-bold text-[17px] leading-[22px]">
           {name}
         </AppText>
-        <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+        <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
           {profile.email}
         </AppText>
       </View>
@@ -288,7 +288,7 @@ export default function SettingsScreen() {
       <GlassHeader title={t('Settings')} onBack={navigate.back} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: padding.top, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingTop: padding.top - 4, paddingBottom: padding.bottom, paddingHorizontal: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -304,7 +304,7 @@ export default function SettingsScreen() {
 
           {userQuery.isError ? (
             <View className="flex-row items-center gap-3 rounded-[14px] bg-app-surface px-4 py-3 dark:bg-dark-surface">
-              <AppText className="flex-1 font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">
+              <AppText className="flex-1 font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">
                 {t('Something went wrong.')}
               </AppText>
               <GlassButton label={t('Try again')} variant="ghost" size="sm" onPress={() => void refetch()} />
@@ -313,7 +313,7 @@ export default function SettingsScreen() {
 
           {scheduledDeletion ? (
             <View className="gap-3 rounded-[14px] border border-danger/30 bg-danger/[0.06] p-4">
-              <AppText className="font-gilroy-semibold text-[14px] text-danger dark:text-danger">
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px] text-danger dark:text-danger">
                 {`${t('Profile scheduled for deletion on')} ${formatDeletionDate(scheduledDeletion)}`}
               </AppText>
               <GlassButton label={t('Cancel deletion')} variant="secondary" size="sm" onPress={onCancelDeletion} />
@@ -352,7 +352,7 @@ export default function SettingsScreen() {
               />
             </View>
             <View className="mt-3 flex-row items-center justify-between gap-3 rounded-[14px] bg-app-surface px-4 py-3.5 dark:bg-dark-surface">
-              <AppText className="font-gilroy-medium text-[15px]">{t('Theme')}</AppText>
+              <AppText className="font-gilroy-medium text-[15px] leading-[20px]">{t('Theme')}</AppText>
               <View className="flex-1 flex-row flex-wrap justify-end gap-2">
                 {themeOptions.map((option) => (
                   <Chip
@@ -365,7 +365,7 @@ export default function SettingsScreen() {
               </View>
             </View>
             <View className="mt-3 flex-row items-center justify-between gap-3 rounded-[14px] bg-app-surface px-4 py-3.5 dark:bg-dark-surface">
-              <AppText className="font-gilroy-medium text-[15px]">{t('Language')}</AppText>
+              <AppText className="font-gilroy-medium text-[15px] leading-[20px]">{t('Language')}</AppText>
               <View className="flex-1 flex-row flex-wrap justify-end gap-2">
                 {SUPPORTED_LANGUAGES.map((code) => (
                   <Chip
@@ -407,7 +407,7 @@ export default function SettingsScreen() {
           </View>
 
           {Constants.expoConfig?.version ? (
-            <AppText className="text-center font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+            <AppText className="text-center font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
               {`${t('Version')} ${Constants.expoConfig.version}`}
             </AppText>
           ) : null}

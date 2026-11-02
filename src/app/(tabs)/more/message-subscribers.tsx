@@ -61,17 +61,27 @@ function ListCard({ children }: { children: ReactNode[] }) {
   );
 }
 
-function SelectAllBar({ allSelected, onToggle, summary }: { allSelected: boolean; onToggle: () => void; summary: string | null }) {
+function SelectAllBar({
+  allSelected,
+  onToggle,
+  summary,
+  summaryCheck,
+}: {
+  allSelected: boolean;
+  onToggle: () => void;
+  summary: string | null;
+  summaryCheck?: boolean;
+}) {
   const { t } = useTranslation();
   return (
     <View className="flex-row items-center justify-between">
       <PressableScale onPress={onToggle} accessibilityLabel={allSelected ? t('Unselect All') : t('Select All')}>
-        <AppText className="font-gilroy-semibold text-[13px] text-links">{allSelected ? t('Unselect All') : t('Select All')}</AppText>
+        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-links">{allSelected ? t('Unselect All') : t('Select All')}</AppText>
       </PressableScale>
       {summary ? (
         <View className="flex-row items-center gap-1">
-          <Check size={14} color={colors.muted} />
-          <AppText className="font-gilroy-semibold text-[13px] text-muted">{summary}</AppText>
+          {summaryCheck ? <Check size={14} color={colors.muted} /> : null}
+          <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted dark:text-dark-muted">{summary}</AppText>
         </View>
       ) : null}
     </View>
@@ -233,7 +243,7 @@ export default function MessageSubscribersScreen() {
           {!searching && !filtered ? (
             <View className="flex-row items-center justify-center gap-1.5 px-6">
               <Info size={14} color={colors.muted} />
-              <AppText className="text-center font-gilroy-medium text-[13px] text-muted">
+              <AppText className="text-center font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
                 {t('Try selecting events or categories to find subscribers')}
               </AppText>
             </View>
@@ -268,13 +278,13 @@ export default function MessageSubscribersScreen() {
   const renderTicketTypes = () => (
     <View className="gap-4">
       <View className="gap-1.5">
-        <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Select Event')}</AppText>
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Select Event')}</AppText>
         <PressableScale
           onPress={() => setEventPickerOpen(true)}
           accessibilityLabel={`${t('Select Event')}: ${ticketEvent?.title ?? t('Choose an event...')}`}
           className="h-12 flex-row items-center justify-between gap-2 rounded-[10px] border border-app-border bg-app-surface px-3 dark:border-dark-border dark:bg-dark-surface"
         >
-          <AppText numberOfLines={1} className={ticketEvent ? 'flex-1 text-[16px]' : 'flex-1 text-[16px] text-muted'}>
+          <AppText numberOfLines={1} className={ticketEvent ? 'flex-1 text-[16px] leading-[21px]' : 'flex-1 text-[16px] leading-[21px] text-muted dark:text-dark-muted'}>
             {ticketEvent?.title ?? t('Choose an event...')}
           </AppText>
           <ChevronDown size={18} color={colors.muted} />
@@ -285,7 +295,7 @@ export default function MessageSubscribersScreen() {
         <EmptyState icon={Ticket} title={t('Select an event')} message={t('Choose an event above to see its ticket types')} />
       ) : ticketHoldersQuery.isFetching && !ticketHoldersQuery.data ? (
         <View className="gap-2">
-          <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Loading ticket types...')}</AppText>
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Loading ticket types...')}</AppText>
           <ListCard>
             {[0, 1, 2].map((key) => (
               <AudienceRowSkeleton key={key} />
@@ -312,6 +322,7 @@ export default function MessageSubscribersScreen() {
               setSelectedTicketTypeIds(allTicketTypesSelected ? [] : ticketTypes.map((ticketType) => ticketType.id));
             }}
             summary={selectedTicketTypeIds.length > 0 ? `${ticketHolderCount} ${t('recipients')}` : null}
+            summaryCheck
           />
           <ListCard>
             {ticketTypes.map((ticketType) => (
@@ -427,7 +438,7 @@ export default function MessageSubscribersScreen() {
         }
       >
         <View className="gap-4">
-          <AppText className="font-gilroy-medium text-[14px] text-muted">
+          <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">
             {t('Choose who receives your email, then compose or schedule it.')}
           </AppText>
 
@@ -450,9 +461,9 @@ export default function MessageSubscribersScreen() {
           {activeFilters.length > 0 && mode !== 'ticket_types' ? (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <AppText className="font-gilroy-semibold text-[13px] text-muted">{t('Active Filters')}</AppText>
+                <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Active Filters')}</AppText>
                 <PressableScale onPress={() => applyFilters([], [])} accessibilityLabel={t('Clear All')}>
-                  <AppText className="font-gilroy-semibold text-[13px] text-links">{t('Clear All')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-links dark:text-links">{t('Clear All')}</AppText>
                 </PressableScale>
               </View>
               <View className="flex-row flex-wrap gap-2">
@@ -467,7 +478,7 @@ export default function MessageSubscribersScreen() {
                     className="h-8 flex-row items-center gap-1.5 rounded-full border border-app-border bg-app-surface px-3 dark:border-dark-border dark:bg-white/10"
                   >
                     {filter.kind === 'event' ? <CalendarDays size={12} color={colors.muted} /> : <Tag size={12} color={colors.muted} />}
-                    <AppText numberOfLines={1} className="max-w-[160px] font-gilroy-medium text-[13px]">
+                    <AppText numberOfLines={1} className="max-w-[160px] font-gilroy-medium text-[13px] leading-[17px]">
                       {filter.label}
                     </AppText>
                     <X size={13} color={colors.muted} />
@@ -483,7 +494,7 @@ export default function MessageSubscribersScreen() {
 
       {showComposeBar ? (
         <View
-          style={{ paddingBottom: padding.bottom }}
+          style={{ paddingBottom: padding.bottom - 12 }}
           className="absolute bottom-0 left-0 right-0 border-t border-app-border bg-app-bg px-4 pt-3 dark:border-dark-border dark:bg-dark-bg"
         >
           <PressableScale
@@ -495,7 +506,7 @@ export default function MessageSubscribersScreen() {
             className="h-[52px] w-full flex-row items-center justify-center gap-2 rounded-[12px] bg-primary dark:bg-white"
           >
             <Mail size={18} color={composeTint} />
-            <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">
+            <AppText className="font-gilroy-bold text-[16px] leading-[21px] text-white dark:text-primary">
               {`${t('Compose email')} · ${t('{{count}} recipients', { count: composeCount })}`}
             </AppText>
           </PressableScale>

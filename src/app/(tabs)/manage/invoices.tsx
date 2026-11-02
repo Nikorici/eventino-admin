@@ -3,7 +3,7 @@ import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 import { FileText, ReceiptText, Search, Send } from 'lucide-react-native';
 
-import { AppText, Badge, Chip, EmptyState, GlassHeader, PressableScale, Screen, SegmentedControl, Skeleton } from '@/components/ui';
+import { AppText, Badge, EmptyState, GlassHeader, PressableScale, Screen, SegmentedControl, Skeleton } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { FacturaOrdersPanel, type FacturaTab } from '@/components/dashboard/FacturaOrdersPanel';
 import {
@@ -132,6 +132,28 @@ function InvoiceRow({
         )}
       </View>
     </InvoiceCard>
+  );
+}
+
+function FacturaTabChip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  return (
+    <PressableScale
+      onPress={() => {
+        haptics.selection();
+        onPress();
+      }}
+      accessibilityLabel={label}
+      className={cn(
+        'h-9 justify-center rounded-full border px-3.5',
+        selected
+          ? 'border-primary bg-primary dark:border-white dark:bg-white'
+          : 'border-app-border bg-app-surface dark:border-dark-border dark:bg-white/10',
+      )}
+    >
+      <AppText className={cn('font-gilroy-medium text-[13px]', selected ? 'text-white dark:text-primary' : 'text-primary dark:text-dark-text')}>
+        {label}
+      </AppText>
+    </PressableScale>
   );
 }
 
@@ -302,7 +324,7 @@ export default function InvoicesScreen() {
           contentContainerClassName="gap-2 px-4"
         >
           {facturaTabs.map((item) => (
-            <Chip
+            <FacturaTabChip
               key={item.key}
               label={item.label}
               selected={facturaTab === item.key}

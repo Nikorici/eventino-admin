@@ -39,20 +39,20 @@ function PurchaseRow({ buyer, index, currency }: { buyer: EventBuyer; index: num
   const { t, i18n } = useTranslation();
   return (
     <View className="flex-row items-center gap-3 py-3">
-      <View className="h-10 w-10 items-center justify-center rounded-full bg-brand/20 dark:bg-dark-elevated">
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-brand/20">
         <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{index + 1}</AppText>
       </View>
       <View className="flex-1">
-        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+        <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
           {buyerName(buyer, t('Unknown'))}
         </AppText>
-        <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+        <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
           {buyer.email || '-'}
         </AppText>
       </View>
       <View className="items-end">
-        <AppText className="font-gilroy-bold text-[14px]">{moneyLabel(buyer.total_price, buyer.currency || currency)}</AppText>
-        <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{purchaseDate(buyer.date, i18n.language)}</AppText>
+        <AppText className="font-gilroy-bold text-[14px] leading-[19px]">{moneyLabel(buyer.total_price, buyer.currency || currency)}</AppText>
+        <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">{purchaseDate(buyer.date, i18n.language)}</AppText>
       </View>
     </View>
   );
@@ -107,7 +107,7 @@ export default function TicketInfoScreen() {
     if (rows.length === 0) return <PanelMessage text={emptyText} />;
     return (
       <>
-        <PanelCard>
+        <PanelCard className="mt-1">
           {rows.map((buyer, index) => (
             <RowDivider key={`${buyer.order_id ?? buyer.id ?? index}-${index}`} index={index}>
               <PurchaseRow buyer={buyer} index={index} currency={fallbackCurrency} />
@@ -118,14 +118,14 @@ export default function TicketInfoScreen() {
           <PressableScale
             onPress={() => setPage((current) => current + 1)}
             disabled={query.isFetching}
-            accessibilityLabel={t('Load More')}
-            className="h-11 items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border"
+            accessibilityLabel={t('Load more')}
+            className="mt-1 h-11 items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border"
           >
             {query.isFetching ? (
               <ActivityIndicator size="small" color={colors.muted} />
             ) : (
-              <AppText className="font-gilroy-semibold text-[14px] text-primary dark:text-dark-text">
-                {`${t('Load More')} (${remaining} ${t('remaining')})`}
+              <AppText className="font-gilroy-semibold text-[14px] leading-[19px] text-primary dark:text-dark-text">
+                {`${t('Load more')} (${remaining} ${t('remaining')})`}
               </AppText>
             )}
           </PressableScale>
@@ -157,7 +157,7 @@ export default function TicketInfoScreen() {
             setSearchInput(next);
             setPage(1);
           }}
-          placeholder={t('Search by name or email...')}
+          placeholder={t('Search by name or email')}
         />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="grow-0" contentContainerClassName="gap-2">
           {intervalOptions.map((option) => (
@@ -185,10 +185,10 @@ export default function TicketInfoScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          paddingTop: padding.top + 8,
+          paddingTop: padding.top,
           paddingBottom: padding.bottom,
           paddingHorizontal: 16,
-          gap: 12,
+          gap: 8,
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />

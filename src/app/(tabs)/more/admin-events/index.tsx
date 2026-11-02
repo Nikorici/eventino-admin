@@ -149,7 +149,7 @@ function AdminEventCard({
           >
             {paid ? <CircleCheck size={12} color={ACCENT_GREEN} /> : <Clock size={12} color={ACCENT_ORANGE} />}
             <AppText
-              className="font-gilroy-bold text-[10px] uppercase tracking-wide"
+              className="font-gilroy-bold text-[10px] uppercase tracking-[0.04em]"
               style={{ color: paid ? ACCENT_GREEN : ACCENT_ORANGE }}
             >
               {paid ? t('Paid') : t('Pending')}
@@ -165,7 +165,7 @@ function AdminEventCard({
               onPress={openOwner}
               accessibilityRole="link"
               suppressHighlighting
-              className="shrink font-gilroy-medium text-[13px] text-links underline dark:text-dark-text"
+              className="shrink font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70"
             >
               {event.owner_name || t('Unknown')}
             </AppText>
@@ -200,7 +200,7 @@ function AdminEventCard({
 
         <View className="mt-1 flex-row items-end justify-between gap-3 border-t pt-3" style={{ borderColor: rowDivider }}>
           <View className="flex-1">
-            <AppText className="font-gilroy-medium text-[10px] uppercase tracking-wide text-muted dark:text-dark-muted">{t('Coupons')}</AppText>
+            <AppText className="font-gilroy-medium text-[10px] uppercase tracking-[0.04em] text-muted dark:text-dark-muted">{t('Coupons')}</AppText>
             {event.coupons.length > 0 ? (
               <View className="mt-1 flex-row flex-wrap gap-1.5">
                 {event.coupons.map((coupon) => (
@@ -222,7 +222,7 @@ function AdminEventCard({
             )}
           </View>
           <View className="shrink-0 items-end">
-            <AppText className="font-gilroy-medium text-[10px] uppercase tracking-wide text-muted dark:text-dark-muted">{t('Total Income')}</AppText>
+            <AppText className="font-gilroy-medium text-[10px] uppercase tracking-[0.04em] text-muted dark:text-dark-muted">{t('Total Income')}</AppText>
             <AppText className="font-gilroy-bold text-[15px]" style={{ color: ACCENT_GREEN }}>
               {symbol} {formatMoney(Number(event.income) || 0)}
             </AppText>
@@ -435,19 +435,19 @@ const AdminListHeader = memo(function AdminListHeader({
         <Chip
           label={countryLabel}
           onPress={() => onOpenSheet('country')}
-          trailing={<ChevronDown size={14} color={chipIconColor} />}
+          trailing={<ChevronDown size={14} color={iconColor} />}
           className="px-3"
         />
         <Chip
           label={regionLabel}
           onPress={() => onOpenSheet('region')}
-          trailing={<ChevronDown size={14} color={chipIconColor} />}
+          trailing={<ChevronDown size={14} color={iconColor} />}
           className="px-3"
         />
         <Chip
           label={paymentLabel}
           onPress={() => onOpenSheet('payment')}
-          trailing={<ChevronDown size={14} color={chipIconColor} />}
+          trailing={<ChevronDown size={14} color={iconColor} />}
           className="px-3"
         />
         {hasActiveFilters ? (
@@ -463,7 +463,7 @@ const AdminListHeader = memo(function AdminListHeader({
       {country === 'ro' ? <DecontArchiveCard /> : null}
 
       {total != null ? (
-        <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted dark:text-dark-muted">
+        <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-[0.04em] text-muted dark:text-dark-muted">
           {`${total} ${total === 1 ? t('Event') : t('Events')}`}
         </AppText>
       ) : null}

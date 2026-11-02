@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, Switch, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, Switch, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { X } from 'lucide-react-native';
 
-import { AppText, PressableScale, SegmentedControl, Skeleton, ToastHost } from '@/components/ui';
+import { AppText, GlassInput, PressableScale, SegmentedControl, Skeleton, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
@@ -68,7 +68,7 @@ export function useCardBorder(): string {
 export function StatusBadge({ label, color }: { label: string; color: string }) {
   return (
     <View className="self-start rounded-full px-2.5 py-0.5" style={{ backgroundColor: `${color}22` }}>
-      <AppText className="font-gilroy-semibold text-[11px]" style={{ color }}>
+      <AppText className="font-gilroy-semibold text-[11px] leading-[14px]" style={{ color }}>
         {label}
       </AppText>
     </View>
@@ -77,7 +77,9 @@ export function StatusBadge({ label, color }: { label: string; color: string }) 
 
 export function SectionLabel({ children }: { children: string }) {
   return (
-    <AppText className="font-gilroy-semibold text-[13px] uppercase tracking-wide text-muted">{children}</AppText>
+    <AppText className="font-gilroy-semibold text-[13px] uppercase leading-[17px] tracking-[0.52px] text-muted dark:text-dark-muted">
+      {children}
+    </AppText>
   );
 }
 
@@ -96,10 +98,10 @@ export function Card({ children, className }: { children: ReactNode; className?:
 export function KpiCard({ label, value }: { label: string; value: string }) {
   return (
     <Card className="flex-1 gap-1 p-3">
-      <AppText numberOfLines={1} className="font-gilroy-medium text-[11px] uppercase tracking-wide text-muted">
+      <AppText numberOfLines={1} className="font-gilroy-medium text-[11px] uppercase leading-[14px] tracking-[0.44px] text-muted dark:text-dark-muted">
         {label}
       </AppText>
-      <AppText numberOfLines={1} className="font-gilroy-bold text-[16px]">
+      <AppText numberOfLines={1} className="font-gilroy-bold text-[16px] leading-[21px]">
         {value}
       </AppText>
     </Card>
@@ -140,8 +142,8 @@ export function ListSkeleton() {
 export function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-start justify-between gap-3 py-1">
-      <AppText className="font-gilroy-medium text-[13px] text-muted">{label}</AppText>
-      <AppText numberOfLines={1} className="flex-1 text-right font-gilroy-medium text-[13px]">
+      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{label}</AppText>
+      <AppText numberOfLines={1} className="flex-1 text-right font-gilroy-medium text-[13px] leading-[17px]">
         {value}
       </AppText>
     </View>
@@ -163,19 +165,15 @@ export function MultilineInput({
 }) {
   return (
     <View className="w-full gap-1.5">
-      <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{label}</AppText>
-      <View className="rounded-[10px] border border-app-border bg-app-surface px-3 py-2.5 dark:border-dark-border dark:bg-dark-surface">
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={colors.muted}
-          multiline
-          className="min-h-[88px] font-gilroy text-base text-primary dark:text-dark-text"
-          style={{ textAlignVertical: 'top' }}
-        />
-      </View>
-      {hint ? <AppText className="font-gilroy-medium text-[12px] text-muted">{hint}</AppText> : null}
+      <GlassInput
+        label={label}
+        placeholder={placeholder}
+        value={value}
+        onChangeText={onChangeText}
+        multiline
+        className="min-h-[88px]"
+      />
+      {hint ? <AppText className="font-gilroy text-[12px] leading-4 text-muted dark:text-dark-muted">{hint}</AppText> : null}
     </View>
   );
 }
@@ -187,6 +185,7 @@ export function ToggleRow({
   onValueChange,
   disabled,
   bordered = true,
+  spacious = false,
 }: {
   label: string;
   hint?: string;
@@ -194,14 +193,17 @@ export function ToggleRow({
   onValueChange: (next: boolean) => void;
   disabled?: boolean;
   bordered?: boolean;
+  spacious?: boolean;
 }) {
   const switchTrackOn = useThemeColor(colors.primary, colors.accent);
   const switchTrackOff = useThemeColor('#d1d1d6', colors.dark.elevated);
   const body = (
     <>
       <View className="flex-1 pr-3">
-        <AppText className={cn('text-[14px]', hint ? 'font-gilroy-semibold' : 'font-gilroy-medium')}>{label}</AppText>
-        {hint ? <AppText className="font-gilroy-medium text-[12px] text-muted">{hint}</AppText> : null}
+        <AppText className={cn('text-[14px] leading-[19px]', hint ? 'font-gilroy-semibold' : 'font-gilroy-medium')}>
+          {label}
+        </AppText>
+        {hint ? <AppText className="font-gilroy-medium text-[12px] leading-4 text-muted dark:text-dark-muted">{hint}</AppText> : null}
       </View>
       <Switch
         value={value}
@@ -217,7 +219,16 @@ export function ToggleRow({
     </>
   );
   if (!bordered) return <View className="flex-row items-center justify-between">{body}</View>;
-  return <Card className={cn('flex-row items-center justify-between', hint ? 'p-4' : 'px-4 py-2.5')}>{body}</Card>;
+  return (
+    <Card
+      className={cn(
+        'flex-row items-center justify-between',
+        hint ? 'p-4' : spacious ? 'min-h-[57px] px-4 py-3' : 'min-h-[53px] px-4 py-2.5',
+      )}
+    >
+      {body}
+    </Card>
+  );
 }
 
 export function PrimaryButton({
@@ -268,12 +279,16 @@ export function SecondaryButton({
   loading,
   disabled,
   icon,
+  compact,
+  radius = 12,
 }: {
   label: string;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
   icon?: ReactNode;
+  compact?: boolean;
+  radius?: 10 | 12;
 }) {
   return (
     <PressableScale
@@ -281,12 +296,16 @@ export function SecondaryButton({
       disabled={disabled || loading}
       accessibilityLabel={label}
       className={cn(
-        'h-11 w-full flex-row items-center justify-center gap-2 rounded-[12px] border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface',
+        'w-full flex-row items-center justify-center gap-2 border border-app-border bg-white dark:border-dark-border dark:bg-dark-surface',
+        radius === 10 ? 'rounded-[10px]' : 'rounded-[12px]',
+        compact ? 'h-10 px-3' : 'h-11',
         disabled && !loading && 'opacity-50',
       )}
     >
       {loading ? <ActivityIndicator size="small" color={colors.muted} /> : icon}
-      <AppText className="font-gilroy-semibold text-[14px]">{label}</AppText>
+      <AppText numberOfLines={1} className={cn('font-gilroy-semibold', compact ? 'text-[13px]' : 'text-[14px]')}>
+        {label}
+      </AppText>
     </PressableScale>
   );
 }
@@ -341,7 +360,7 @@ export function SheetModal({
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <AppText numberOfLines={1} className="flex-1 pr-3 font-gilroy-bold text-[20px]">
+              <AppText numberOfLines={1} className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
                 {title}
               </AppText>
               <Pressable

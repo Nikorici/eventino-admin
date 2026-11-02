@@ -3237,7 +3237,7 @@
   "The layout defines the sections, rows and seats. You will set the prices in the next step.": "The layout defines the sections, rows and seats. You will set the prices in the next step.",
   "The selected venue layout is not active": "The selected venue layout is not active",
   "This event already uses a zone map. Remove the zones before adding a seat map.": "This event already uses a zone map. Remove the zones before adding a seat map.",
-  "This is the final price the client pays — VAT and platform fees included.": "This is the final price the client pays — TVA and platform fees included.",
+  "This is the final price the client pays — VAT and platform fees included.": "This is the final price the client pays — VAT and platform fees included.",
   "This link is invalid or the offer was removed.": "This link is invalid or the offer was removed.",
   "This offer has expired.": "This offer has expired.",
   "This offer was cancelled.": "This offer was cancelled.",
@@ -4159,5 +4159,9 @@
   "Some coupons were rejected. Check the highlighted rows.": "Some coupons were rejected. Check the highlighted rows.",
   "One or more tickets were rejected by the server. See the highlighted rows.": "One or more tickets were rejected by the server. See the highlighted rows.",
   "Failed to save marketing tracking settings": "Failed to save marketing tracking settings",
-  "Marketing tracking settings saved successfully": "Marketing tracking settings saved successfully"
+  "Marketing tracking settings saved successfully": "Marketing tracking settings saved successfully",
+  "We strongly recommend adding images in 16:9 format (for example, 1920 x 1080 or 1280 x 720).": "We strongly recommend adding images in 16:9 format (for example, 1920 x 1080 or 1280 x 720).",
+  "Add discount tier": "Add discount tier",
+  "1 printer": "1 printer",
+  "{{count}} printers": "{{count}} printers"
 }

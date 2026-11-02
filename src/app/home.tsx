@@ -24,8 +24,7 @@ import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
 import { CurrencySelector } from '@/components/overview/CurrencySelector';
 import { useSummaryCurrency } from '@/components/overview/useSummaryCurrency';
 import { WelcomeHeading } from '@/components/overview/WelcomeHeading';
-import { BlurredPoster } from '@/components/events/BlurredPoster';
-import { organizerEventStatus } from '@/components/events/OrganizerEventCard';
+import { EventThumb, organizerEventStatus } from '@/components/events/OrganizerEventCard';
 import { AppText, Chip, EmptyState, GlassButton, GlassSurface, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
@@ -65,7 +64,7 @@ function StatCard({
     <View
       className={cn(
         'gap-0.5 rounded-[14px] border px-5 py-[18px]',
-        hero ? 'border-primary bg-primary dark:border-white/10' : 'bg-white dark:bg-dark-surface',
+        hero ? 'border-primary bg-primary dark:border-white/[0.12]' : 'bg-white dark:bg-dark-surface',
       )}
       style={hero ? undefined : { borderColor: cardBorder }}
     >
@@ -75,22 +74,28 @@ function StatCard({
           adjustsFontSizeToFit
           minimumFontScale={0.6}
           className={cn(
-            'shrink font-gilroy-bold tracking-tight',
-            unit ? (hero ? 'text-[34px] leading-[40px]' : 'text-[32px] leading-[38px]') : 'text-[38px] leading-[44px]',
+            'shrink font-gilroy-bold',
+            unit
+              ? hero
+                ? 'text-[34px] leading-[40px] tracking-[-0.68px]'
+                : 'text-[32px] leading-[38px] tracking-[-0.64px]'
+              : 'text-[38px] leading-[44px] tracking-[-0.76px]',
             hero && 'text-white dark:text-white',
           )}
         >
-          {value}
+          {unit ? `${value} ` : value}
           {unit ? (
             <AppText
-              className={cn('font-gilroy-semibold text-[18px] tracking-normal', hero && 'text-white dark:text-white')}
-            >{` ${unit}`}</AppText>
+              className={cn('font-gilroy-semibold text-[18px] leading-[24px] tracking-normal', hero && 'text-white dark:text-white')}
+            >
+              {unit}
+            </AppText>
           ) : null}
         </AppText>
         <View
           className={cn(
             'h-10 w-10 items-center justify-center rounded-[10px]',
-            hero ? 'bg-white/10' : 'bg-black/[0.04] dark:bg-white/10',
+            hero ? 'bg-white/[0.12]' : 'bg-black/[0.04] dark:bg-white/10',
           )}
         >
           <Icon size={20} color={hero ? colors.white : iconColor} />
@@ -141,14 +146,13 @@ function CurrentEventRow({ eventId }: { eventId: number }) {
       accessibilityLabel={`${t('Current event')}: ${name}`}
       className="flex-row items-center gap-2.5 px-1 pb-3"
     >
-      <BlurredPoster
+      <EventThumb
         uri={listItem?.image ?? detail?.images[0] ?? null}
         className="h-9 w-9 rounded-[8px]"
-        iconSize={16}
         recyclingKey={String(eventId)}
       />
       <View className="flex-1">
-        <AppText className="font-gilroy-semibold text-[11px] uppercase leading-[14px] tracking-wide text-muted dark:text-dark-muted">
+        <AppText className="font-gilroy-semibold text-[11px] uppercase leading-[14px] tracking-[0.44px] text-muted dark:text-dark-muted">
           {t('Current event')}
         </AppText>
         <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
@@ -157,7 +161,7 @@ function CurrentEventRow({ eventId }: { eventId: number }) {
       </View>
       {status ? (
         <View className="h-[22px] justify-center rounded-full px-2.5" style={{ backgroundColor: status.color }}>
-          <AppText className="font-gilroy-bold text-[10px] uppercase tracking-wide text-white dark:text-white">
+          <AppText className="font-gilroy-bold text-[10px] uppercase tracking-[0.5px] text-white dark:text-white">
             {status.label}
           </AppText>
         </View>
@@ -300,7 +304,7 @@ export default function HomeScreen() {
 
       <GlassSurface
         className="absolute bottom-0 left-0 right-0 rounded-b-none rounded-t-[24px] border-b-0 px-4 pt-3"
-        style={{ paddingBottom: insets.bottom + 16 }}
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
         {eventId != null ? <CurrentEventRow eventId={eventId} /> : null}
         <GlassButton

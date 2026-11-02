@@ -2,22 +2,22 @@ import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle2, Info, XCircle } from 'lucide-react-native';
+import { CircleCheck, Info, CircleX } from 'lucide-react-native';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { hideToast, type ToastType } from '@/store/slices/uiSlice';
+import { glassShadow } from '@/theme/glass';
 
 import { AppText } from './AppText';
-import { GlassSurface } from './GlassSurface';
 
 const iconByType: Record<ToastType, typeof Info> = {
-  success: CheckCircle2,
-  error: XCircle,
+  success: CircleCheck,
+  error: CircleX,
   info: Info,
 };
 
 const colorByType: Record<ToastType, string> = {
-  success: '#15dd7d',
+  success: '#34c759',
   error: '#d83636',
   info: '#61859d',
 };
@@ -38,12 +38,15 @@ export function ToastHost() {
   const Icon = iconByType[toast.type];
 
   return (
-    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { paddingTop: insets.top + 8 }]} className="z-[100] items-center">
-      <Animated.View entering={FadeInUp.springify().damping(18)} exiting={FadeOutUp} className="px-4">
-        <GlassSurface elevation="high" className="flex-row items-center gap-3 rounded-glass px-4 py-3">
-          <Icon size={20} color={colorByType[toast.type]} />
-          <AppText className="max-w-[260px] font-gilroy-medium text-sm">{toast.message}</AppText>
-        </GlassSurface>
+    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { paddingTop: insets.top + 8 }]} className="z-[100] px-4">
+      <Animated.View
+        entering={FadeInUp.springify().damping(18)}
+        exiting={FadeOutUp}
+        style={glassShadow}
+        className="flex-row items-center gap-2.5 rounded-[14px] border border-app-border bg-app-surface px-3.5 py-3 dark:border-dark-border dark:bg-dark-surface"
+      >
+        <Icon size={20} color={colorByType[toast.type]} />
+        <AppText className="flex-1 font-gilroy-semibold text-sm">{toast.message}</AppText>
       </Animated.View>
     </View>
   );

@@ -23,7 +23,9 @@ export function ResendCode({ onResend }: { onResend: () => Promise<unknown> }) {
 
   return (
     <View className="flex-row items-center justify-center gap-1.5">
-      <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Did not get the code?')}</AppText>
+      <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary dark:text-dark-text">
+        {t('Did not get the code?')}
+      </AppText>
       <PressableScale
         onPress={async () => {
           if (waiting) return;
@@ -38,7 +40,7 @@ export function ResendCode({ onResend }: { onResend: () => Promise<unknown> }) {
         hitSlop={8}
       >
         <AppText
-          className={cn('font-gilroy-bold text-[13px] text-primary dark:text-dark-text', waiting && 'opacity-50')}
+          className={cn('font-gilroy-bold text-[13px] leading-[17px] text-primary dark:text-dark-text', waiting && 'opacity-50')}
         >
           {t('Resend code')}
           {secondsLeft > 0 ? ` (${String(secondsLeft).padStart(2, '0')})` : ''}

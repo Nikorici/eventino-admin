@@ -1,4 +1,4 @@
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { formatPrice, parsePrice } from '@/lib/seating/pricing';
@@ -35,12 +35,7 @@ export function SeatLegend({ categories, currency }: SeatLegendProps) {
   const theme = seatMapTheme(useColorScheme() === 'dark');
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
-      accessibilityLabel={t('Seat map legend')}
-    >
+    <View className="flex-row flex-wrap gap-2" accessibilityLabel={t('Seat map legend')}>
       {categories.map((category) => (
         <LegendChip
           key={category.ticket_type_id}
@@ -52,6 +47,6 @@ export function SeatLegend({ categories, currency }: SeatLegendProps) {
       <LegendChip color={theme.reserved} label={t('Reserved')} />
       <LegendChip color={theme.sold} label={t('Sold')} />
       <LegendChip color={theme.unavailable} label={t('Unavailable')} />
-    </ScrollView>
+    </View>
   );
 }

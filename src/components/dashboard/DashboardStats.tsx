@@ -59,6 +59,10 @@ const MINI_HEIGHT = 30;
 const CHART_PAD = 12;
 const TOOLTIP_WIDTH = 172;
 
+function wholeMoney(value: number): string {
+  return formatMoney(Math.round(value));
+}
+
 const hourlyGraphApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getOrganizerHourlyGraph: builder.query<OrganizerGraphPoint[], { targetDate: string; eventId?: number }>({
@@ -108,12 +112,17 @@ export function IntervalSelector({ value, onChange }: { value: IntervalKey; onCh
               accessibilityLabel={option.label}
               className={cn(
                 'h-9 w-full items-center justify-center rounded-[8px] border',
-                active ? 'border-primary bg-primary' : 'border-[#e1e4e8] bg-[#f4f5f7] dark:border-dark-border dark:bg-dark-elevated',
+                active
+                  ? 'border-primary bg-primary dark:border-white dark:bg-white'
+                  : 'border-[#e1e4e8] bg-[#f4f5f7] dark:border-dark-border dark:bg-dark-elevated',
               )}
             >
               <AppText
                 numberOfLines={1}
-                className={cn('font-gilroy-semibold text-[12px]', active ? 'text-white' : 'text-primary/70')}
+                className={cn(
+                  'font-gilroy-semibold text-[12px]',
+                  active ? 'text-white dark:text-primary' : 'text-primary/70 dark:text-dark-text/70',
+                )}
               >
                 {option.label}
               </AppText>
@@ -131,17 +140,22 @@ export function CountCard({
   value,
   caption,
   allTimeValue,
+  className,
 }: {
   icon: LucideIcon;
   label: string;
   value: number;
   caption?: string;
   allTimeValue?: number;
+  className?: string;
 }) {
   const { t } = useTranslation();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   return (
-    <View className="w-[48%] rounded-[12px] border bg-white dark:bg-dark-surface p-4" style={{ borderColor: cardBorder }}>
+    <View
+      className={cn(className ?? 'w-[48%]', 'rounded-[12px] border bg-white p-4 dark:bg-dark-surface')}
+      style={{ borderColor: cardBorder }}
+    >
       <View className="flex-row items-start justify-between">
         <AppText className="font-gilroy-bold text-[22px] leading-[26px] text-primary">{value}</AppText>
         <View className="h-9 w-9 items-center justify-center rounded-[10px]" style={{ backgroundColor: `${ACCENT_BLUE}1a` }}>
@@ -152,11 +166,11 @@ export function CountCard({
         {label}
       </AppText>
       {allTimeValue != null ? (
-        <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted">
+        <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
           {`↗ ${allTimeValue} ${t('all time')}`}
         </AppText>
       ) : caption ? (
-        <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted">
+        <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
           {caption}
         </AppText>
       ) : null}
@@ -172,6 +186,7 @@ export function RevenueCard({
   allTimeEntries,
   note,
   wide,
+  suffixClassName = 'font-gilroy-semibold text-[14px] text-primary/70 dark:text-dark-text/70',
 }: {
   icon: LucideIcon;
   label: string;
@@ -180,6 +195,7 @@ export function RevenueCard({
   allTimeEntries?: CurrencyEntry[];
   note?: string;
   wide?: boolean;
+  suffixClassName?: string;
 }) {
   const { t } = useTranslation();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
@@ -187,10 +203,10 @@ export function RevenueCard({
   const rest = entries.slice(1);
   const invoiceSuffix = (code: string) => {
     const amount = invoiceByCurrency?.[code];
-    return amount != null ? ` (${currencySymbol(code)} ${formatMoney(amount)})` : '';
+    return amount != null ? ` (${currencySymbol(code)} ${wholeMoney(amount)})` : '';
   };
   const allTimeLine = allTimeEntries?.length
-    ? allTimeEntries.map((entry) => `${currencySymbol(entry.code)} ${formatMoney(entry.amount)}`).join(' · ')
+    ? allTimeEntries.map((entry) => `${currencySymbol(entry.code)} ${wholeMoney(entry.amount)}`).join(' · ')
     : null;
   return (
     <View
@@ -205,16 +221,16 @@ export function RevenueCard({
             minimumFontScale={0.6}
             className="font-gilroy-bold text-[20px] leading-[24px] text-primary"
           >
-            {primary ? `${currencySymbol(primary.code)} ${formatMoney(primary.amount)}${wide ? '' : invoiceSuffix(primary.code)}` : '—'}
+            {primary ? `${currencySymbol(primary.code)} ${wholeMoney(primary.amount)}${wide ? '' : invoiceSuffix(primary.code)}` : '—'}
             {primary && wide && invoiceSuffix(primary.code) ? (
-              <AppText className="font-gilroy-semibold text-[14px] text-primary/70 dark:text-dark-text/70">
+              <AppText className={suffixClassName}>
                 {invoiceSuffix(primary.code)}
               </AppText>
             ) : null}
           </AppText>
           {rest.map((entry) => (
             <AppText key={entry.code} numberOfLines={1} className="mt-0.5 font-gilroy-semibold text-[13px] text-primary/60">
-              {`${currencySymbol(entry.code)} ${formatMoney(entry.amount)}${invoiceSuffix(entry.code)}`}
+              {`${currencySymbol(entry.code)} ${wholeMoney(entry.amount)}${invoiceSuffix(entry.code)}`}
             </AppText>
           ))}
         </View>
@@ -226,11 +242,11 @@ export function RevenueCard({
         {label}
       </AppText>
       {allTimeLine ? (
-        <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted">
+        <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
           {`↗ ${allTimeLine} ${t('all time')}`}
         </AppText>
       ) : null}
-      {note ? <AppText className="mt-0.5 font-gilroy-medium text-[11px] text-muted">{note}</AppText> : null}
+      {note ? <AppText className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{note}</AppText> : null}
     </View>
   );
 }
@@ -256,11 +272,14 @@ function StatsGrid({
   const allTimeManual = allTime?.manual_tickets_count ?? 0;
   const paidTickets = Math.max(0, allTimeTickets - allTimeManual);
   const allTimeCaption = t('all time');
+  const suffixClassName = 'font-gilroy-semibold text-[13px] text-muted dark:text-dark-muted';
 
   return (
-    <View className="flex-row flex-wrap justify-between gap-y-3">
-      <RevenueCard icon={Wallet} label={t('Total Revenue')} entries={revenueEntries} allTimeEntries={revenueAllTime} />
+    <View className="gap-3">
+      <RevenueCard wide suffixClassName={suffixClassName} icon={Wallet} label={t('Total Revenue')} entries={revenueEntries} allTimeEntries={revenueAllTime} />
       <RevenueCard
+        wide
+        suffixClassName={suffixClassName}
         icon={Banknote}
         label={t('Total Received')}
         entries={receivedEntries}
@@ -268,23 +287,34 @@ function StatsGrid({
         allTimeEntries={receivedAllTime}
         note={t('Without invoices')}
       />
-      <CountCard
-        icon={Users}
-        label={t('Total Users')}
-        value={bucket?.new_users ?? 0}
-        allTimeValue={showAllTime ? (allTime?.new_users ?? 0) : undefined}
-      />
-      <CountCard
-        icon={CheckCircle2}
-        label={t('Tickets sold')}
-        value={bucket?.tickets_sold ?? 0}
-        allTimeValue={showAllTime ? (allTime?.tickets_sold ?? 0) : undefined}
-      />
-      <CountCard icon={Ticket} label={t('Total Tickets')} value={allTimeTickets} caption={allTimeCaption} />
-      <CountCard icon={ScanLine} label={t('Scanned Tickets')} value={allTime?.scanned_tickets ?? 0} caption={allTimeCaption} />
-      <CountCard icon={XCircle} label={t('Not Scanned Tickets')} value={allTime?.not_scanned_tickets ?? 0} caption={allTimeCaption} />
-      <CountCard icon={CreditCard} label={t('Paid Tickets')} value={paidTickets} caption={allTimeCaption} />
-      <CountCard icon={Gift} label={t('Free Tickets')} value={allTimeManual} caption={allTimeCaption} />
+      <View className="flex-row gap-3">
+        <CountCard
+          className="flex-1"
+          icon={Users}
+          label={t('Total Users')}
+          value={bucket?.new_users ?? 0}
+          allTimeValue={showAllTime ? (allTime?.new_users ?? 0) : undefined}
+        />
+        <CountCard
+          className="flex-1"
+          icon={CheckCircle2}
+          label={t('Tickets sold')}
+          value={bucket?.tickets_sold ?? 0}
+          allTimeValue={showAllTime ? (allTime?.tickets_sold ?? 0) : undefined}
+        />
+      </View>
+      <View className="flex-row gap-3">
+        <CountCard className="flex-1" icon={Ticket} label={t('Total Tickets')} value={allTimeTickets} caption={allTimeCaption} />
+        <CountCard className="flex-1" icon={CreditCard} label={t('Paid Tickets')} value={paidTickets} caption={allTimeCaption} />
+      </View>
+      <View className="flex-row gap-3">
+        <CountCard className="flex-1" icon={Gift} label={t('Free Tickets')} value={allTimeManual} caption={allTimeCaption} />
+        <CountCard className="flex-1" icon={ScanLine} label={t('Scanned Tickets')} value={allTime?.scanned_tickets ?? 0} caption={allTimeCaption} />
+      </View>
+      <View className="flex-row gap-3">
+        <CountCard className="flex-1" icon={XCircle} label={t('Not Scanned Tickets')} value={allTime?.not_scanned_tickets ?? 0} caption={allTimeCaption} />
+        <View className="flex-1 border border-transparent p-4" />
+      </View>
     </View>
   );
 }
@@ -504,13 +534,14 @@ export const AnalyticsChart = memo(function AnalyticsChart({
   const periodTotal = useMemo(() => points.reduce((sum, point) => sum + point.income, 0), [points]);
   const previousTotal = useMemo(
     () =>
-      summaryRates
+      viewMode === 'month'
         ? buildWindowPoints('month', shiftAnchor('month', anchor, -1), dailyData ?? EMPTY_GRAPH, currency, locale, null, summaryRates)
             .reduce((sum, point) => sum + point.income, 0)
         : 0,
-    [summaryRates, anchor, dailyData, currency, locale],
+    [viewMode, summaryRates, anchor, dailyData, currency, locale],
   );
-  const deltaPercent = summaryRates && previousTotal > 0 ? ((periodTotal - previousTotal) / previousTotal) * 100 : null;
+  const deltaPercent = viewMode === 'month' && previousTotal > 0 ? ((periodTotal - previousTotal) / previousTotal) * 100 : null;
+  const deltaLabel = deltaPercent != null ? `${deltaPercent >= 0 ? '↑' : '↓'} ${Math.abs(deltaPercent).toFixed(1)}% ` : '';
 
   const countSeries = useMemo(
     () =>
@@ -553,7 +584,7 @@ export const AnalyticsChart = memo(function AnalyticsChart({
   const chartStepX = points.length > 1 ? (width - CHART_PAD * 2) / (points.length - 1) : 0;
   const selectedX = selectedIndex != null ? CHART_PAD + selectedIndex * chartStepX : 0;
   const tooltipLeft = Math.min(Math.max(selectedX - TOOLTIP_WIDTH / 2, 0), Math.max(width - TOOLTIP_WIDTH, 0));
-  const peakIndex = summary ? points.reduce((best, point, index) => (point.income > (points[best]?.income ?? 0) ? index : best), -1) : -1;
+  const peakIndex = points.reduce((best, point, index) => (point.income > (points[best]?.income ?? 0) ? index : best), -1);
   const peakMax = Math.max(...points.map((point) => point.income), 1);
   const peakX = CHART_PAD + peakIndex * chartStepX;
   const peakY = peakIndex >= 0 ? CHART_PAD + (CHART_HEIGHT - CHART_PAD * 2) * (1 - points[peakIndex].income / peakMax) : 0;
@@ -563,9 +594,7 @@ export const AnalyticsChart = memo(function AnalyticsChart({
       <View className="flex-row items-center justify-between">
         <View className="gap-0.5">
           <AppText className="font-gilroy-bold text-[16px]">{t('Event Analytics')}</AppText>
-          {summary ? (
-            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('Total Revenue')}</AppText>
-          ) : null}
+          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('Total Revenue')}</AppText>
         </View>
         <View className="flex-row gap-1">
           {(summary ? [] : CHART_VIEW_MODES).map((option) => {
@@ -575,9 +604,14 @@ export const AnalyticsChart = memo(function AnalyticsChart({
                 key={option.key}
                 onPress={() => setViewMode(option.key)}
                 accessibilityLabel={t(option.label)}
-                className={cn('rounded-[7px] px-2.5 py-1', active ? 'bg-primary' : 'bg-[#f4f5f7] dark:bg-dark-elevated')}
+                className={cn('rounded-[7px] px-2.5 py-1', active ? 'bg-primary dark:bg-white' : 'bg-[#f4f5f7] dark:bg-dark-elevated')}
               >
-                <AppText className={cn('font-gilroy-semibold text-[11px]', active ? 'text-white' : 'text-primary/60')}>
+                <AppText
+                  className={cn(
+                    'font-gilroy-semibold text-[11px]',
+                    active ? 'text-white dark:text-primary' : 'text-primary/60 dark:text-dark-text/60',
+                  )}
+                >
                   {t(option.label)}
                 </AppText>
               </PressableScale>
@@ -600,19 +634,19 @@ export const AnalyticsChart = memo(function AnalyticsChart({
           <ChevronLeft size={16} color={chevronColor} />
         </PressableScale>
         <View className="flex-1 items-center">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px] leading-[17px]">
             {rangeLabel}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-bold text-[13px]" style={{ color: INCOME_COLOR }}>
-            {currency ? `${currencySymbol(currency)} ${formatMoney(periodTotal)}` : formatMoney(periodTotal)}
+          <AppText numberOfLines={1} className="font-gilroy-bold text-[13px] leading-[17px]" style={{ color: INCOME_COLOR }}>
+            {currency ? `${currencySymbol(currency)} ${wholeMoney(periodTotal)}` : wholeMoney(periodTotal)}
           </AppText>
-          {deltaPercent != null ? (
+          {summary && deltaPercent != null ? (
             <AppText
               numberOfLines={1}
               className="mt-0.5 font-gilroy-semibold text-[11px]"
               style={{ color: deltaPercent >= 0 ? DELTA_UP : DELTA_DOWN }}
             >
-              {`${deltaPercent >= 0 ? '↑' : '↓'} ${Math.abs(deltaPercent).toFixed(1)}% `}
+              {deltaLabel}
               <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{t('vs previous month')}</AppText>
             </AppText>
           ) : null}
@@ -630,6 +664,17 @@ export const AnalyticsChart = memo(function AnalyticsChart({
           <ChevronRight size={16} color={chevronColor} />
         </PressableScale>
       </View>
+
+      {!summary && deltaPercent != null ? (
+        <AppText
+          numberOfLines={1}
+          className="mt-1.5 text-center font-gilroy-semibold text-[12px] leading-[16px]"
+          style={{ color: deltaPercent >= 0 ? ACCENT_GREEN : colors.danger }}
+        >
+          {deltaLabel}
+          <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('vs previous month')}</AppText>
+        </AppText>
+      ) : null}
 
       {summary && !isLoading && periodTotal <= 0 ? (
         <AppText className="mt-2 text-center font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
@@ -700,13 +745,13 @@ export const AnalyticsChart = memo(function AnalyticsChart({
                   <View key={series.key} className="mt-1 flex-row items-center justify-between gap-2">
                     <View className="flex-row items-center gap-1.5">
                       <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: series.color }} />
-                      <AppText className="font-gilroy-medium text-[10px] text-muted">{t(series.label)}</AppText>
+                      <AppText className="font-gilroy-medium text-[10px] text-muted dark:text-dark-muted">{t(series.label)}</AppText>
                     </View>
                     <AppText className="font-gilroy-semibold text-[10px]">
                       {series.key === 'income'
                         ? currency
-                          ? `${currencySymbol(currency)} ${formatMoney(selected.income)}`
-                          : formatMoney(selected.income)
+                          ? `${currencySymbol(currency)} ${wholeMoney(selected.income)}`
+                          : wholeMoney(selected.income)
                         : String(selected[series.key])}
                     </AppText>
                   </View>
@@ -722,7 +767,7 @@ export const AnalyticsChart = memo(function AnalyticsChart({
       {axisLabels.length > 0 ? (
         <View className="mt-1.5 flex-row justify-between">
           {axisLabels.map((label, index) => (
-            <AppText key={`${index}-${label}`} className="font-gilroy-medium text-[10px] text-muted">
+            <AppText key={`${index}-${label}`} className="font-gilroy-medium text-[10px] text-muted dark:text-dark-muted">
               {label}
             </AppText>
           ))}
@@ -738,8 +783,8 @@ export const AnalyticsChart = memo(function AnalyticsChart({
           <View key={series.key} className="flex-1 gap-1">
             <View className="flex-row items-center gap-1.5">
               <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: series.color }} />
-              <AppText numberOfLines={1} className="font-gilroy-medium text-[10px] text-muted">
-                {t(series.label)}
+              <AppText numberOfLines={1} className="font-gilroy-medium text-[10px] text-muted dark:text-dark-muted">
+                {t(!summary && series.key === 'tickets_sold' ? 'Tickets Sold' : series.label)}
               </AppText>
             </View>
             <AppText className="font-gilroy-bold text-[16px]">{Math.round(series.total)}</AppText>
@@ -785,7 +830,7 @@ export const DashboardStatsSection = memo(function DashboardStatsSection({
 
   if (isError && !stats) {
     return (
-      <View className="gap-3">
+      <View className="gap-4">
         <EmptyState
           className="py-8"
           title={t('Something went wrong.')}
@@ -799,9 +844,11 @@ export const DashboardStatsSection = memo(function DashboardStatsSection({
   }
 
   return (
-    <View className="gap-3">
-      <IntervalSelector value={interval} onChange={setStatsInterval} />
-      <StatsGrid bucket={stats?.[interval]} allTime={stats?.all_time} interval={interval} currencies={currencies} />
+    <View className="gap-4">
+      <View className="gap-3">
+        <IntervalSelector value={interval} onChange={setStatsInterval} />
+        <StatsGrid bucket={stats?.[interval]} allTime={stats?.all_time} interval={interval} currencies={currencies} />
+      </View>
       <AnalyticsChart eventId={eventId} currencies={currencies} lifecycle={lifecycle} />
     </View>
   );

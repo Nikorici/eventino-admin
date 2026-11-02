@@ -362,23 +362,23 @@ export default function PresaleScreen() {
     <View className="gap-3 pb-4">
       <View className="gap-2 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
         <View className="flex-row items-center justify-between gap-3">
-          <AppText numberOfLines={2} className="flex-1 font-gilroy-bold text-[17px]">
+          <AppText numberOfLines={2} className="flex-1 font-gilroy-bold text-[17px] leading-[22px]">
             {event.title}
           </AppText>
           <View className="flex-row items-center gap-1.5">
             <View className="h-2 w-2 rounded-full" style={{ backgroundColor: STREAM_COLORS[streamStatus] }} />
-            <AppText className="font-gilroy-semibold text-[12px]" style={{ color: STREAM_COLORS[streamStatus] }}>
+            <AppText className="font-gilroy-semibold text-[12px] leading-[16px]" style={{ color: STREAM_COLORS[streamStatus] }}>
               {t(STREAM_LABELS[streamStatus])}
             </AppText>
           </View>
         </View>
-        <AppText className="font-gilroy-semibold text-[13px] text-primary dark:text-white">
+        <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary dark:text-white">
           {t(STATE_LABELS[presale.state] ?? presale.state)}
         </AppText>
-        <AppText className="font-gilroy-medium text-[12px] text-muted">
+        <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
           {t('Pre-sale opens')}: {presale.starts_at ? formatStamp(presale.starts_at, lang) : t('Date not set')}
         </AppText>
-        <AppText className="font-gilroy-medium text-[12px] text-muted">
+        <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
           {t('Public sale opens')}: {presale.public_sale_starts_at ? formatStamp(presale.public_sale_starts_at, lang) : t('Date not set')}
         </AppText>
       </View>
@@ -401,15 +401,15 @@ export default function PresaleScreen() {
             className="grow basis-[46%] gap-1 rounded-[12px] border bg-white p-3.5 dark:bg-dark-surface"
             style={{ borderColor: cardBorder }}
           >
-            <AppText className="font-gilroy-medium text-[12px] text-muted">{kpi.label}</AppText>
-            <AppText className="font-gilroy-bold text-[24px]">{kpi.value}</AppText>
-            {kpi.hint ? <AppText className="font-gilroy-medium text-[11px] text-muted">{kpi.hint}</AppText> : null}
+            <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">{kpi.label}</AppText>
+            <AppText className="font-gilroy-bold text-[24px] leading-[30px]">{kpi.value}</AppText>
+            {kpi.hint ? <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted">{kpi.hint}</AppText> : null}
           </View>
         ))}
       </View>
 
       <View className="gap-2.5 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-        <AppText className="font-gilroy-bold text-[15px]">{t('Traffic sources')}</AppText>
+        <AppText className="font-gilroy-bold text-[15px] leading-[20px]">{t('Traffic sources')}</AppText>
         {shares.length ? (
           shares.map((item) => (
             <PressableScale
@@ -422,8 +422,8 @@ export default function PresaleScreen() {
               className={`gap-1.5 rounded-[10px] p-2 ${source === item.source ? 'bg-black/[0.05] dark:bg-white/10' : ''}`}
             >
               <View className="flex-row items-center justify-between">
-                <AppText className="font-gilroy-semibold text-[14px]">{sourceLabel(item.source, t)}</AppText>
-                <AppText className="font-gilroy-medium text-[13px] text-muted">
+                <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{sourceLabel(item.source, t)}</AppText>
+                <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted">
                   {item.count} · {item.percent}%
                 </AppText>
               </View>
@@ -438,30 +438,29 @@ export default function PresaleScreen() {
       </View>
 
       <View className="gap-2 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: cardBorder }}>
-        <AppText className="font-gilroy-bold text-[15px]">{t('Top campaigns')}</AppText>
+        <AppText className="font-gilroy-bold text-[15px] leading-[20px]">{t('Top campaigns')}</AppText>
         {summary.campaigns.length ? (
           summary.campaigns.map((item) => (
             <View key={item.campaign} className="flex-row justify-between gap-3">
-              <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[13px]">
+              <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">
                 {item.campaign}
               </AppText>
-              <AppText className="font-gilroy-bold text-[13px]">{item.count}</AppText>
+              <AppText className="font-gilroy-bold text-[13px] leading-[17px]">{item.count}</AppText>
             </View>
           ))
         ) : (
           <AppText className="font-gilroy-medium text-[13px] text-muted">{t('No campaigns yet')}</AppText>
         )}
-        <AppText className="mt-1 font-gilroy-bold text-[13px] text-muted">{t('Languages')}</AppText>
-        <View className="flex-row gap-4">
+        <View className="mt-1 flex-row gap-4">
           {summary.languages.map((item) => (
-            <AppText key={item.language} className="font-gilroy-medium text-[13px] text-muted">
+            <AppText key={item.language} className="font-gilroy-medium text-[13px] leading-[17px] text-muted">
               {item.language.toUpperCase()} <AppText className="font-gilroy-bold text-[13px]">{item.count}</AppText>
             </AppText>
           ))}
         </View>
       </View>
 
-      <AppText className="mt-1 font-gilroy-bold text-[18px]">{t('Registrations')}</AppText>
+      <AppText className="font-gilroy-bold text-[18px] leading-[24px]">{t('Registrations')}</AppText>
       <GlassInput
         placeholder={t('Search email or phone')}
         accessibilityLabel={t('Search email or phone')}
@@ -498,8 +497,7 @@ export default function PresaleScreen() {
             onPress={() => void onExport()}
             disabled={exporting}
             accessibilityLabel={t('Export CSV')}
-            className="h-9 w-9 items-center justify-center rounded-full border bg-white dark:bg-dark-surface"
-            style={{ borderColor: cardBorder }}
+            className="h-10 w-10 items-center justify-center rounded-full border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
           >
             {exporting ? <ActivityIndicator /> : <Download size={18} color={iconTint} />}
           </PressableScale>
@@ -521,21 +519,21 @@ export default function PresaleScreen() {
             style={{ borderColor: cardBorder }}
           >
             <View className="flex-row items-center justify-between gap-3">
-              <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px]">
+              <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[14px] leading-[19px]">
                 {item.email}
               </AppText>
-              <AppText className="font-gilroy-semibold text-[12px]" style={{ color: STATUS_COLORS[item.notification_status] ?? colors.muted }}>
+              <AppText className="font-gilroy-semibold text-[12px] leading-[16px]" style={{ color: STATUS_COLORS[item.notification_status] ?? colors.muted }}>
                 {t(STATUS_LABELS[item.notification_status] ?? item.notification_status)}
               </AppText>
             </View>
-            <AppText className="font-gilroy-medium text-[12px] text-muted">
+            <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
               {item.phone || '—'} · {item.language.toUpperCase()} · {sourceLabel(item.traffic_source, t)}
               {item.utm_campaign ? ` · ${item.utm_campaign}` : ''}
             </AppText>
             <View className="flex-row items-center justify-between">
-              <AppText className="font-gilroy-medium text-[11px] text-muted">{formatStamp(item.registered_at, lang)}</AppText>
+              <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted">{formatStamp(item.registered_at, lang)}</AppText>
               <AppText
-                className={`overflow-hidden rounded-full px-2 py-0.5 font-gilroy-semibold text-[11px] ${item.has_account ? 'bg-black/[0.06] dark:bg-white/10' : 'bg-[#eef0ff] text-[#4a4ebe] dark:bg-white/10 dark:text-white'}`}
+                className={`overflow-hidden rounded-full px-2 py-0.5 font-gilroy-semibold text-[11px] leading-[14px] ${item.has_account ? 'bg-black/[0.06] dark:bg-white/10' : 'bg-[#eef0ff] text-[#4a4ebe] dark:bg-white/10 dark:text-white'}`}
               >
                 {item.has_account ? t('Eventino user') : t('New lead')}
               </AppText>
@@ -567,16 +565,16 @@ export default function PresaleScreen() {
       <Modal visible={selected != null} animationType="slide" transparent onRequestClose={() => setSelected(null)}>
         <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setSelected(null)}>
           <Pressable
-            className="max-h-[80%] rounded-t-[20px] bg-white px-5 pb-5 pt-2 dark:bg-dark-surface"
+            className="max-h-[80%] rounded-t-[28px] bg-white px-4 pt-3 dark:bg-dark-surface"
             onPress={() => undefined}
             accessibilityViewIsModal
             accessibilityLabel={t('Registration details')}
           >
-            <View className="mb-3 h-1 w-10 self-center rounded-full bg-black/[0.15] dark:bg-white/20" />
+            <View className="mb-3 h-[5px] w-9 self-center rounded-full bg-app-border dark:bg-dark-border" />
             {selected ? (
-              <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 12 }}>
+              <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
                 <View className="mb-3 flex-row items-center justify-between gap-3">
-                  <AppText numberOfLines={2} className="flex-1 font-gilroy-bold text-[16px]">
+                  <AppText numberOfLines={2} className="flex-1 font-gilroy-bold text-[16px] leading-[21px]">
                     {selected.email}
                   </AppText>
                   <PressableScale
@@ -600,8 +598,8 @@ export default function PresaleScreen() {
                   [t('Eventino account'), selected.has_account ? t('Has an Eventino account') : t('No Eventino account')],
                 ].map(([label, value]) => (
                   <View key={label} className="flex-row gap-3 border-b border-black/[0.05] py-2.5 dark:border-white/10">
-                    <AppText className="w-[120px] font-gilroy-medium text-[13px] text-muted">{label}</AppText>
-                    <AppText selectable className="flex-1 font-gilroy-medium text-[13px]">
+                    <AppText className="w-[120px] font-gilroy-medium text-[13px] leading-[17px] text-muted">{label}</AppText>
+                    <AppText selectable className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">
                       {value}
                     </AppText>
                   </View>

@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import {
   BottomSheetBackdrop,
@@ -64,10 +64,10 @@ function AccountRow({ account, switching, disabled, onSwitch, onUnlink }: Accoun
         >
           <UserAvatar uri={account.profile_image} name={name} size={40} />
           <View className="flex-1">
-            <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+            <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px] leading-[20px]">
               {name}
             </AppText>
-            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
               {accountSubtitle(account)}
             </AppText>
           </View>
@@ -119,7 +119,6 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
 
   const modalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ['55%', '85%'], []);
   const [switchingId, setSwitchingId] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -209,17 +208,17 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
       <BottomSheetModal
         ref={modalRef}
         index={0}
-        snapPoints={snapPoints}
         backdropComponent={renderBackdrop}
-        handleIndicatorStyle={{ backgroundColor: colors.muted }}
-        backgroundStyle={{ backgroundColor: isDark ? colors.dark.surface : colors.surface }}
+        handleStyle={{ paddingTop: 12, paddingBottom: 12 }}
+        handleIndicatorStyle={{ width: 36, height: 5, backgroundColor: colors.muted }}
+        backgroundStyle={{ borderRadius: 28, backgroundColor: isDark ? colors.dark.surface : colors.surface }}
       >
-        <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <BottomSheetScrollView contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 40) }}>
           <View className="gap-5 px-5 pt-2">
-            <AppText className="font-gilroy-bold text-2xl">{t('Accounts')}</AppText>
+            <AppText className="font-gilroy-bold text-[24px] leading-[30px]">{t('Accounts')}</AppText>
 
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[12px] uppercase tracking-wide text-muted">
+              <AppText className="font-gilroy-semibold text-[12px] uppercase leading-[16px] tracking-[0.48px] text-muted">
                 {t('Active organizer')}
               </AppText>
               <View
@@ -228,11 +227,11 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
               >
                 <UserAvatar uri={user?.profile_image} name={activeName} size={44} />
                 <View className="flex-1">
-                  <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+                  <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px] leading-[20px]">
                     {activeName}
                   </AppText>
                   {user?.email ? (
-                    <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                    <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                       {user.email}
                     </AppText>
                   ) : null}
@@ -247,7 +246,7 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
             </View>
 
             <View className="gap-2">
-              <AppText className="font-gilroy-semibold text-[12px] uppercase tracking-wide text-muted">
+              <AppText className="font-gilroy-semibold text-[12px] uppercase leading-[16px] tracking-[0.48px] text-muted">
                 {t('Linked accounts')}
               </AppText>
 

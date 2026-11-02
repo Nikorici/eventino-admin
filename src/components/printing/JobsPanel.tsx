@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { TriangleAlert } from 'lucide-react-native';
 import { format } from 'date-fns';
 
 import { AppText, PressableScale } from '@/components/ui';
-import { PanelCard, RowDivider, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { PanelCard, ROW_DIVIDER, RowDivider } from '@/components/dashboard/dashboardParts';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { colors } from '@/theme/colors';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
 import { dateFnsLocale } from '@/lib/format';
@@ -36,10 +39,12 @@ import {
   splitByPrinter,
   type LabelChanges,
 } from './printingLogic';
-import { ErrorText, SelectField, SmallButton, StaleNote, StatusPill, Tag } from './printingParts';
+import { ErrorText, SectionHeading, SelectField, SmallButton, StaleNote, StatusPill, Tag } from './printingParts';
 import { useBusyKeys } from './useBusyKeys';
 
 type JobAction = 'cancel' | 'reprint' | 'mark_printed' | 'resolve_reprint';
+
+const NEEDS_LOOK_BORDER = 'rgba(249,115,22,0.35)';
 
 const isJobStatus = (value: string): value is JobStatus => JOB_STATUSES.some((status) => status === value);
 
@@ -51,6 +56,7 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
   const [editing, setEditing] = useState<{ uuid: string; action: JobAction; changes: LabelChanges } | null>(null);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const { isBusy, run } = useBusyKeys();
+  const rowDivider = useThemeColor(ROW_DIVIDER, colors.dark.border);
 
   const jobs = useGetPrintJobsQuery(
     { eventId, status: status || undefined, page: pageNumber },
@@ -108,7 +114,7 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
 
   const holder = (job: PrintJob) => (
     <View className="flex-1 flex-row items-center gap-1.5">
-      <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px]">
+      <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[14px] leading-[19px]">
         {jobHolderName(job) || '-'}
       </AppText>
       {isFreeLabel(job) ? <Tag label={t('No ticket')} /> : null}
@@ -144,7 +150,7 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
 
   return (
     <View className="gap-3">
-      <SectionTitle subtitle={t('What this event has printed, newest first.')}>{t('Printed labels')}</SectionTitle>
+      <SectionHeading title={t('Printed labels')} subtitle={t('What this event has printed, newest first.')} />
       <SelectField
         accessibilityLabel={t('Status')}
         value={status}
@@ -159,22 +165,26 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
       />
       <StaleNote show={stale} />
       {unknownHidden > 0 && !unknownShown.length ? (
-        <AppText className="font-gilroy-medium text-[13px] text-muted">
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted">
           {t('{{count}} labels at other printers need a look.', { count: unknownHidden })}
         </AppText>
       ) : null}
       {unknownShown.length > 0 ? (
-        <PanelCard className="gap-2 py-4" >
-          <AppText className="font-gilroy-bold text-[15px]" style={{ color: TONE_COLORS.warn }}>
-            {t('Needs a look')}
-          </AppText>
-          <AppText className="font-gilroy-medium text-[13px] text-muted">
+        <View className="gap-2 rounded-[12px] border bg-white p-4 dark:bg-dark-surface" style={{ borderColor: NEEDS_LOOK_BORDER }}>
+          <View className="flex-row items-center gap-2">
+            <TriangleAlert size={16} color={TONE_COLORS.warn} />
+            <AppText className="font-gilroy-bold text-[15px] leading-[20px]" style={{ color: TONE_COLORS.warn }}>
+              {t('Needs a look')}
+            </AppText>
+          </View>
+          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted">
             {t('A delayed label can still come out — look at the printer before you choose.')}
           </AppText>
           {unknownShown.map((job) => (
-            <View key={job.uuid} className="gap-1.5 border-t border-black/5 pt-2.5 dark:border-white/10">
+            <View key={job.uuid} className="gap-2">
+              <View className="my-1 h-px" style={{ backgroundColor: rowDivider }} />
               {holder(job)}
-              <AppText className="font-gilroy-medium text-[12px] text-muted">
+              <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                 {[job.printer_name, jobReason(job, t)].filter(Boolean).join(' · ')}
               </AppText>
               {editing?.uuid === job.uuid ? (
@@ -192,7 +202,7 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
               <ErrorText text={errors[job.uuid]} />
             </View>
           ))}
-        </PanelCard>
+        </View>
       ) : null}
       <PanelCard>
         {page.results.map((job, index) => {
@@ -205,12 +215,12 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
                   {holder(job)}
                   <StatusPill label={t(`job_status_${job.status}`)} tone={jobTone(job.status)} />
                 </View>
-                <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                   {[type || '-', job.printer_name ? `${job.printer_name} · ${connectionLabel(job.connection_type, t)}` : '-'].join(' · ')}
                 </AppText>
-                {reason ? <AppText className="font-gilroy-medium text-[12px] text-danger dark:text-danger">{reason}</AppText> : null}
+                {reason ? <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-danger dark:text-danger">{reason}</AppText> : null}
                 <View className="min-h-8 flex-row items-center justify-between gap-2">
-                  <AppText className="font-gilroy-medium text-[12px] text-muted">{createdAt(job)}</AppText>
+                  <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">{createdAt(job)}</AppText>
                   {editing?.uuid === job.uuid ? null : job.status === 'QUEUED' ? (
                     <SmallButton compact label={t('Cancel')} disabled={isBusy(job.uuid)} onPress={() => void act(job, 'cancel')} />
                   ) : REPRINTABLE.includes(job.status) ? (
@@ -233,7 +243,7 @@ export function JobsPanel({ eventId, printerFilter }: { eventId: number; printer
         <View className="flex-row items-center justify-between gap-2">
           <SmallButton label={t('Previous')} disabled={page.page <= 1} onPress={() => setPageNumber(page.page - 1)} />
           <PressableScale accessibilityLabel={t('Page {{page}} of {{pages}}', { page: page.page, pages: page.pages })}>
-            <AppText className="font-gilroy-semibold text-[13px] text-primary/80 dark:text-dark-text/80">
+            <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary/80 dark:text-dark-text/80">
               {t('Page {{page}} of {{pages}}', { page: page.page, pages: page.pages })}
             </AppText>
           </PressableScale>

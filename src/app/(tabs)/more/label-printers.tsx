@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { Laptop, Printer as PrinterIcon } from 'lucide-react-native';
+import { ChevronRight, Laptop, Plus, Printer as PrinterIcon } from 'lucide-react-native';
 
 import { AppText, GlassButton, GlassHeader, PressableScale, Screen } from '@/components/ui';
-import { ListSkeleton, PanelCard, PanelError, RowDivider, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { ListSkeleton, PanelCard, PanelError, RowDivider } from '@/components/dashboard/dashboardParts';
+import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import {
   REFRESH_MS,
   clearIntent,
@@ -18,9 +19,19 @@ import {
   printingErrorText,
   secondsRemaining,
   sortComputers,
+  TONE_COLORS,
   type Tone,
 } from '@/components/printing/printingLogic';
-import { ErrorText, Notice, PromptSheet, SmallButton, StaleNote, StatusPill, Tag } from '@/components/printing/printingParts';
+import {
+  ErrorText,
+  Notice,
+  PromptSheet,
+  SectionHeading,
+  SmallButton,
+  StaleNote,
+  StatusPill,
+  Tag,
+} from '@/components/printing/printingParts';
 import { useBusyKeys } from '@/components/printing/useBusyKeys';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -60,8 +71,8 @@ type Prompt = { kind: 'rename' | 'revoke'; agent: PrintAgent } | null;
 function ToolIcon({ icon: Icon }: { icon: typeof Laptop }) {
   const tint = useThemeColor(colors.primary, colors.dark.text);
   return (
-    <View className="h-10 w-10 items-center justify-center rounded-[10px] bg-black/[0.05] dark:bg-white/10">
-      <Icon size={20} color={tint} />
+    <View className="h-9 w-9 items-center justify-center rounded-[9px] bg-black/[0.04] dark:bg-white/10">
+      <Icon size={18} color={tint} />
     </View>
   );
 }
@@ -70,6 +81,10 @@ export default function LabelPrintersScreen() {
   const { t, i18n } = useTranslation();
   const padding = useScreenPadding();
   const toast = useToast();
+  const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
+  const mutedTint = useThemeColor(colors.muted, colors.dark.textSecondary);
+  const onPrimary = useThemeColor(colors.white, colors.primary);
+  const textTint = useThemeColor(colors.primary, colors.dark.text);
   const agentsQuery = useGetPrintAgentsQuery(undefined, { pollingInterval: REFRESH_MS });
   const printersQuery = useGetPrintersQuery(undefined, { pollingInterval: REFRESH_MS });
   const templatesQuery = useGetLabelTemplatesQuery(undefined, { pollingInterval: REFRESH_MS });
@@ -249,8 +264,12 @@ export default function LabelPrintersScreen() {
         ) : (
           <>
             <View className="gap-3">
-              <SectionTitle subtitle={t('Each computer runs the Eventino Print Agent beside its printer.')}>{t('Computers')}</SectionTitle>
-              <GlassButton label={t('Pair a computer')} onPress={() => void startPairing()} />
+              <SectionHeading title={t('Computers')} subtitle={t('Each computer runs the Eventino Print Agent beside its printer.')} />
+              <GlassButton
+                label={t('Pair a computer')}
+                icon={<Plus size={18} color={onPrimary} />}
+                onPress={() => void startPairing()}
+              />
               <ErrorText text={errors.pairing} />
               <StaleNote show={agentsQuery.isError && Boolean(agentsQuery.data)} />
               {pairing ? (
@@ -281,27 +300,32 @@ export default function LabelPrintersScreen() {
                   const count = printers.filter((printer) => printer.agent_uuid === agent.uuid).length;
                   return (
                     <RowDivider key={agent.uuid} index={index}>
-                      <View className={cn('flex-row gap-3 py-3.5', agent.revoked_at && 'opacity-60')}>
+                      <View className={cn('flex-row gap-3 py-3.5', agent.revoked_at && 'opacity-[.55]')}>
                         <ToolIcon icon={Laptop} />
-                        <View className="flex-1 gap-1">
+                        <View className="flex-1">
                           <View className="flex-row items-center gap-1.5">
-                            <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[15px]">
+                            <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[15px] leading-[20px]">
                               {agent.name}
                             </AppText>
                             {state !== 'online' ? (
                               <StatusPill label={state === 'revoked' ? t('Revoked') : t('Offline')} tone={state === 'revoked' ? 'muted' : 'warn'} />
                             ) : null}
                           </View>
-                          <AppText className="font-gilroy-medium text-[12px] text-muted">
-                            {t('Last seen')} {dateTime(agent.last_seen_at)} · {t('Printers')}: {count}
+                          <AppText className="mt-0.5 font-gilroy-medium text-[12px] leading-[16px] text-muted">
+                            {t('Last seen')} {dateTime(agent.last_seen_at)} ·{' '}
+                            {count === 1 ? t('1 printer') : t('{{count}} printers', { count })}
                           </AppText>
                           {agent.revoked_at ? null : (
-                            <View className="flex-row gap-2 pt-1">
+                            <View className="mt-2 flex-row gap-2">
                               <SmallButton label={t('Rename')} onPress={() => setPrompt({ kind: 'rename', agent })} />
-                              <SmallButton label={t('Revoke')} onPress={() => setPrompt({ kind: 'revoke', agent })} />
+                              <SmallButton label={t('Revoke')} danger onPress={() => setPrompt({ kind: 'revoke', agent })} />
                             </View>
                           )}
-                          <ErrorText text={errors[agent.uuid]} />
+                          {errors[agent.uuid] ? (
+                            <View className="mt-1">
+                              <ErrorText text={errors[agent.uuid]} />
+                            </View>
+                          ) : null}
                         </View>
                       </View>
                     </RowDivider>
@@ -314,9 +338,10 @@ export default function LabelPrintersScreen() {
             </View>
 
             <View className="gap-3">
-              <SectionTitle subtitle={t('A printer reachable over both USB and Wi-Fi appears twice, once per connection.')}>
-                {t('Printers')}
-              </SectionTitle>
+              <SectionHeading
+                title={t('Printers')}
+                subtitle={t('A printer reachable over both USB and Wi-Fi appears twice, once per connection.')}
+              />
               <StaleNote show={(printersQuery.isError && Boolean(printersQuery.data)) || (templatesQuery.isError && Boolean(templatesQuery.data))} />
               <PanelCard>
                 {sortedPrinters.map((printer, index) => {
@@ -324,26 +349,30 @@ export default function LabelPrintersScreen() {
                   const reason = statusReason(printer);
                   return (
                     <RowDivider key={printer.uuid} index={index}>
-                      <View className={cn('gap-2.5 py-3.5', (printer.archived_at || revoked) && 'opacity-60')}>
+                      <View className={cn('gap-2.5 py-3.5', (printer.archived_at || revoked) && 'opacity-[.55]')}>
                         <View className="flex-row items-center gap-3">
                           <ToolIcon icon={PrinterIcon} />
                           <View className="flex-1 flex-row items-center gap-1.5">
-                            <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[15px]">
+                            <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[15px] leading-[20px]">
                               {printer.name}
                             </AppText>
                             <Tag label={connectionLabel(printer.connection_type, t)} />
                           </View>
                           <StatusPill label={statusLabel(printer)} tone={statusTone(printer)} />
                         </View>
-                        {reason ? <AppText className="font-gilroy-medium text-[12px]">{reason}</AppText> : null}
-                        <View className="flex-row gap-3">
+                        {reason ? (
+                          <AppText className="font-gilroy-medium text-[12px] leading-[16px]" style={{ color: TONE_COLORS[statusTone(printer)] }}>
+                            {reason}
+                          </AppText>
+                        ) : null}
+                        <View className="flex-row gap-2">
                           <View className="flex-1">
-                            <AppText className="font-gilroy-medium text-[11px] text-muted">{t('Labels loaded')}</AppText>
-                            <AppText className="font-gilroy-semibold text-[13px]">{mediaLabel(printer)}</AppText>
+                            <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted">{t('Labels loaded')}</AppText>
+                            <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{mediaLabel(printer)}</AppText>
                           </View>
                           <View className="flex-1">
-                            <AppText className="font-gilroy-medium text-[11px] text-muted">{t('Computer')}</AppText>
-                            <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px]">
+                            <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted">{t('Computer')}</AppText>
+                            <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px] leading-[17px]">
                               {agentOf(printer)?.name ?? t('unknown')}
                             </AppText>
                           </View>
@@ -352,6 +381,7 @@ export default function LabelPrintersScreen() {
                           {revoked ? null : (
                             <>
                               <SmallButton
+                                icon={PrinterIcon}
                                 label={testing.isBusy(printer.uuid) ? t('Printing...') : t('Test print')}
                                 disabled={!templates.length || printerState(printer) !== 'online' || testing.isBusy(printer.uuid)}
                                 onPress={() => runTestPrint(printer)}
@@ -378,17 +408,23 @@ export default function LabelPrintersScreen() {
             </View>
 
             <View className="gap-3">
-              <SectionTitle subtitle={t('The preview is drawn by the same code that prints, so this is exactly what comes out.')}>
-                {t('Label layouts')}
-              </SectionTitle>
-              <GlassButton label={t('New layout')} variant="secondary" onPress={() => navigate.labelLayout()} />
+              <SectionHeading
+                title={t('Label layouts')}
+                subtitle={t('The preview is drawn by the same code that prints, so this is exactly what comes out.')}
+              />
+              <GlassButton
+                label={t('New layout')}
+                variant="social"
+                icon={<Plus size={18} color={textTint} />}
+                onPress={() => navigate.labelLayout()}
+              />
               <PanelCard>
-                <View className="flex-row justify-between pt-3">
-                  <AppText className="font-gilroy-semibold text-[12px] text-muted">{t('Name')}</AppText>
-                  <AppText className="font-gilroy-semibold text-[12px] text-muted">{t('Use for')}</AppText>
+                <View className="flex-row justify-between border-b py-2.5" style={{ borderColor: cardBorder }}>
+                  <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-muted">{t('Name')}</AppText>
+                  <AppText className="font-gilroy-semibold text-[12px] leading-[16px] text-muted">{t('Use for')}</AppText>
                 </View>
-                {templates.map((template) => (
-                  <RowDivider key={template.id} index={1}>
+                {templates.map((template, index) => (
+                  <RowDivider key={template.id} index={index}>
                     {template.layout ? (
                       <PressableScale
                         accessibilityLabel={template.name}
@@ -398,25 +434,28 @@ export default function LabelPrintersScreen() {
                         }}
                         className="flex-row items-center gap-3 py-3.5"
                       >
-                        <AppText numberOfLines={1} className="font-gilroy-semibold text-[15px]">
+                        <AppText numberOfLines={1} className="max-w-[45%] shrink-0 font-gilroy-semibold text-[15px] leading-[20px]">
                           {template.name}
                         </AppText>
-                        <AppText numberOfLines={1} className="flex-1 text-right font-gilroy-medium text-[13px] text-muted">
+                        <AppText numberOfLines={1} className="flex-1 text-right font-gilroy-medium text-[13px] leading-[17px] text-muted">
                           {scopeLabel(template)}
                         </AppText>
+                        <ChevronRight size={18} color={mutedTint} />
                       </PressableScale>
                     ) : (
-                      <View className="gap-1 py-3.5">
-                        <View className="flex-row items-center gap-3">
-                          <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[15px]">
-                            {template.name}
-                          </AppText>
-                          <AppText className="font-gilroy-medium text-[13px] text-muted">{scopeLabel(template)}</AppText>
+                      <View
+                        accessible
+                        accessibilityLabel={template.name}
+                        accessibilityHint={t("This layout was made outside this editor, so it can't be changed here.")}
+                        className="flex-row items-center gap-3 py-3.5"
+                      >
+                        <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[15px] leading-[20px]">
+                          {template.name}
+                        </AppText>
+                        <View className="flex-row items-center gap-1.5">
+                          <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted">{scopeLabel(template)}</AppText>
                           <Tag label={t('custom')} />
                         </View>
-                        <AppText className="font-gilroy-medium text-[12px] text-muted">
-                          {t("This layout was made outside this editor, so it can't be changed here.")}
-                        </AppText>
                       </View>
                     )}
                   </RowDivider>

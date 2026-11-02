@@ -93,7 +93,7 @@ export function OfferCard({
           </AppText>
         </View>
         <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: background }}>
-          <AppText className="font-gilroy-bold text-[10px] uppercase tracking-wide" style={{ color }}>
+          <AppText className="font-gilroy-bold text-[10px] uppercase leading-[13px] tracking-[0.5px]" style={{ color }}>
             {statusLabel}
           </AppText>
         </View>

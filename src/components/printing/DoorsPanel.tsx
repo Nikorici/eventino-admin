@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/ui';
-import { Avatar, PanelCard, RowDivider, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { PanelCard, RowDivider } from '@/components/dashboard/dashboardParts';
 import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/cn';
 import {
@@ -25,7 +25,15 @@ import {
   unavailablePrinterLabel,
   type PrinterProblem,
 } from './printingLogic';
-import { ErrorText, Notice, SelectField, StaleNote } from './printingParts';
+import { ErrorText, Notice, SectionHeading, SelectField, StaleNote } from './printingParts';
+
+function DoorAvatar({ name }: { name: string }) {
+  return (
+    <View className="h-9 w-9 items-center justify-center rounded-full bg-brand/20">
+      <AppText className="font-gilroy-bold text-[14px] leading-[19px]">{name.trim().slice(0, 1).toUpperCase()}</AppText>
+    </View>
+  );
+}
 
 export function DoorsPanel({
   eventId,
@@ -71,19 +79,19 @@ export function DoorsPanel({
 
   return (
     <View className="gap-3">
-      <SectionTitle subtitle={t('Each scanner account prints at the printer standing next to it.')}>{t('Doors')}</SectionTitle>
+      <SectionHeading title={t('Doors')} subtitle={t('Each scanner account prints at the printer standing next to it.')} />
       <StaleNote show={isError && Boolean(data)} />
       <PanelCard>
         {doors.map((door, index) => (
           <RowDivider key={door.user_id} index={index}>
             <View className="gap-2.5 py-3.5">
               <View className="flex-row items-center gap-3">
-                <Avatar name={door.name} />
+                <DoorAvatar name={door.name} />
                 <View className="flex-1">
-                  <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+                  <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
                     {door.name}
                   </AppText>
-                  <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                  <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                     {door.email}
                   </AppText>
                 </View>
@@ -102,7 +110,7 @@ export function DoorsPanel({
                 ]}
               />
               <ErrorText text={errors[door.user_id]} />
-              <AppText className="font-gilroy-medium text-[12px] text-muted">
+              <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                 {t('Prints at')} ·{' '}
                 <AppText
                   className={cn(

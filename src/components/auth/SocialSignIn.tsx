@@ -180,12 +180,15 @@ export function SocialSignIn({ mode, disabled, onPendingChange, onSignedIn }: So
   };
 
   const busy = disabled || provider !== null;
+  const iconSize = isLogin ? 20 : 18;
 
   return (
     <View className="gap-4">
       <View className="flex-row items-center gap-3 py-1">
         <View className="h-px flex-1 bg-app-border dark:bg-dark-border" />
-        <AppText className="font-gilroy-medium text-[11px] uppercase tracking-[2px] text-muted">{t('or')}</AppText>
+        <AppText className="font-gilroy-medium text-[11px] uppercase leading-[14px] tracking-[2px] text-primary dark:text-dark-text">
+          {t('or')}
+        </AppText>
         <View className="h-px flex-1 bg-app-border dark:bg-dark-border" />
       </View>
       <View className="gap-3">
@@ -195,7 +198,7 @@ export function SocialSignIn({ mode, disabled, onPendingChange, onSignedIn }: So
           onPress={() => void onGoogle()}
           loading={provider === 'google'}
           disabled={busy}
-          icon={<GoogleIcon size={20} />}
+          icon={<GoogleIcon size={iconSize} />}
         />
         <ProviderButton
           tone="apple"
@@ -203,7 +206,7 @@ export function SocialSignIn({ mode, disabled, onPendingChange, onSignedIn }: So
           onPress={() => void onApple()}
           loading={provider === 'apple'}
           disabled={busy}
-          icon={<AppleIcon size={20} color="#ffffff" />}
+          icon={<AppleIcon size={iconSize} color="#ffffff" />}
         />
       </View>
       {applePending ? (

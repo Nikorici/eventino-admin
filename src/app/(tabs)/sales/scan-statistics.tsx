@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Ban, BarChart2, CheckCircle, Circle, RefreshCw, type LucideIcon } from 'lucide-react-native';
+import { Ban, BarChart2, ChartColumn, RefreshCw, ScanLine, Ticket, type LucideIcon } from 'lucide-react-native';
 
 import { AppText, EmptyState, GlassHeader, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
-import { ACCENT_GREEN, PanelCard, PanelMessage, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { ACCENT_GREEN, PanelCard, PanelMessage } from '@/components/dashboard/dashboardParts';
 import { ProgressStatCard, ProgressStatCardSkeleton } from '@/components/sales-reports/ProgressStatCard';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
@@ -20,7 +20,7 @@ function SummaryCard({ icon: Icon, label, value, wide }: { icon: LucideIcon; lab
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   return (
     <View
-      className={cn('rounded-[12px] border bg-white p-4 dark:bg-dark-surface', wide ? 'w-full' : 'w-[48%]')}
+      className={cn('rounded-[12px] border bg-white p-4 dark:bg-dark-surface', !wide && 'flex-1')}
       style={{ borderColor: cardBorder }}
     >
       <View className="flex-row items-start justify-between">
@@ -29,7 +29,7 @@ function SummaryCard({ icon: Icon, label, value, wide }: { icon: LucideIcon; lab
           <Icon size={17} color={colors.accent} />
         </View>
       </View>
-      <AppText numberOfLines={1} className="mt-1.5 font-gilroy-semibold text-[12px]" style={{ color: colors.accent }}>
+      <AppText numberOfLines={1} className="mt-1.5 font-gilroy-semibold text-[12px] leading-[16px]" style={{ color: colors.accent }}>
         {label}
       </AppText>
     </View>
@@ -38,9 +38,11 @@ function SummaryCard({ icon: Icon, label, value, wide }: { icon: LucideIcon; lab
 
 function SummarySkeleton() {
   return (
-    <View className="flex-row flex-wrap justify-between gap-y-3">
-      <Skeleton className="h-[92px] w-[48%] rounded-[12px]" />
-      <Skeleton className="h-[92px] w-[48%] rounded-[12px]" />
+    <View className="gap-3">
+      <View className="flex-row gap-3">
+        <Skeleton className="h-[92px] flex-1 rounded-[12px]" />
+        <Skeleton className="h-[92px] flex-1 rounded-[12px]" />
+      </View>
       <Skeleton className="h-[92px] w-full rounded-[12px]" />
     </View>
   );
@@ -115,13 +117,15 @@ export default function ScanStatisticsScreen() {
     }
     return (
       <>
-        <View className="flex-row flex-wrap justify-between gap-y-3">
-          <SummaryCard icon={CheckCircle} label={t('Total Scanned')} value={String(totalScanned)} />
-          <SummaryCard icon={BarChart2} label={t('Total Tickets')} value={String(totalTickets)} />
-          <SummaryCard icon={Circle} label={t('Scan Rate')} value={`${overallPercentage}%`} wide />
+        <View className="gap-3">
+          <View className="flex-row gap-3">
+            <SummaryCard icon={ScanLine} label={t('Total Scanned')} value={String(totalScanned)} />
+            <SummaryCard icon={Ticket} label={t('Total Tickets')} value={String(totalTickets)} />
+          </View>
+          <SummaryCard icon={ChartColumn} label={t('Scan Rate')} value={`${overallPercentage}%`} wide />
         </View>
         <View className="gap-3">
-          <SectionTitle>{t('Ticket Types')}</SectionTitle>
+          <AppText className="font-gilroy-bold text-[18px] leading-[24px]">{t('Ticket Types')}</AppText>
           {ticketTypes.length > 0 ? (
             ticketTypes.map((item) => (
               <ProgressStatCard
@@ -174,7 +178,7 @@ export default function ScanStatisticsScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: padding.top + 8,
+          paddingTop: padding.top,
           paddingBottom: padding.bottom,
           paddingHorizontal: 16,
           gap: 16,
@@ -183,7 +187,7 @@ export default function ScanStatisticsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} progressViewOffset={padding.top} />
         }
       >
-        <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">{t('Track scanned tickets by type')}</AppText>
+        <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">{t('Track scanned tickets by type')}</AppText>
         {renderBody()}
       </ScrollView>
     </Screen>

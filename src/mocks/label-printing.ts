@@ -200,8 +200,9 @@ export const handlers: MockHandler[] = [
     if (values.auto_print_enabled && !(values.default_template_id ?? settings.default_template_id)) {
       return mockError(400, { auto_print_enabled: ['auto_print_enabled cannot be on: no default label template'] });
     }
-    Object.assign(settings, values);
-    return settings;
+    const eventId = Number(request.params.eventId);
+    settingsByEvent[eventId] = { ...settings, ...values };
+    return settingsByEvent[eventId];
   }),
   mock('GET', '/api/v1/printing/events/:eventId/doors/', ({ params }) => ({
     doors: doors.filter((door) => door.event === Number(params.eventId)).map(doorView),

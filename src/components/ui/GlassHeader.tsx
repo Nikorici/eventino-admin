@@ -31,10 +31,12 @@ export function GlassHeader({ title, onBack, right, transparent, onTitlePress, t
           <GlassView glassEffectStyle="regular" colorScheme={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
         ) : Platform.OS === 'ios' ? (
           <BlurView intensity={60} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+        ) : Platform.OS === 'web' ? (
+          <View style={StyleSheet.absoluteFill} className="bg-app-bg/[0.82] backdrop-blur-[20px] dark:bg-dark-bg/[0.78]" />
         ) : (
           <View style={StyleSheet.absoluteFill} className="bg-app-bg/90 dark:bg-dark-bg/90" />
         ))}
-      <View className="h-14 flex-row items-center justify-between px-4">
+      <View className="h-14 flex-row items-center justify-between gap-2 px-4">
         <View className="w-12">
           {onBack ? (
             <PressableScale
@@ -53,14 +55,14 @@ export function GlassHeader({ title, onBack, right, transparent, onTitlePress, t
               accessibilityLabel={titleAccessibilityLabel ?? title}
               className="max-w-full flex-row items-center gap-1 rounded-full px-3 py-1.5"
             >
-              <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-base">
+              <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-base leading-[21px]">
                 {title}
               </AppText>
               <ChevronDown size={16} color={iconColor} />
             </PressableScale>
           </View>
         ) : title ? (
-          <AppText numberOfLines={1} className="flex-1 text-center font-gilroy-semibold text-base">
+          <AppText numberOfLines={1} className="flex-1 text-center font-gilroy-semibold text-base leading-[21px]">
             {title}
           </AppText>
         ) : (

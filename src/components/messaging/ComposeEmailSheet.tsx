@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, TextInput, useWindowDimensions, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import * as ImagePicker from 'expo-image-picker';
 import { format, isValid, parse } from 'date-fns';
@@ -97,15 +97,15 @@ function ToolChip({
       )}
     >
       {icon}
-      <AppText className="font-gilroy-semibold text-[13px]">{label}</AppText>
+      <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{label}</AppText>
     </PressableScale>
   );
 }
 
 function RemovableTag({ label, onRemove, removeLabel }: { label: string; onRemove: () => void; removeLabel: string }) {
   return (
-    <View className="h-7 max-w-full flex-row items-center gap-1 rounded-full bg-black/[0.04] pl-2.5 pr-1 dark:bg-white/10">
-      <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[12px] text-primary/80 dark:text-dark-text/80">
+    <View className="h-7 max-w-full flex-row items-center gap-1 rounded-full bg-black/[0.04] pl-2.5 pr-1.5 dark:bg-white/10">
+      <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[12px] leading-[16px] text-primary/80 dark:text-dark-text/80">
         {label}
       </AppText>
       <Pressable onPress={onRemove} accessibilityLabel={removeLabel} className="h-[18px] w-[18px] items-center justify-center">
@@ -150,6 +150,7 @@ export function ComposeEmailSheet({
   const isEditing = Boolean(editing);
   const submitTint = useThemeColor(colors.white, colors.primary);
   const iconTint = useThemeColor(colors.primary, colors.dark.text);
+  const { height: windowHeight } = useWindowDimensions();
 
   const initialParts = useMemo(() => parseEmailHtml(editing?.message ?? ''), [editing]);
   const initialHtml = useMemo(() => composeEmailHtml(initialParts), [initialParts]);
@@ -423,9 +424,9 @@ export function ComposeEmailSheet({
       <View className="flex-1 justify-end bg-black/40">
         <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
         <KeyboardAvoidingView behavior="padding">
-          <View className="max-h-[720px] rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg">
+          <View className="rounded-t-[24px] bg-app-bg px-5 pb-10 pt-4 dark:bg-dark-bg" style={{ maxHeight: windowHeight - 108 }}>
             <View className="mb-4 flex-row items-center justify-between">
-              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px]">
+              <AppText className="flex-1 pr-3 font-gilroy-bold text-[20px] leading-[26px]">
                 {isEditing ? t('Edit Scheduled Email') : t('New Message')}
               </AppText>
               <Pressable
@@ -447,8 +448,8 @@ export function ComposeEmailSheet({
                   ) : (
                     <Users size={15} color={colors.muted} />
                   )}
-                  <AppText className="font-gilroy-semibold text-[13px] text-muted">{t('To')}</AppText>
-                  <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[13px]">
+                  <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('To')}</AppText>
+                  <AppText numberOfLines={1} className="flex-1 font-gilroy-medium text-[13px] leading-[17px]">
                     {recipientsLabel}
                   </AppText>
                 </View>
@@ -462,8 +463,8 @@ export function ComposeEmailSheet({
                 />
 
                 <View className="gap-1.5">
-                  <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Message')}</AppText>
-                  <View className="rounded-[10px] border border-app-border bg-app-surface px-3 py-2 dark:border-dark-border dark:bg-dark-surface">
+                  <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Message')}</AppText>
+                  <View className="rounded-[10px] border border-app-border bg-app-surface px-3 py-3 dark:border-dark-border dark:bg-dark-surface">
                     <TextInput
                       placeholder={t('Write your message...')}
                       placeholderTextColor={colors.muted}
@@ -473,7 +474,7 @@ export function ComposeEmailSheet({
                       multiline
                       textAlignVertical="top"
                       accessibilityLabel={t('Message')}
-                      className="min-h-[120px] font-gilroy text-base text-primary dark:text-dark-text"
+                      className="min-h-[110px] font-gilroy text-base leading-[22px] text-primary dark:text-dark-text"
                     />
                   </View>
                 </View>
@@ -492,8 +493,8 @@ export function ComposeEmailSheet({
                       label={t('Button')}
                       active={ctaOpen}
                       icon={
-                        <View className="rounded-[4px] bg-black/[0.06] px-1 py-px dark:bg-white/15">
-                          <AppText className="font-gilroy-bold text-[10px]">CTA</AppText>
+                        <View className="rounded-[4px] bg-black/[0.04] px-1 py-px dark:bg-white/10">
+                          <AppText className="font-gilroy-extrabold text-[10px] leading-[13px]">CTA</AppText>
                         </View>
                       }
                       onPress={() => setCtaOpen((open) => !open)}
@@ -509,7 +510,7 @@ export function ComposeEmailSheet({
                     {images.length > 0 ? (
                       <View className="h-8 flex-row items-center gap-1.5 rounded-full border border-app-border bg-app-surface pl-3 pr-1 dark:border-dark-border dark:bg-dark-surface">
                         <ImageIcon size={14} color={iconTint} />
-                        <AppText className="font-gilroy-semibold text-[13px]">
+                        <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">
                           {`${images.length} ${t(images.length === 1 ? 'image' : 'images')}`}
                         </AppText>
                         <Pressable
@@ -574,19 +575,19 @@ export function ComposeEmailSheet({
                         />
                       </View>
                     </View>
-                    {ctaError ? <AppText className="font-gilroy-medium text-[12px] text-danger dark:text-danger">{ctaError}</AppText> : null}
+                    {ctaError ? <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-danger dark:text-danger">{ctaError}</AppText> : null}
                     <GlassButton label={t('Insert')} variant="secondary" size="sm" onPress={insertCta} />
                   </View>
                 ) : null}
 
-                {previewError ? <AppText className="font-gilroy-medium text-[13px] text-danger dark:text-danger">{previewError}</AppText> : null}
+                {previewError ? <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-danger dark:text-danger">{previewError}</AppText> : null}
 
                 {previewOpen ? (
                   <View className="gap-3 rounded-[12px] border border-app-border bg-app-surface p-3 dark:border-dark-border dark:bg-dark-surface">
                     <View className="flex-row items-center justify-between gap-2">
                       <View className="flex-row items-center gap-1.5">
                         <Eye size={16} color={iconTint} />
-                        <AppText className="font-gilroy-semibold text-[14px]">{t('Email Preview')}</AppText>
+                        <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Email Preview')}</AppText>
                       </View>
                       {previewStale ? (
                         <ToolChip
@@ -602,12 +603,12 @@ export function ComposeEmailSheet({
                     {previewLoading ? (
                       <View className="flex-row items-center gap-2 py-4">
                         <ActivityIndicator size="small" color={colors.muted} />
-                        <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Generating preview...')}</AppText>
+                        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">{t('Generating preview...')}</AppText>
                       </View>
                     ) : previewHtml ? (
                       <View className="gap-2">
                         {previewStale ? (
-                          <AppText className="font-gilroy-medium text-[12px] text-muted">
+                          <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                             {t('Content changed. Refresh to sync the preview.')}
                           </AppText>
                         ) : null}
@@ -616,7 +617,7 @@ export function ComposeEmailSheet({
                         </View>
                       </View>
                     ) : (
-                      <AppText className="py-2 font-gilroy-medium text-[13px] text-muted">
+                      <AppText className="py-2 font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
                         {t('Generate a preview to see the final layout')}
                       </AppText>
                     )}
@@ -625,7 +626,7 @@ export function ComposeEmailSheet({
 
                 {isEditing ? null : (
                   <View className="gap-2">
-                    <AppText className="font-gilroy-semibold text-[14px]">{t('Delivery')}</AppText>
+                    <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{t('Delivery')}</AppText>
                     <SegmentedControl<SendMode>
                       value={sendMode}
                       onChange={setSendMode}
@@ -687,7 +688,7 @@ export function ComposeEmailSheet({
                       </View>
                     ) : (
                       <View className="gap-3">
-                        <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Event')}</AppText>
+                        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Event')}</AppText>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
                           {scheduleableEvents.map((event) => (
                             <Chip
@@ -698,7 +699,7 @@ export function ComposeEmailSheet({
                             />
                           ))}
                         </ScrollView>
-                        <AppText className="font-gilroy-medium text-[13px] text-primary/70 dark:text-dark-text/70">{t('Send')}</AppText>
+                        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary/70 dark:text-dark-text/70">{t('Send')}</AppText>
                         <View className="flex-row flex-wrap gap-2">
                           {HOURS_BEFORE_EVENT_OPTIONS.map((hours) => (
                             <Chip
@@ -710,7 +711,7 @@ export function ComposeEmailSheet({
                           ))}
                         </View>
                         {relativeScheduledAt ? (
-                          <AppText className="font-gilroy-medium text-[12px] text-muted">
+                          <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
                             {t('Will send at {{time}}', { time: formatDateTime(relativeScheduledAt) })}
                           </AppText>
                         ) : null}
@@ -740,7 +741,7 @@ export function ComposeEmailSheet({
                 ) : (
                   <Send size={18} color={submitTint} />
                 )}
-                <AppText className="font-gilroy-bold text-[16px] text-white dark:text-primary">
+                <AppText className="font-gilroy-bold text-[16px] leading-[21px] text-white dark:text-primary">
                   {sending ? t('Sending...') : submitLabel}
                 </AppText>
               </PressableScale>

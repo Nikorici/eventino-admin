@@ -5,7 +5,6 @@ import { Search, SlidersHorizontal } from 'lucide-react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { cn } from '@/lib/cn';
 import { AppText } from '@/components/ui/AppText';
-import { GlassSurface } from '@/components/ui/GlassSurface';
 import { PressableScale } from '@/components/ui/PressableScale';
 
 export interface SearchBarProps {
@@ -28,7 +27,7 @@ export const SearchBar = forwardRef<TextInputInstance, SearchBarProps>(function 
   const actionColor = isDark ? '#f9f9f9' : '#2b3a44';
 
   const content = (
-    <GlassSurface className="h-12 flex-row items-center gap-2.5 rounded-glass px-4">
+    <View className="h-12 flex-row items-center gap-2.5 rounded-glass border border-app-border bg-app-surface px-4 dark:border-dark-border dark:bg-dark-surface">
       <Search size={18} color="#8a8d93" />
       {editable && !onPress ? (
         <TextInput
@@ -56,7 +55,7 @@ export const SearchBar = forwardRef<TextInputInstance, SearchBarProps>(function 
           <SlidersHorizontal size={18} color={actionColor} />
         </PressableScale>
       ) : null}
-    </GlassSurface>
+    </View>
   );
 
   if (onPress) {

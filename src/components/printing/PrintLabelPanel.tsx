@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Printer as PrinterIcon } from 'lucide-react-native';
 
 import { AppText, GlassButton, GlassInput, PressableScale, SegmentedControl } from '@/components/ui';
-import { PanelCard, RowDivider, SectionTitle } from '@/components/dashboard/dashboardParts';
+import { PanelCard, RowDivider } from '@/components/dashboard/dashboardParts';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { colors } from '@/theme/colors';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
 import { haptics } from '@/lib/haptics';
@@ -30,7 +33,7 @@ import {
   wait,
   type LabelChanges,
 } from './printingLogic';
-import { ErrorText, Notice, SelectField } from './printingParts';
+import { ErrorText, Notice, SectionHeading, SelectField } from './printingParts';
 
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MIN_LENGTH = 2;
@@ -52,6 +55,7 @@ export function PrintLabelPanel({
 }) {
   const { t } = useTranslation();
   const toast = useToast();
+  const onPrimary = useThemeColor(colors.white, colors.primary);
   const [kind, setKind] = useState<LabelKind>('attendee');
   const [freeEdits, setFreeEdits] = useState<LabelChanges>({});
   const [freeRound, setFreeRound] = useState(0);
@@ -152,7 +156,7 @@ export function PrintLabelPanel({
 
   return (
     <View className="gap-3">
-      <SectionTitle subtitle={t('For a badge that was lost or damaged at the desk.')}>{t('Print a label')}</SectionTitle>
+      <SectionHeading title={t('Print a label')} subtitle={t('For a badge that was lost or damaged at the desk.')} />
       <PanelCard className="gap-4 py-4">
         <SegmentedControl<LabelKind>
           value={kind}
@@ -194,8 +198,8 @@ export function PrintLabelPanel({
                       }}
                       className="gap-0.5 py-2.5"
                     >
-                      <AppText className="font-gilroy-semibold text-[14px]">{ticket.holder_name || t('(no name)')}</AppText>
-                      <AppText className="font-gilroy-medium text-[12px] text-muted">
+                      <AppText className="font-gilroy-semibold text-[14px] leading-[19px]">{ticket.holder_name || t('(no name)')}</AppText>
+                      <AppText className="font-gilroy-medium text-[12px] leading-[16px] text-muted">
                         {[ticket.ticket_type, ticket.scanned ? t('Already scanned') : t('Not scanned yet')].filter(Boolean).join(' · ')}
                       </AppText>
                     </PressableScale>
@@ -249,6 +253,7 @@ export function PrintLabelPanel({
         ) : null}
         <GlassButton
           label={busy ? t('Printing...') : t('Print one label')}
+          icon={<PrinterIcon size={18} color={onPrimary} />}
           disabled={!ready || busy || locked}
           onPress={print}
         />

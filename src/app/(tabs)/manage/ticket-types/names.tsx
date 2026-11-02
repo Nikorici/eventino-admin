@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, RefreshControl, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
 import { Check, UserPen } from 'lucide-react-native';
 
-import { AppText, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton } from '@/components/ui';
+import { AppText, EmptyState, GlassHeader, PressableScale, Screen, Skeleton } from '@/components/ui';
 import { matchesQuery, PanelCard, RowDivider, SearchField } from '@/components/dashboard/dashboardParts';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
@@ -17,6 +18,7 @@ import { useGetEventTicketsQuery, useSetTicketDisplayNameMutation, type EventTic
 import { colors } from '@/theme/colors';
 
 const SAVED_GREEN = '#0f9f5f';
+const SCANNED_GREEN = '#34c759';
 
 function TicketNameRow({
   ticket,
@@ -37,35 +39,45 @@ function TicketNameRow({
 }) {
   const { t } = useTranslation();
   const dirty = value !== (ticket.display_name ?? '');
+  const spinner = useThemeColor(colors.white, colors.primary);
   return (
     <View className="gap-2 py-3">
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1">
-          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
             {ticket.ticket_type} · #{ticket.id}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted leading-[16px]">
             {ticket.account_name || t('Unknown')}
           </AppText>
         </View>
         <AppText
-          className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted"
-          style={ticket.scan_date ? { color: SAVED_GREEN } : undefined}
+          className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted leading-[16px]"
+          style={ticket.scan_date ? { color: SCANNED_GREEN } : undefined}
         >
           {`${t('Scanned')}: ${ticket.scan_date ? t('Yes') : t('No')}`}
         </AppText>
         {saved && !dirty ? <Check size={16} color={SAVED_GREEN} /> : null}
       </View>
       <View className="flex-row items-center gap-2">
-        <GlassInput
-          containerClassName="flex-1"
-          placeholder={ticket.account_name || t('Name on ticket')}
-          accessibilityLabel={t('Name on ticket')}
-          value={value}
-          onChangeText={onChange}
-          editable={!locked}
-          autoCapitalize="words"
-        />
+        <View
+          className={cn(
+            'h-12 flex-1 flex-row items-center rounded-[10px] border bg-app-surface px-3 dark:bg-dark-surface',
+            dirty ? 'border-primary dark:border-dark-text' : 'border-app-border dark:border-dark-border',
+          )}
+        >
+          <TextInput
+            placeholder={ticket.account_name || t('Name on ticket')}
+            placeholderTextColor={colors.muted}
+            accessibilityLabel={t('Name on ticket')}
+            value={value}
+            onChangeText={onChange}
+            editable={!locked}
+            autoCapitalize="words"
+            style={{ includeFontPadding: false }}
+            className="h-full flex-1 font-gilroy text-[16px] text-primary dark:text-dark-text"
+          />
+        </View>
         {locked ? null : (
           <PressableScale
             onPress={onSave}
@@ -77,9 +89,9 @@ function TicketNameRow({
             )}
           >
             {saving ? (
-              <ActivityIndicator size="small" color={colors.white} />
+              <ActivityIndicator size="small" color={spinner} />
             ) : (
-              <AppText className="font-gilroy-semibold text-[14px] text-white dark:text-primary">{t('Save')}</AppText>
+              <AppText className="font-gilroy-semibold text-[14px] text-white dark:text-primary leading-[19px]">{t('Save')}</AppText>
             )}
           </PressableScale>
         )}
@@ -212,7 +224,7 @@ export default function TicketNamesScreen() {
         }
       >
         <View className="gap-3">
-          <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted">
+          <AppText className="font-gilroy-medium text-[14px] text-muted dark:text-dark-muted leading-[19px]">
             {t('Set the name printed on each paid ticket. Buyers see it on their QR code.')}
           </AppText>
           <SearchField value={query} onChange={setQuery} placeholder={t('Search by account, ticket type, attendee...')} />

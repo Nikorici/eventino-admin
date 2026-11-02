@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
-import { CircleCheck, CircleX, Receipt } from 'lucide-react-native';
+import { CircleCheck, CircleX, ReceiptText } from 'lucide-react-native';
 
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { ToggleRow } from '@/components/merch/merchParts';
@@ -141,7 +141,7 @@ export default function SmartBillScreen() {
     if (connectionQuery.isError && !connection) {
       return (
         <EmptyState
-          icon={Receipt}
+          icon={ReceiptText}
           title={t('Something went wrong.')}
           message={t('Please try again.')}
           actionLabel={t('Try again')}
@@ -204,6 +204,7 @@ export default function SmartBillScreen() {
           label={t('Auto-send invoice on paid order')}
           value={form.auto_send}
           onValueChange={(value) => setField('auto_send', value)}
+          spacious
         />
 
         {testResult ? (
@@ -260,7 +261,7 @@ export default function SmartBillScreen() {
             style={{ borderColor: cardBorder }}
           >
             <View className="h-10 w-10 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10">
-              <Receipt size={20} color={colors.accent} />
+              <ReceiptText size={20} color={colors.accent} />
             </View>
             <View className="flex-1 gap-1">
               <AppText className="font-gilroy-bold text-[16px]">{t('SmartBill Integration')}</AppText>

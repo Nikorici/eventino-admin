@@ -1,7 +1,7 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const HEADER_CLEARANCE = 68;
-export const TAB_BAR_CLEARANCE = 100;
+export const HEADER_CLEARANCE = 72;
+export const TAB_BAR_CLEARANCE = 112;
 
 export function useScreenPadding(options?: { tabBar?: boolean }): { top: number; bottom: number } {
   const insets = useSafeAreaInsets();

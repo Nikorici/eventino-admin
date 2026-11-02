@@ -1,4 +1,4 @@
-import type { OrganizationResult } from '@/store/api/usersApi';
+import type { AccountDelegator, OrganizationResult } from '@/store/api/usersApi';
 import type {
   Category,
   EventCoupon,
@@ -11,7 +11,15 @@ import type {
   TicketType,
 } from '@/types/api';
 
-import { currentMockUser, findMockEvent, mockEvents, mockUsers, type MockEvent, type MockTicketType } from './core';
+import {
+  currentMockUser,
+  findMockEvent,
+  mockEvents,
+  mockLinkedOrganizers,
+  mockUsers,
+  type MockEvent,
+  type MockTicketType,
+} from './core';
 import { isoDate, isoDateTime, mock, mockError, paginate, type MockHandler, type MockRequest } from './mock';
 
 const categories: Category[] = [
@@ -534,10 +542,32 @@ function updateEvent(request: MockRequest) {
   return { id: event.id, slug: `event-${event.id}`, title: event.name };
 }
 
+const delegators: AccountDelegator[] = mockLinkedOrganizers.map((organizer, index) => ({
+  id: 301 + index,
+  principal_id: organizer.id,
+  first_name: organizer.first_name ?? '',
+  last_name: organizer.last_name ?? '',
+  email: organizer.email,
+  profile_image: organizer.profile_image ?? null,
+  is_organization: organizer.is_organization ?? false,
+  organization_name: organizer.organization_name ?? null,
+}));
+
+function deleteEvent(request: MockRequest) {
+  const index = mockEvents.findIndex((event) => event.id === Number(request.params.id));
+  if (index < 0) return mockError(404, { detail: 'Not found.' });
+  mockEvents.splice(index, 1);
+  return '';
+}
+
 export const handlers: MockHandler[] = [
   mock('GET', '/api/v1/categories/', ({ query }) => paginate(categories, query, 100)),
   mock('POST', '/api/v1/events/', createEvent, { delay: 900 }),
   mock('PATCH', '/api/v1/events/:id/', updateEvent, { delay: 900 }),
+  mock('DELETE', '/api/v1/events/:id/', deleteEvent),
+  mock('GET', '/api/v1/account-delegates/my-delegators/', (request) =>
+    currentMockUser(request).id === 1001 ? delegators : [],
+  ),
   mock('GET', '/api/v1/users/organizations/', ({ query }) => {
     const needle = (query.query ?? '').trim().toLowerCase();
     const matches = organizations.filter((organization) =>

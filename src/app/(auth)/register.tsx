@@ -4,7 +4,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as WebBrowser from 'expo-web-browser';
-import { Building2, Check, Eye, EyeOff, Lock, Mail, MailCheck } from 'lucide-react-native';
+import { Building2, Check, Eye, EyeOff, Lock, Mail, MailCheck, User } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
 import { WEB_ORIGIN } from '@/lib/constants';
@@ -106,7 +106,7 @@ function LegalLink({ label, path }: { label: string; path: string }) {
         void WebBrowser.openBrowserAsync(`${WEB_ORIGIN}${path}`);
       }}
       accessibilityRole="link"
-      className="font-gilroy-semibold text-primary-light underline dark:text-accent"
+      className="font-gilroy-semibold text-primary dark:text-dark-text"
     >
       {label}
     </AppText>
@@ -265,6 +265,11 @@ export default function RegisterScreen() {
           textContentType="givenName"
           autoComplete="name-given"
           error={fieldErrors.first_name}
+          leftIcon={
+            <View>
+              <User size={18} color={ICON_MUTED} />
+            </View>
+          }
         />
         <GlassInput
           containerClassName="flex-1"
@@ -309,10 +314,10 @@ export default function RegisterScreen() {
             <Logo width={150} />
             <View className="items-center gap-1">
               <AppText className="text-center font-gilroy-bold text-[28px] leading-[34px] text-primary dark:text-dark-text">
-                {step === 'form' ? t('Create an account') : t('Verify your email')}
+                {step === 'form' ? t('Create account') : t('Verify your email')}
               </AppText>
-              <AppText className="max-w-[320px] text-center font-gilroy-medium text-[15px] leading-[22px] text-muted">
-                {step === 'form' ? t('Create your account, it takes less than a minute') : t('We sent a code to your email')}
+              <AppText className="max-w-[320px] text-center font-gilroy-medium text-[15px] leading-[22px] text-primary dark:text-dark-text">
+                {step === 'form' ? t('Join Eventino to discover and book events') : t('We sent a code to your email')}
               </AppText>
             </View>
           </View>
@@ -332,8 +337,6 @@ export default function RegisterScreen() {
                   ]}
                 />
 
-                {nameFields}
-
                 <GlassInput
                   label={t('Email')}
                   value={email}
@@ -341,7 +344,7 @@ export default function RegisterScreen() {
                     setEmail(value);
                     clearFieldError('email');
                   }}
-                  placeholder={t('you@email.com')}
+                  placeholder={t('Email')}
                   autoCapitalize="none"
                   autoCorrect={false}
                   autoComplete="email"
@@ -358,7 +361,7 @@ export default function RegisterScreen() {
                     setPassword(value);
                     clearFieldError('password');
                   }}
-                  placeholder={t('at least 8 characters')}
+                  placeholder={t('Password')}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -381,6 +384,8 @@ export default function RegisterScreen() {
                     </PressableScale>
                   }
                 />
+
+                {nameFields}
 
                 <View className="gap-3 pt-1">
                   <CheckRow
@@ -410,7 +415,7 @@ export default function RegisterScreen() {
                 </View>
 
                 <GlassButton
-                  label={t('Create an account')}
+                  label={t('Create account')}
                   onPress={() => void handleRegister()}
                   loading={isRegistering}
                   disabled={busy}
@@ -467,7 +472,7 @@ export default function RegisterScreen() {
                   className="items-center"
                   hitSlop={6}
                 >
-                  <AppText className="font-gilroy-semibold text-[13px] text-primary-light dark:text-dark-text/70">
+                  <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary dark:text-dark-text">
                     {t('Use a different email')}
                   </AppText>
                 </PressableScale>
@@ -476,7 +481,7 @@ export default function RegisterScreen() {
           )}
 
           <View className="flex-row items-center justify-center gap-1.5">
-            <AppText className="font-gilroy-medium text-[13px] text-muted">{t('Already have an account?')}</AppText>
+            <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Already have an account?')}</AppText>
             <PressableScale
               onPress={() => {
                 haptics.selection();
@@ -484,8 +489,9 @@ export default function RegisterScreen() {
               }}
               accessibilityLabel={t('Log In')}
               hitSlop={6}
+              className="py-1.5"
             >
-              <AppText className="font-gilroy-semibold text-[13px] text-primary dark:text-dark-text">{t('Log In')}</AppText>
+              <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-primary dark:text-dark-text">{t('Log In')}</AppText>
             </PressableScale>
           </View>
         </View>

@@ -36,7 +36,6 @@ import { haptics } from '@/lib/haptics';
 import {
   ordersSettlementExportEndpoint,
   useGetEventBuyersQuery,
-  type BuyerParticipantInfo,
   type BuyerQuestionAnswer,
   type BuyersAttendanceFilter,
   type BuyersTimeInterval,
@@ -82,13 +81,8 @@ function titleCaseKey(key: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function participantsPreview(participants: BuyerParticipantInfo[]): string {
-  return participants
-    .slice(0, 2)
-    .map((info) => Object.values(info).find((value) => value != null && String(value).trim() !== ''))
-    .filter((value) => value != null)
-    .map(String)
-    .join(' | ');
+function attendanceStatus(buyer: EventBuyer): string {
+  return buyer.user_type !== 'follower' && buyer.attendance_status ? buyer.attendance_status : 'Not Applicable';
 }
 
 function amountLabel(buyer: EventBuyer): string {
@@ -106,7 +100,7 @@ function DetailStat({ label, value }: { label: string; value: string }) {
       <AppText numberOfLines={2} className="text-center font-gilroy-bold text-[13px]">
         {value}
       </AppText>
-      <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted">
+      <AppText numberOfLines={1} className="mt-0.5 font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
         {label}
       </AppText>
     </View>
@@ -116,7 +110,7 @@ function DetailStat({ label, value }: { label: string; value: string }) {
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
     <View className="w-1/2 gap-0.5 pr-2">
-      <AppText className="font-gilroy-medium text-[11px] text-muted">{label}</AppText>
+      <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{label}</AppText>
       <AppText className="font-gilroy-semibold text-[13px]">{value}</AppText>
     </View>
   );
@@ -129,6 +123,7 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
   const name = buyerName(buyer, t('Unknown'));
   const answers = buyer.questions_and_answers ?? [];
   const participants = buyer.participants_info ?? [];
+  const status = attendanceStatus(buyer);
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
@@ -143,9 +138,13 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
                 <AppText numberOfLines={1} className="font-gilroy-bold text-[17px]">
                   {name}
                 </AppText>
-                <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+                <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
                   {buyer.email || '-'}
                 </AppText>
+                <View className="mt-1.5 flex-row flex-wrap gap-1.5">
+                  <Pill label={status} color={attendanceColor(status)} />
+                  {buyer.coupon_code ? <Pill label={buyer.coupon_code} color={colors.primaryLight} /> : null}
+                </View>
               </View>
             </View>
             <Pressable
@@ -188,13 +187,13 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
                       style={{ borderColor: cardBorder }}
                     >
                       <AppText className="font-gilroy-semibold text-[13px]">{qa.question || t('Question')}</AppText>
-                      <AppText className="mt-1 font-gilroy-medium text-[13px] text-muted">
+                      <AppText className="mt-1 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
                         {answerText(qa.answer, t('No answer'))}
                       </AppText>
                     </View>
                   ))
                 ) : (
-                  <AppText className="font-gilroy-medium text-[13px] text-muted">{t('No additional answers')}</AppText>
+                  <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No additional answers')}</AppText>
                 )}
               </View>
 
@@ -220,7 +219,7 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
                     </View>
                   ))
                 ) : (
-                  <AppText className="font-gilroy-medium text-[13px] text-muted">{t('No participant details')}</AppText>
+                  <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No participant details')}</AppText>
                 )}
               </View>
             </View>
@@ -245,17 +244,12 @@ function BuyerRow({
   onDownload?: () => void;
   downloading: boolean;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const downloadTint = useThemeColor(colors.primary, colors.dark.text);
   const name = buyerName(buyer, t('Unknown'));
   const ticketCount = buyer.ticket_count ?? 0;
-  const status = buyer.user_type !== 'follower' && buyer.attendance_status ? buyer.attendance_status : 'Not Applicable';
-  const answers = buyer.questions_and_answers ?? [];
-  const answered = answers.filter((qa) => answerText(qa.answer, '') !== '').length;
-  const participants = buyer.participants_info ?? [];
-  const preview = participantsPreview(participants);
   return (
-    <View className="flex-row items-start gap-2 py-3">
+    <View className="flex-row items-center gap-3 py-3">
       <Pressable
         onPress={() => {
           void haptics.selection();
@@ -263,51 +257,32 @@ function BuyerRow({
         }}
         accessibilityRole="button"
         accessibilityLabel={name}
-        className="flex-1 gap-2"
+        className="flex-1 flex-row items-center gap-3"
       >
-        <View className="flex-row items-center gap-3">
-          <Avatar name={name} image={buyer.profile_image} />
-          <View className="flex-1">
-            <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
-              {`${index + 1}. ${name}`}
-            </AppText>
-            <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
-              {buyer.email || '-'}
-            </AppText>
-          </View>
-          <View className="items-end">
-            <AppText className="font-gilroy-bold text-[14px]">{moneyLabel(buyer.total_price, buyer.currency)}</AppText>
-            <AppText className="font-gilroy-medium text-[11px] text-muted">
-              {`${ticketCount} ${ticketCount === 1 ? t('ticket') : t('tickets')}`}
-            </AppText>
-          </View>
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-brand/20 dark:bg-dark-elevated">
+          <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{index + 1}</AppText>
         </View>
-        <View className="flex-row flex-wrap items-center gap-1.5 pl-[52px]">
-          <Pill label={status} color={attendanceColor(status)} />
-          {buyer.coupon_code ? <Pill label={buyer.coupon_code} color={colors.primaryLight} /> : null}
-          <AppText numberOfLines={1} className="shrink font-gilroy-medium text-[11px] text-muted">
-            {[buyer.ticket_name, formatDateTimeLabel(buyer.date, i18n.language)].filter(Boolean).join(' · ')}
+        <View className="flex-1">
+          <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
+            {name}
+          </AppText>
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
+            {buyer.email || '-'}
           </AppText>
         </View>
-        <View className="flex-row flex-wrap items-center gap-1.5 pl-[52px]">
-          <Pill label={`Q&A: ${answered}/${answers.length}`} color={colors.muted} />
-          <Pill label={`${t('Attendees')}: ${participants.length}`} color={colors.muted} />
-          {preview ? (
-            <AppText numberOfLines={1} className="shrink font-gilroy-medium text-[11px] text-muted">
-              {preview}
-            </AppText>
-          ) : null}
+        <View className="items-end">
+          <AppText className="font-gilroy-bold text-[14px] leading-[19px]">{moneyLabel(buyer.total_price, buyer.currency)}</AppText>
+          <AppText className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
+            {`${ticketCount} ${ticketCount === 1 ? t('ticket') : t('tickets')}`}
+          </AppText>
         </View>
-        {buyer.payment_method === 'INVOICE' ? (
-          <AppText className="pl-[52px] font-gilroy-medium text-[11px] text-muted">{`${buyer.payment_method} (handled by organizer)`}</AppText>
-        ) : null}
       </Pressable>
       {onDownload ? (
         <PressableScale
           onPress={onDownload}
           disabled={downloading}
           accessibilityLabel={t('Ticket')}
-          className="mt-0.5 h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
+          className="h-9 w-9 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10"
         >
           {downloading ? <ActivityIndicator size="small" color={colors.muted} /> : <Download size={16} color={downloadTint} />}
         </PressableScale>
@@ -388,7 +363,7 @@ export function BuyersPanel({
           { event_id: eventId },
           `Ticket Export - Event ${eventId}.xlsx`,
         ),
-      { ...XLSX_SHARE, dialogTitle: t('Export Excel') },
+      { ...XLSX_SHARE, dialogTitle: t('Export tickets') },
     );
 
   const onExportSettlement = () => {
@@ -436,11 +411,11 @@ export function BuyersPanel({
 
   return (
     <View className="gap-3">
-      <SectionTitle>{t('List of Customers')}</SectionTitle>
+      <SectionTitle className="leading-[24px]">{t('List of Customers')}</SectionTitle>
       <View className="flex-row">
         <HeaderAction
           icon={FileSpreadsheet}
-          label={busyKey === 'export' ? t('Exporting...') : t('Export Excel')}
+          label={busyKey === 'export' ? t('Exporting...') : t('Export tickets')}
           onPress={() => void onExportTickets()}
           loading={busyKey === 'export'}
           variant="outline"
@@ -531,14 +506,17 @@ export function BuyersPanel({
             <PressableScale
               onPress={() => setPage((current) => current + 1)}
               disabled={query.isFetching}
-              accessibilityLabel={t('Load More')}
-              className="h-11 items-center justify-center rounded-[10px] border border-app-border dark:border-dark-border"
+              accessibilityLabel={t('Load more')}
+              className="h-11 items-center justify-center rounded-[10px] border border-app-border bg-white px-2.5 dark:border-dark-border dark:bg-dark-surface"
             >
               {query.isFetching ? (
                 <ActivityIndicator size="small" color={colors.muted} />
               ) : (
-                <AppText className="font-gilroy-semibold text-[14px] text-primary dark:text-dark-text">
-                  {`${t('Load More')} (${remaining} ${t('remaining')})`}
+                <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px] leading-[17px]">
+                  {t('Load more')}
+                  {remaining > 0 ? (
+                    <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{` (${remaining} ${t('remaining')})`}</AppText>
+                  ) : null}
                 </AppText>
               )}
             </PressableScale>

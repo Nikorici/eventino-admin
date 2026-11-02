@@ -27,7 +27,7 @@ function statusTone(status: string): string {
   if (status === 'PENDING') return 'text-warning dark:text-warning';
   if (status === 'SENT' || status === 'COMPLETED') return 'text-success dark:text-success';
   if (status === 'FAILED') return 'text-danger dark:text-danger';
-  return 'text-muted';
+  return 'text-muted dark:text-dark-muted';
 }
 
 function ScheduledEmailRow({
@@ -53,18 +53,17 @@ function ScheduledEmailRow({
   return (
     <View className="gap-2 rounded-[12px] border border-app-border bg-app-surface p-3.5 dark:border-dark-border dark:bg-dark-surface">
       <View className="flex-row items-start justify-between gap-3">
-        <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[15px]">
+        <AppText numberOfLines={1} className="flex-1 font-gilroy-semibold text-[15px] leading-[20px]">
           {email.subject || t('No subject')}
         </AppText>
-        <AppText className={cn('font-gilroy-semibold text-[12px] uppercase', statusTone(email.status))}>
+        <AppText className={cn('font-gilroy-semibold text-[12px] leading-[16px] uppercase', statusTone(email.status))}>
           {email.status}
         </AppText>
       </View>
       <View className="flex-row items-center gap-1.5">
         <Clock size={13} color={colors.muted} />
-        <AppText className="font-gilroy-medium text-[13px] text-muted">{scheduledLabel}</AppText>
-        <AppText className="font-gilroy-medium text-[13px] text-muted">
-          {`· ${t('{{count}} recipients', { count: email.recipient_count })}`}
+        <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
+          {`${scheduledLabel} · ${t('{{count}} recipients', { count: email.recipient_count })}`}
         </AppText>
       </View>
       {isPending ? (
@@ -76,7 +75,7 @@ function ScheduledEmailRow({
               className="h-9 w-full flex-row items-center justify-center gap-1.5 rounded-[10px] border border-app-border dark:border-dark-border"
             >
               <Pencil size={15} color={iconColor} />
-              <AppText className="font-gilroy-semibold text-[13px]">{t('Edit')}</AppText>
+              <AppText className="font-gilroy-semibold text-[13px] leading-[17px]">{t('Edit')}</AppText>
             </PressableScale>
           </View>
           <View className="flex-1">
@@ -90,7 +89,7 @@ function ScheduledEmailRow({
               )}
             >
               <Trash2 size={15} color={colors.danger} />
-              <AppText className="font-gilroy-semibold text-[13px] text-danger dark:text-danger">{t('Delete')}</AppText>
+              <AppText className="font-gilroy-semibold text-[13px] leading-[17px] text-danger dark:text-danger">{t('Delete')}</AppText>
             </PressableScale>
           </View>
         </View>
@@ -134,7 +133,7 @@ export function ScheduledEmailsSheet({ onClose, onEdit, onScheduleNew }: Schedul
         <Pressable className="flex-1" onPress={onClose} accessibilityLabel={t('Close')} />
         <View className="h-[70%] rounded-t-[24px] bg-app-bg px-5 pb-8 pt-4 dark:bg-dark-bg">
           <View className="mb-4 flex-row items-center justify-between">
-            <AppText className="font-gilroy-bold text-[20px]">{t('Scheduled Emails')}</AppText>
+            <AppText className="font-gilroy-bold text-[20px] leading-[26px]">{t('Scheduled Emails')}</AppText>
             <Pressable
               onPress={onClose}
               accessibilityLabel={t('Close')}

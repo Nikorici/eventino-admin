@@ -271,7 +271,7 @@ export function ReleaseTicketSheet({
 
                 <AppText className="mt-1 font-gilroy-semibold text-[14px]">{`${t('Ticket Type')}*`}</AppText>
                 {sortedTypes.length === 0 ? (
-                  <AppText className="font-gilroy-medium text-[13px] text-muted">{t('No ticket types available')}</AppText>
+                  <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('No ticket types available')}</AppText>
                 ) : (
                   <View className="flex-row flex-wrap gap-2">
                     {sortedTypes.map((type) => {
@@ -324,7 +324,7 @@ export function ReleaseTicketSheet({
                         </PressableScale>
                       </View>
                       <View className="flex-row items-center gap-4">
-                        <AppText className="flex-1 font-gilroy-medium text-[13px] text-muted">{t('Quantity')}</AppText>
+                        <AppText className="flex-1 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">{t('Quantity')}</AppText>
                         <PressableScale
                           onPress={() => changeRowQuantity(type.id, -1)}
                           accessibilityLabel={t('Decrease')}

@@ -112,11 +112,11 @@ export function LocationAutocompleteField({
             >
               <MapPin size={15} color={mutedIcon} />
               <View className="flex-1">
-                <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px]">
+                <AppText numberOfLines={1} className="font-gilroy-semibold text-[13px] leading-[17px]">
                   {prediction.primaryText}
                 </AppText>
                 {prediction.secondaryText ? (
-                  <AppText numberOfLines={1} className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
+                  <AppText numberOfLines={1} className="font-gilroy-medium text-[11px] leading-[14px] text-muted dark:text-dark-muted">
                     {prediction.secondaryText}
                   </AppText>
                 ) : null}
@@ -126,7 +126,7 @@ export function LocationAutocompleteField({
           {loading && predictions.length === 0 ? (
             <View className="flex-row items-center gap-2 px-3.5 py-3">
               <ActivityIndicator size="small" color={mutedIcon} />
-              <AppText className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
+              <AppText className="font-gilroy-medium text-[13px] leading-[17px] text-muted dark:text-dark-muted">
                 {t('Searching…')}
               </AppText>
             </View>
