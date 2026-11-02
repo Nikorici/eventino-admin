@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -27,6 +27,7 @@ import { AppText, DashedAddButton, GlassButton, PressableScale, Skeleton } from 
 import { AddOrganizerAccountModal } from '@/components/events/AddOrganizerAccountModal';
 import { UserAvatar, followUserName } from '@/components/social/UserRow';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { confirmAction } from '@/components/dashboard/dashboardParts';
 
 const ACCENT_GREEN = '#34c759';
 const DANGER_RED = '#ff3b30';
@@ -184,21 +185,21 @@ export const OrganizerSwitcherSheet = forwardRef<OrganizerSwitcherSheetHandle>(f
   const handleUnlink = useCallback(
     (account: LinkedAccount) => {
       haptics.medium();
-      Alert.alert(t('Unlink account'), t('Unlink this account?'), [
-        { text: t('Cancel'), style: 'cancel' },
-        {
-          text: t('Unlink account'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await unlinkAccount(account.id).unwrap();
-              toast(t('Account unlinked'), 'success');
-            } catch {
-              toast(t('Failed to unlink account'), 'error');
-            }
-          },
+      confirmAction({
+        title: t('Unlink account'),
+        message: t('Unlink this account?'),
+        confirmLabel: t('Unlink account'),
+        cancelLabel: t('Cancel'),
+        destructive: true,
+        onConfirm: async () => {
+          try {
+            await unlinkAccount(account.id).unwrap();
+            toast(t('Account unlinked'), 'success');
+          } catch {
+            toast(t('Failed to unlink account'), 'error');
+          }
         },
-      ]);
+      });
     },
     [unlinkAccount, toast, t],
   );

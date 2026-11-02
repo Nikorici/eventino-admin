@@ -97,6 +97,8 @@ import {
   detectMeetingPlatform,
   requiredPaymentSetup,
   validateQuantityDiscountTiers,
+  type EventFormRowErrors,
+  type EventFormServerErrors,
   type PaymentSetupKind,
 } from './eventFormRules';
 import { MapPreview } from './MapPreview';
@@ -240,6 +242,7 @@ export interface EventFormProps {
   isOrganization?: boolean;
   couponsEditable?: boolean;
   stickySubmit?: boolean;
+  serverErrors?: EventFormServerErrors | null;
 }
 
 const ticketSchema = z.object({
@@ -875,9 +878,23 @@ interface TicketCardProps {
   showRemove: boolean;
   locked: boolean;
   pinnableDays: string[];
+  serverErrorLines?: string[];
 }
 
-function TicketCard({ control, setValue, index, currency, onRemove, showRemove, locked, pinnableDays }: TicketCardProps) {
+function ServerErrorLines({ lines }: { lines?: string[] }) {
+  if (!lines?.length) return null;
+  return (
+    <View className="gap-1">
+      {lines.map((line) => (
+        <AppText key={line} className="font-gilroy-medium text-xs text-danger">
+          {line}
+        </AppText>
+      ))}
+    </View>
+  );
+}
+
+function TicketCard({ control, setValue, index, currency, onRemove, showRemove, locked, pinnableDays, serverErrorLines }: TicketCardProps) {
   const { t, i18n } = useTranslation();
   const isDark = useColorScheme() === 'dark';
   const mutedIcon = isDark ? colors.dark.textSecondary : colors.muted;
@@ -1157,6 +1174,7 @@ function TicketCard({ control, setValue, index, currency, onRemove, showRemove, 
           )}
         />
       </View>
+      <ServerErrorLines lines={serverErrorLines} />
     </View>
   );
 }
@@ -1295,6 +1313,7 @@ interface CouponsBuilderProps {
   coupons: EventFormCoupon[];
   onChange: (coupons: EventFormCoupon[]) => void;
   showUsage: boolean;
+  serverErrors?: EventFormRowErrors;
 }
 
 function clampCouponPercent(raw: string): number {
@@ -1308,7 +1327,7 @@ function parseCouponMaxUses(raw: string): number {
   return digits.length === 0 ? 0 : Number(digits);
 }
 
-function CouponsBuilder({ coupons, onChange, showUsage }: CouponsBuilderProps) {
+function CouponsBuilder({ coupons, onChange, showUsage, serverErrors }: CouponsBuilderProps) {
   const { t } = useTranslation();
 
   const addCoupon = () => {
@@ -1380,6 +1399,7 @@ function CouponsBuilder({ coupons, onChange, showUsage }: CouponsBuilderProps) {
                 {`${t('Usage')}: ${coupon.usage_count ?? 0} / ${coupon.max_uses > 0 ? coupon.max_uses : '∞'}`}
               </AppText>
             ) : null}
+            <ServerErrorLines lines={serverErrors?.[String(index)]} />
           </View>
         ) : null,
       )}
@@ -1399,6 +1419,7 @@ export function EventForm({
   isOrganization,
   couponsEditable = true,
   stickySubmit = true,
+  serverErrors,
 }: EventFormProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -1458,7 +1479,8 @@ export function EventForm({
   const [saveAsDraft, setSaveAsDraft] = useState<boolean>(initialValues?.inDraft ?? false);
   const [coupons, setCoupons] = useState<EventFormCoupon[]>(initialValues?.coupons ?? []);
   const [paymentSetup, setPaymentSetup] = useState<PaymentSetupKind | null>(null);
-  const [contractSigned, setContractSigned] = useState(currentUser?.contract_signed === true);
+  const [signedHere, setContractSigned] = useState(false);
+  const contractSigned = signedHere || currentUser?.contract_signed === true;
   const [checkingPayments, setCheckingPayments] = useState(false);
 
   const mutedIcon = isDark ? colors.dark.textSecondary : colors.muted;
@@ -2021,7 +2043,7 @@ export function EventForm({
 
         {couponsEditable ? (
           <FormSection icon={Tag} title={t('Coupons')} subtitle={t('Offer discount codes buyers can apply at checkout.')}>
-            <CouponsBuilder coupons={coupons} onChange={setCoupons} showUsage={mode === 'edit'} />
+            <CouponsBuilder coupons={coupons} onChange={setCoupons} showUsage={mode === 'edit'} serverErrors={serverErrors?.coupons} />
           </FormSection>
         ) : null}
 
@@ -2044,6 +2066,7 @@ export function EventForm({
                       showRemove={fields.length > 1 && !(isExistingTicket && isPaidEvent)}
                       locked={isExistingTicket}
                       pinnableDays={pinnableDays}
+                      serverErrorLines={serverErrors?.tickets?.[String(index)]}
                     />
                   );
                 })}
@@ -2051,6 +2074,11 @@ export function EventForm({
             )}
           />
           {ticketsError ? <AppText className="mt-3 font-gilroy-medium text-xs text-danger">{t(ticketsError)}</AppText> : null}
+          {serverErrors?.tickets ? (
+            <AppText className="mt-3 font-gilroy-medium text-xs text-danger">
+              {t('One or more tickets were rejected by the server. See the highlighted rows.')}
+            </AppText>
+          ) : null}
           <PressableScale
             onPress={() => append(DEFAULT_TICKET)}
             accessibilityLabel={t('Add more tickets')}

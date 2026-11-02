@@ -14,7 +14,6 @@ export interface OrgTrafficReferrerStat {
 
 export interface OrgTrafficStats {
   total_clicks: number;
-  event_count: number;
   by_referrer: OrgTrafficReferrerStat[];
 }
 
@@ -40,7 +39,6 @@ export const trafficApi = baseApi
         query: (args) => buildTrafficQuery(args),
         transformResponse: (response: Partial<OrgTrafficStats>): OrgTrafficStats => ({
           total_clicks: response.total_clicks ?? 0,
-          event_count: response.event_count ?? 0,
           by_referrer: response.by_referrer ?? [],
         }),
         providesTags: ['OrgTraffic'],

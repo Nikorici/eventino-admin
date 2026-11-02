@@ -35,6 +35,15 @@ export interface ReleaseTicketSheetProps {
   currency: string;
 }
 
+function releaseErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null || !('data' in error)) return undefined;
+  const data: unknown = error.data;
+  if (typeof data !== 'object' || data === null) return undefined;
+  if ('message' in data && typeof data.message === 'string' && data.message) return data.message;
+  if ('detail' in data && typeof data.detail === 'string' && data.detail) return data.detail;
+  return undefined;
+}
+
 function priceOf(type: TicketType): number {
   const value = Number(type.price);
   return Number.isFinite(value) ? value : 0;
@@ -151,14 +160,16 @@ export function ReleaseTicketSheet({
       phone: phone.trim(),
     };
     const failed: ReleaseRow[] = [];
+    let firstError: unknown;
     for (const row of rows) {
       try {
         await release({
           eventId,
           ...buildReleasePayload(attendee, row, seated),
         }).unwrap();
-      } catch {
+      } catch (error) {
         failed.push(row);
+        firstError ??= error;
       }
     }
 
@@ -169,7 +180,9 @@ export function ReleaseTicketSheet({
       return;
     }
     setRows(failed);
-    if (failed.length === rows.length) return toast(t('Failed to release ticket. Please try again.'), 'error');
+    if (failed.length === rows.length) {
+      return toast(releaseErrorMessage(firstError) ?? t('Failed to release ticket. Please try again.'), 'error');
+    }
     toast(
       t('Released {{ok}} of {{total}} ticket types. Failed: {{names}}', {
         ok: rows.length - failed.length,

@@ -30,17 +30,19 @@ import {
 } from '@/store/api/organizerApi';
 import { colors } from '@/theme/colors';
 
-function requestId(request: FreeTicketRequest): number {
-  return request.id ?? request.order_id;
-}
+export const SPECIAL_FREE_TICKET_EVENT_IDS = [984, 1284, 1473, 1550];
+const ORGANIZATION_COLUMN_EVENT_ID = 1473;
+const COUPONLESS_FREE_EVENT_ID = 1550;
 
 function RequestRow({
   request,
+  eventId,
   busy,
   onSend,
   onReject,
 }: {
   request: FreeTicketRequest;
+  eventId: number;
   busy: 'send' | 'reject' | null;
   onSend: () => void;
   onReject: () => void;
@@ -64,7 +66,11 @@ function RequestRow({
         <AppText className="font-gilroy-medium text-[12px] text-muted">
           {`${t('Submission date')}: ${formatDateTimeLabel(request.submission_date, i18n.language)}`}
         </AppText>
-        <AppText className="font-gilroy-medium text-[12px] text-muted">{`${t('Coupon code')}: ${request.coupon_code || '-'}`}</AppText>
+        {eventId === ORGANIZATION_COLUMN_EVENT_ID ? (
+          <AppText className="font-gilroy-medium text-[12px] text-muted">{`${t('Organizatia')}: ${request.organization_answer || '-'}`}</AppText>
+        ) : eventId === COUPONLESS_FREE_EVENT_ID ? null : (
+          <AppText className="font-gilroy-medium text-[12px] text-muted">{`${t('Coupon code')}: ${request.coupon_code || '-'}`}</AppText>
+        )}
         {(request.tickets ?? []).length > 0 ? (
           <View className="flex-row flex-wrap gap-1.5">
             {(request.tickets ?? []).map((ticket, index) => (
@@ -132,7 +138,13 @@ export function FreeTicketRequestsPanel({ eventId, refreshSignal }: { eventId: n
 
   return (
     <View className="gap-3">
-      <SectionTitle subtitle={t('Registrations submitted with 100% discount codes are listed here until approved.')}>
+      <SectionTitle
+        subtitle={
+          eventId === COUPONLESS_FREE_EVENT_ID
+            ? t('Free pre-registration requests are listed here until approved.')
+            : t('Registrations submitted with 100% discount codes are listed here until approved.')
+        }
+      >
         {t('Pending Free Ticket Requests')}
       </SectionTitle>
       {query.isError && !query.data ? (
@@ -144,11 +156,12 @@ export function FreeTicketRequestsPanel({ eventId, refreshSignal }: { eventId: n
       ) : (
         <PanelCard>
           {requests.map((request, index) => {
-            const id = requestId(request);
+            const id = request.id;
             return (
               <RowDivider key={id} index={index}>
                 <RequestRow
                   request={request}
+                  eventId={eventId}
                   busy={busy?.id === id ? busy.action : null}
                   onSend={() =>
                     confirmAction({

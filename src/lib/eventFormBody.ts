@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import type { Coordinates, EventType, QuantityDiscountTier } from '@/types/api';
 
 export interface MultipartFile {
@@ -6,8 +8,16 @@ export interface MultipartFile {
   type: string;
 }
 
+export type UploadFile = MultipartFile | File;
+
 interface NativeFormData {
-  append(name: string, value: string | MultipartFile): void;
+  append(name: string, value: string | UploadFile): void;
+}
+
+export async function toUploadFile(file: MultipartFile): Promise<UploadFile> {
+  if (Platform.OS !== 'web') return file;
+  const blob = await (await fetch(file.uri)).blob();
+  return new File([blob], file.name, { type: file.type || blob.type });
 }
 
 const NativeFormDataCtor: { new (): NativeFormData } = FormData;
@@ -91,8 +101,8 @@ export interface CreateEventInput extends EventScalarInput {
   owner: number;
   company?: number;
   coupons: EventCouponInput[];
-  photos: MultipartFile[];
-  video?: MultipartFile;
+  photos: UploadFile[];
+  video?: UploadFile;
 }
 
 export type EventMediaOrderEntry =
@@ -103,11 +113,11 @@ export type EventMediaOrderEntry =
 export interface UpdateEventInput extends EventScalarInput {
   id: number;
   company?: number;
-  newPhotos: MultipartFile[];
+  newPhotos: UploadFile[];
   existingImageIds: number[];
   mediaOrder: EventMediaOrderEntry[];
   coupons?: EventCouponInput[];
-  video?: MultipartFile;
+  video?: UploadFile;
   removeVideo: boolean;
 }
 

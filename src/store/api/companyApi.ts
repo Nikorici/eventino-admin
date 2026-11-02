@@ -23,7 +23,7 @@ export interface CompanyProfile extends Partial<CompanyFields> {
 
 export interface UpdateCompanyProfileArgs {
   userId: number;
-  company: CompanyFields;
+  company: Partial<CompanyFields>;
 }
 
 export const companyApi = baseApi

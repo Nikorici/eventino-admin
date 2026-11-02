@@ -80,10 +80,10 @@ function findCoupon(couponId: number): { event: MockEvent; coupons: StoredCoupon
 function invalid(coupons: StoredCoupon[], body: Partial<CouponPayload>, current?: StoredCoupon) {
   const code = body.code?.trim().toUpperCase();
   if (code && coupons.some((coupon) => coupon.id !== current?.id && coupon.code.toUpperCase() === code)) {
-    return mockError(400, { code: ['Event coupon with this code already exists.'] });
+    return mockError(400, { code: ['A coupon with this code already exists for this event.'] });
   }
   if (current && body.max_uses && body.max_uses < current.usage_count) {
-    return mockError(400, { max_uses: ['Usage limit cannot be lower than the current usage.'] });
+    return mockError(400, { max_uses: [`Usage limit cannot be lower than current usage (${current.usage_count}).`] });
   }
   return null;
 }
@@ -127,7 +127,7 @@ export const handlers: MockHandler[] = [
     const found = findCoupon(Number(params.id));
     if (!found) return mockError(404, { detail: 'Not found.' });
     if (found.coupon.usage_count > 0) {
-      return mockError(400, { detail: 'This voucher has been used. Deactivate it instead of deleting.' });
+      return mockError(400, { detail: 'Cannot delete a coupon that has been used. Deactivate it instead.' });
     }
     saveCoupons(found.event, found.coupons.filter((coupon) => coupon.id !== found.coupon.id));
     return {};

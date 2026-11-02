@@ -57,6 +57,7 @@ export const routes = {
   messageSubscribers: '/more/message-subscribers',
   companyInfo: '/more/company-info',
   settings: '/more/settings',
+  changePassword: '/more/change-password',
 } as const;
 
 export type RouteKey = keyof typeof routes;
@@ -115,6 +116,8 @@ export const navigate = {
   more: push('more'),
   overview: push('overview'),
   adminEvents: push('adminEvents'),
+  adminAccounting: (eventId: number) =>
+    router.push(href('/more/admin-events/[id]', { id: String(eventId) })),
   fiscalizare: push('fiscalizare'),
   labelPrinters: push('labelPrinters'),
   labelPrinterSettings: (printerUuid: string) =>
@@ -128,4 +131,5 @@ export const navigate = {
   messageSubscribers: push('messageSubscribers'),
   companyInfo: push('companyInfo'),
   settings: push('settings'),
+  changePassword: push('changePassword'),
 };

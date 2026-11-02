@@ -19,8 +19,8 @@ import type {
   VenueLayoutListItem,
 } from '@/types/seating';
 
-import { findMockEvent, type MockEvent } from './core';
-import { bodyOf, isoDateTime, mock, mockError, type MockHandler } from './mock';
+import { currentMockUser, findMockEvent, type MockEvent } from './core';
+import { bodyOf, isoDateTime, mock, mockError, type MockHandler, type MockResolver } from './mock';
 
 interface SlotSpec {
   slot: string;
@@ -592,6 +592,13 @@ function applyConfig(event: MockEvent, payload: Partial<SeatMapConfigPayload>): 
   };
 }
 
+function adminOnly(resolve: MockResolver): MockResolver {
+  return (request) =>
+    currentMockUser(request).is_staff
+      ? resolve(request)
+      : mockError(403, { detail: 'You do not have permission to perform this action.' });
+}
+
 export const handlers: MockHandler[] = [
   mock('GET', '/api/v1/event-venues/by_event/', ({ query }) =>
     eventVenues
@@ -606,10 +613,10 @@ export const handlers: MockHandler[] = [
       .map(toEventZone)
       .filter((item): item is EventZone => item !== null);
   }),
-  mock('POST', '/api/v1/venues/', (request) => {
+  mock('POST', '/api/v1/venues/', adminOnly((request) => {
     const body = bodyOf<{ name: string; location: string; capacity: number; template: VenueTemplate }>(request);
     const slots = body.template ? TEMPLATE_SLOTS[body.template] : undefined;
-    if (!slots) return mockError(400, { template: ['Invalid template.'] });
+    if (!slots) return mockError(400, { error: 'Invalid template' });
     const id = newId();
     const venue: Venue = {
       id,
@@ -631,20 +638,21 @@ export const handlers: MockHandler[] = [
     };
     venues.push(venue);
     return { ...venue, zones: venue.zones.map((zone) => ({ ...zone })) };
-  }),
-  mock('DELETE', '/api/v1/venues/:id/', ({ params }) => {
-    if (!venues.some((venue) => venue.id === Number(params.id))) return mockError(404, { detail: 'Not found.' });
+  })),
+  mock('DELETE', '/api/v1/venues/:id/', adminOnly(({ params }) => {
+    if (!venues.some((venue) => venue.id === Number(params.id))) return mockError(404, { detail: 'No Venue matches the given query.' });
+    if (eventVenues.some((item) => item.venue === Number(params.id))) return mockError(409, { error: 'Venue is in use' });
     removeVenue(Number(params.id));
     return {};
-  }),
-  mock('POST', '/api/v1/event-venues/assign_venue/', (request) => {
+  })),
+  mock('POST', '/api/v1/event-venues/assign_venue/', adminOnly((request) => {
     const body = bodyOf<{ event_id: number; venue_id: number }>(request);
     const eventId = Number(body.event_id);
     if (!findMockEvent(eventId) || !venues.some((venue) => venue.id === Number(body.venue_id))) {
-      return mockError(400, { detail: 'Event or venue not found.' });
+      return mockError(400, { error: 'Event or venue not found.' });
     }
     if ((configs.get(eventId)?.seat_map ?? null) !== null) {
-      return mockError(400, { detail: 'This event already uses a seat map.' });
+      return mockError(400, { error: 'This event already uses a seat map.' });
     }
     eventVenues
       .filter((item) => item.event === eventId)
@@ -653,8 +661,8 @@ export const handlers: MockHandler[] = [
     const stored: StoredEventVenue = { id: newId(), event: eventId, venue: Number(body.venue_id), configuration_notes: null };
     eventVenues.push(stored);
     return toEventVenue(stored);
-  }),
-  mock('PATCH', '/api/v1/zones/:id/', (request) => {
+  })),
+  mock('PATCH', '/api/v1/zones/:id/', adminOnly((request) => {
     const zoneId = Number(request.params.id);
     const venue = venues.find((item) => item.zones.some((zone) => zone.id === zoneId));
     if (!venue) return mockError(404, { detail: 'Not found.' });
@@ -663,12 +671,12 @@ export const handlers: MockHandler[] = [
     venue.zones = venue.zones.map((zone) => (zone.id === zoneId ? { ...zone, ...patch } : zone));
     const updated = venue.zones.find((zone) => zone.id === zoneId);
     return updated ? { ...updated } : {};
-  }),
-  mock('POST', '/api/v1/event-zones/assign_to_event/', (request) => {
+  })),
+  mock('POST', '/api/v1/event-zones/assign_to_event/', adminOnly((request) => {
     const body = bodyOf<{ event_venue_id: number; zone_id: number; ticket_type_id: number }>(request);
     const eventVenueId = Number(body.event_venue_id);
     if (!eventVenues.some((item) => item.id === eventVenueId) || !zoneById(Number(body.zone_id))) {
-      return mockError(400, { detail: 'Zone not found.' });
+      return mockError(400, { error: 'Zone not found.' });
     }
     const stored: StoredEventZone = {
       id: newId(),
@@ -680,8 +688,8 @@ export const handlers: MockHandler[] = [
     };
     eventZones.push(stored);
     return toEventZone(stored);
-  }),
-  mock('PATCH', '/api/v1/event-zones/:id/', (request) => {
+  })),
+  mock('PATCH', '/api/v1/event-zones/:id/', adminOnly((request) => {
     const stored = eventZones.find((item) => item.id === Number(request.params.id));
     if (!stored) return mockError(404, { detail: 'Not found.' });
     const patch = bodyOf<{ ticket_type: number | null; price_override: number | null }>(request);
@@ -690,13 +698,13 @@ export const handlers: MockHandler[] = [
       stored.price_override = patch.price_override === null ? null : Number(patch.price_override).toFixed(2);
     }
     return toEventZone(stored);
-  }),
-  mock('DELETE', '/api/v1/event-zones/:id/', ({ params }) => {
+  })),
+  mock('DELETE', '/api/v1/event-zones/:id/', adminOnly(({ params }) => {
     const index = eventZones.findIndex((item) => item.id === Number(params.id));
     if (index < 0) return mockError(404, { detail: 'Not found.' });
     eventZones.splice(index, 1);
     return {};
-  }),
+  })),
   mock('GET', '/api/v1/venue-layouts/:id/', ({ params }) => layoutById(Number(params.id)) ?? mockError(404, { detail: 'Not found.' })),
   mock('GET', '/api/v1/events/:id/seat-map/config/', ({ params }) => {
     const event = findMockEvent(params.id);
@@ -727,7 +735,7 @@ export const handlers: MockHandler[] = [
     const event = findMockEvent(params.id);
     const stored = event ? configs.get(event.id) : undefined;
     if (!event || stored?.seat_map?.scope !== 'tables') {
-      return mockError(400, { code: 'no_table_map', message: 'This event has no table map' });
+      return mockError(404, { detail: 'This event has no table map', code: 'no_table_map' });
     }
     return overviewFor(event, stored);
   }),
@@ -735,16 +743,16 @@ export const handlers: MockHandler[] = [
     const event = findMockEvent(request.params.id);
     const stored = event ? configs.get(event.id) : undefined;
     if (!event || !stored || stored.seat_map?.scope !== 'tables') {
-      return mockError(400, { code: 'no_table_map', message: 'This event has no table map' });
+      return mockError(404, { detail: 'This event has no table map', code: 'no_table_map' });
     }
     const body = bodyOf<PaymentLinkPayload>(request);
     const table = overviewFor(event, stored).tables.find((item) => item.seat_id === Number(body.seat_id));
-    if (!table) return mockError(400, { code: 'invalid_seat', message: 'Invalid table' });
+    if (!table) return mockError(400, { detail: 'This table is not on the event map', code: 'invalid_seat' });
     const clientName = body.client_name?.trim() ?? '';
-    if (!clientName || !body.expires_at) return mockError(400, { code: 'invalid_request', message: 'Invalid request' });
-    if (new Date(body.expires_at).getTime() <= Date.now()) return mockError(400, { code: 'expires_in_past', message: 'Expiry in the past' });
-    if (table.status === 'linked') return mockError(409, { code: 'link_exists', message: 'Link exists' });
-    if (!table.linkable) return mockError(409, { code: 'table_unavailable', message: 'Table unavailable' });
+    if (!clientName || !body.expires_at) return mockError(400, { detail: 'Invalid payment link', code: 'invalid_request' });
+    if (new Date(body.expires_at).getTime() <= Date.now()) return mockError(400, { detail: 'Choose an expiry date in the future', code: 'expires_in_past' });
+    if (table.status === 'linked') return mockError(409, { detail: 'This table already has an active payment link', code: 'link_exists' });
+    if (!table.linkable) return mockError(409, { detail: 'This table is sold or someone is paying for it right now', code: 'table_unavailable' });
     const link = linkFor(event.id, table.seat_id, {
       client_name: clientName,
       note: body.note?.trim() ?? '',
@@ -759,8 +767,8 @@ export const handlers: MockHandler[] = [
   }),
   mock('POST', '/api/v1/events/:id/seat-map/payment-links/:linkId/cancel/', ({ params }) => {
     const link = paymentLinks.find((item) => item.id === Number(params.linkId) && item.event === Number(params.id));
-    if (!link) return mockError(404, { code: 'link_not_found', message: 'Not found' });
-    if (link.status === 'paid') return mockError(409, { code: 'link_paid', message: 'Already paid' });
+    if (!link) return mockError(404, { detail: 'Payment link not found', code: 'link_not_found' });
+    if (link.status === 'paid') return mockError(409, { detail: 'This table is already paid', code: 'link_paid' });
     link.status = 'cancelled';
     link.cancelled_at = new Date().toISOString();
     const { event: _event, ...response } = link;

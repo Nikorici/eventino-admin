@@ -21,8 +21,9 @@ const organizerEndpoints = {
 export const ordersSettlementExportEndpoint = '/api/v1/statistics/get-orders-settlement-export/';
 
 export interface FreeTicketRequest {
-  order_id: number;
-  id?: number;
+  id: number;
+  order_id?: number;
+  organization_answer?: string | null;
   first_name?: string | null;
   last_name?: string | null;
   account_name?: string | null;
@@ -143,9 +144,7 @@ export interface EventTicketRecord {
   ticket_type: string;
   display_name?: string | null;
   account_name?: string | null;
-  email?: string | null;
   order_id?: number | null;
-  order_date?: string | null;
   scan_date?: string | null;
 }
 

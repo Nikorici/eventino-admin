@@ -1,4 +1,3 @@
-import { extractApiError } from '@/lib/apiError';
 import type { QuantityDiscountTier } from '@/types/api';
 
 export const MAX_QUANTITY_DISCOUNT_TIERS = 10;
@@ -99,9 +98,67 @@ function submitErrorStatus(error: unknown): number | string | undefined {
   return typeof error.status === 'number' || typeof error.status === 'string' ? error.status : undefined;
 }
 
+function errorData(error: unknown): unknown {
+  return typeof error === 'object' && error !== null && 'data' in error ? error.data : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function parseBackendErrors(data: unknown): string | undefined {
+  if (typeof data === 'string') {
+    const trimmed = data.trim();
+    return trimmed && !trimmed.startsWith('<') ? trimmed : undefined;
+  }
+  if (!isRecord(data)) return undefined;
+  if (typeof data.detail === 'string' && data.detail) return data.detail;
+  if (typeof data.message === 'string' && data.message) return data.message;
+  const messages = Object.entries(data).flatMap(([field, errors]) => {
+    if (Array.isArray(errors)) return errors.map((message) => `${field}: ${String(message)}`);
+    if (typeof errors === 'string') return [`${field}: ${errors}`];
+    if (typeof errors === 'object' && errors !== null) return [`${field}: ${JSON.stringify(errors)}`];
+    return [];
+  });
+  return messages.length > 0 ? messages.join('\n') : undefined;
+}
+
+export type EventFormRowErrors = Record<string, string[]>;
+
+export interface EventFormServerErrors {
+  tickets?: EventFormRowErrors;
+  coupons?: EventFormRowErrors;
+}
+
+function rowErrorLines(rows: Record<string, unknown>): EventFormRowErrors {
+  return Object.fromEntries(
+    Object.entries(rows).map(([index, row]) => [
+      index,
+      isRecord(row)
+        ? Object.entries(row).flatMap(([field, messages]) =>
+            (Array.isArray(messages) ? messages : [messages]).map(
+              (message) => `${field === 'non_field_errors' ? '' : `${field}: `}${String(message)}`,
+            ),
+          )
+        : [String(row)],
+    ]),
+  );
+}
+
+export function eventFormServerErrors(error: unknown): EventFormServerErrors | null {
+  const data = errorData(error);
+  if (!isRecord(data)) return null;
+  if (isRecord(data.ticket_types)) return { tickets: rowErrorLines(data.ticket_types) };
+  if (isRecord(data.coupons)) return { coupons: rowErrorLines(data.coupons) };
+  return null;
+}
+
 export function describeEventSubmitError(error: unknown, t: Translate): string | undefined {
-  const backendMessage = extractApiError(error)?.trim();
-  if (backendMessage && !backendMessage.startsWith('<')) return backendMessage;
+  const serverErrors = eventFormServerErrors(error);
+  if (serverErrors?.tickets) return t('Some tickets were rejected. Check the highlighted rows.');
+  if (serverErrors?.coupons) return t('Some coupons were rejected. Check the highlighted rows.');
+  const backendMessage = parseBackendErrors(errorData(error));
+  if (backendMessage) return backendMessage;
   const status = submitErrorStatus(error);
   if (status === 413) return t('Files too large. Please reduce image or video size and try again.');
   if (status === 401 || status === 403) return t('Session expired. Please log in again.');

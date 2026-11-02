@@ -61,7 +61,7 @@ export const handlers: MockHandler[] = [
   ),
   mock('POST', '/api/v1/integrations/smartbill/invoices/:orderId/send/', ({ params }) => {
     const row = findRow(Number(params.orderId));
-    if (!row) return mockError(404, { error: 'Not found.' });
+    if (!row) return mockError(404, { detail: 'No TicketOrder matches the given query.' });
     if (row.state !== 'sent') {
       lastNumber += 1;
       row.state = 'sent';

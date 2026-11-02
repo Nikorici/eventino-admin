@@ -26,7 +26,6 @@ import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEventId } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
-import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/cn';
 import { dateFnsLocale } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
@@ -535,12 +534,8 @@ export default function VouchersScreen() {
         toast(t('Voucher created'), 'success');
       }
       closeSheet();
-    } catch (error) {
-      toast(
-        extractApiError(error) ??
-          t('Could not save voucher. Check the code is unique and the limit is not below current usage.'),
-        'error',
-      );
+    } catch {
+      toast(t('Could not save voucher. Check the code is unique and the limit is not below current usage.'), 'error');
     }
   };
 

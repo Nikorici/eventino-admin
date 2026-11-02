@@ -17,11 +17,16 @@ import {
   type MultipartFile,
 } from '@/store/api/eventsApi';
 import { useGetMyCompaniesQuery } from '@/store/api/usersApi';
+import { toUploadFile } from '@/lib/eventFormBody';
 import { EmptyState, GlassHeader, Screen, Skeleton } from '@/components/ui';
 import { EventForm, type EventFormSubmit } from '@/components/eventForm/EventForm';
 import { buildEventInitialValues } from '@/components/eventForm/eventInitialValues';
 import { OwnerContextSection } from '@/components/eventForm/OwnerContextSection';
-import { describeEventSubmitError } from '@/components/eventForm/eventFormRules';
+import {
+  describeEventSubmitError,
+  eventFormServerErrors,
+  type EventFormServerErrors,
+} from '@/components/eventForm/eventFormRules';
 
 export default function EditEventScreen() {
   const { t } = useTranslation();
@@ -35,6 +40,7 @@ export default function EditEventScreen() {
   const { data: companyGroups } = useGetMyCompaniesQuery(undefined, { skip: !user });
   const [updateEvent, { isLoading: updating }] = useUpdateEventMutation();
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+  const [serverErrors, setServerErrors] = useState<EventFormServerErrors | null>(null);
 
   const couponsReadable = coupons.isSuccess || Array.isArray(event?.coupons);
   const initialValues = useMemo(
@@ -64,6 +70,7 @@ export default function EditEventScreen() {
       return { type: 'image', photo_index: photoIndex++ };
     });
 
+    setServerErrors(null);
     try {
       await updateEvent({
         id: event.id,
@@ -86,10 +93,10 @@ export default function EditEventScreen() {
         coordinates: payload.coordinates ?? undefined,
         in_draft: payload.inDraft ?? false,
         coupons: couponsReadable ? payload.coupons : undefined,
-        newPhotos,
+        newPhotos: await Promise.all(newPhotos.map(toUploadFile)),
         existingImageIds,
         mediaOrder,
-        video: newVideo,
+        video: newVideo ? await toUploadFile(newVideo) : undefined,
         removeVideo: !hasVideo && Boolean(event.video),
         questions: payload.questions,
         organizers: payload.organizers,
@@ -102,6 +109,7 @@ export default function EditEventScreen() {
       navigate.dashboard();
     } catch (error) {
       haptics.error();
+      setServerErrors(eventFormServerErrors(error));
       toast(describeEventSubmitError(error, t) ?? t('We could not save your changes. Please try again.'), 'error');
     }
   };
@@ -144,6 +152,7 @@ export default function EditEventScreen() {
         mode="edit"
         initialValues={initialValues}
         submitting={updating}
+        serverErrors={serverErrors}
         onSubmit={(payload) => void handleSubmit(payload)}
         isOrganization={Boolean(user?.is_organization)}
         couponsEditable={couponsReadable}

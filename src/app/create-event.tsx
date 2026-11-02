@@ -8,13 +8,18 @@ import { navigate } from '@/lib/nav';
 import { useSelectEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
 import { useAppSelector } from '@/store/hooks';
+import { toUploadFile } from '@/lib/eventFormBody';
 import { useCreateEventMutation, type MultipartFile } from '@/store/api/eventsApi';
 import { useGetMyCompaniesQuery, useGetMyDelegatorsQuery, type OrganizationResult } from '@/store/api/usersApi';
 import { EmptyState, GlassHeader, Screen } from '@/components/ui';
 import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
 import { EventForm, type EventFormSubmit } from '@/components/eventForm/EventForm';
 import { OwnerContextSection } from '@/components/eventForm/OwnerContextSection';
-import { describeEventSubmitError } from '@/components/eventForm/eventFormRules';
+import {
+  describeEventSubmitError,
+  eventFormServerErrors,
+  type EventFormServerErrors,
+} from '@/components/eventForm/eventFormRules';
 
 export default function CreateEventScreen() {
   const { t } = useTranslation();
@@ -29,6 +34,7 @@ export default function CreateEventScreen() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [actingOnBehalfOfId, setActingOnBehalfOfId] = useState<number | null>(null);
   const [ownerOrganization, setOwnerOrganization] = useState<OrganizationResult | null>(null);
+  const [serverErrors, setServerErrors] = useState<EventFormServerErrors | null>(null);
 
   const myCompanies = companyGroups?.find((group) => group.user_id === user?.id)?.companies ?? [];
   const myDelegators = delegators ?? [];
@@ -65,6 +71,7 @@ export default function CreateEventScreen() {
       else video = { uri: item.video.uri, name: item.video.name, type: item.video.type };
     });
 
+    setServerErrors(null);
     try {
       const created = await createEvent({
         owner: ownerId,
@@ -87,8 +94,8 @@ export default function CreateEventScreen() {
         coordinates: payload.coordinates ?? undefined,
         in_draft: false,
         coupons: payload.coupons,
-        photos,
-        video,
+        photos: await Promise.all(photos.map(toUploadFile)),
+        video: video ? await toUploadFile(video) : undefined,
         questions: payload.questions,
         organizers: payload.organizers,
         timelines: payload.timelines,
@@ -104,6 +111,7 @@ export default function CreateEventScreen() {
       }
     } catch (error) {
       haptics.error();
+      setServerErrors(eventFormServerErrors(error));
       toast(describeEventSubmitError(error, t) ?? t('We could not create your event. Please try again.'), 'error');
     }
   };
@@ -114,6 +122,7 @@ export default function CreateEventScreen() {
       <EventForm
         mode="create"
         submitting={creating}
+        serverErrors={serverErrors}
         onSubmit={(payload) => void handleSubmit(payload)}
         isOrganization={Boolean(user?.is_organization)}
         contextSection={

@@ -19,6 +19,7 @@ import { ProductInfoForm, type ProductInfoValues } from '@/components/merch/Prod
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -118,8 +119,8 @@ export default function MerchScreen() {
       toast(t('Product created'), 'success');
       setSheetOpen(false);
       navigate.merchProduct(created.id);
-    } catch {
-      toast(t('Unable to create product'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Unable to create product'), 'error');
     }
   };
 

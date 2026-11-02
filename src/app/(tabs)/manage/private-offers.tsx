@@ -108,7 +108,7 @@ export default function PrivateOffersScreen() {
         cancelOffer({ offerId: offer.id, eventId })
           .unwrap()
           .then(() => toast(t('Offer cancelled'), 'success'))
-          .catch(() => toast(t('Something went wrong.'), 'error'))
+          .catch((error: unknown) => toast(extractApiError(error) ?? t('Something went wrong.'), 'error'))
           .finally(() => setBusyOfferId(null));
       },
     });

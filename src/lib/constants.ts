@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   themePreference: 'themePreference',
   selectedEvent: 'selectedEvent',
   defaultCurrency: 'defaultCurrency',
+  scheduledDeletionDate: 'scheduledDeletionDate',
 } as const;
 
 export const endpoints = {

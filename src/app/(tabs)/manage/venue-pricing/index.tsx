@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, RefreshControl, ScrollView, Switch, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Switch, View, useWindowDimensions } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { Armchair, Building2, LayoutGrid, MapPin, Pencil, RotateCcw, Ticket, X }
 
 import { AppText, EmptyState, GlassHeader, GlassInput, PressableScale, Screen, Skeleton, ToastHost } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { confirmAction } from '@/components/dashboard/dashboardParts';
 import { ArenaPreview } from '@/components/venue/ArenaPreview';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
@@ -438,6 +439,7 @@ export default function VenuePricingScreen() {
     if (creating || eventId == null) return;
     haptics.light();
     setCreating(true);
+    let step = 'Failed to create venue';
     try {
       const venue = await createVenue({
         eventId,
@@ -446,6 +448,7 @@ export default function VenuePricingScreen() {
         capacity: 0,
         template,
       }).unwrap();
+      step = 'Failed to assign venue';
       await assignVenue({ eventId, venueId: venue.id }).unwrap();
       haptics.success();
       toast(t('Template applied'), 'success');
@@ -453,7 +456,7 @@ export default function VenuePricingScreen() {
     } catch (error) {
       haptics.error();
       const message = extractApiError(error);
-      toast(message ? t(message) : t('Failed to assign venue'), 'error');
+      toast(message ? t(message) : t(step), 'error');
     } finally {
       setCreating(false);
     }
@@ -461,19 +464,19 @@ export default function VenuePricingScreen() {
 
   const confirmResetTemplate = () => {
     if (!eventVenue || eventId == null) return;
-    Alert.alert(t('Change template'), t('Reset template? This will delete all zone configuration for this event.'), [
-      { text: t('Cancel'), style: 'cancel' },
-      {
-        text: t('Change template'),
-        style: 'destructive',
-        onPress: () => {
-          deleteVenue({ eventId, venueId: eventVenue.venue })
-            .unwrap()
-            .then(() => toast(t('Template removed'), 'success'))
-            .catch(() => toast(t('Update failed'), 'error'));
-        },
+    confirmAction({
+      title: t('Change template'),
+      message: t('Reset template? This will delete all zone configuration for this event.'),
+      cancelLabel: t('Cancel'),
+      confirmLabel: t('Change template'),
+      destructive: true,
+      onConfirm: () => {
+        deleteVenue({ eventId, venueId: eventVenue.venue })
+          .unwrap()
+          .then(() => toast(t('Template removed'), 'success'))
+          .catch((error: unknown) => toast(extractApiError(error) ?? t('Update failed'), 'error'));
       },
-    ]);
+    });
   };
 
   const renderZoneVenue = () =>

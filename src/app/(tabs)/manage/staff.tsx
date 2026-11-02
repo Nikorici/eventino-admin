@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Check, Pencil, Search, Shield, Trash2, UserPlus, X } from 'lucide-react-native';
 
+import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -17,6 +18,7 @@ import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useToast } from '@/hooks/useToast';
 import { useAppSelector } from '@/store/hooks';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { confirmAction } from '@/components/dashboard/dashboardParts';
 import {
   useAddEventStaffMutation,
   useGetEventStaffQuery,
@@ -372,8 +374,8 @@ export default function EventStaffScreen() {
       await addStaff({ event: numericId, user: selectedUser.id, ...newPermissions }).unwrap();
       toast(`${staffUserLabel(selectedUser)} ${t('added as staff')}`, 'success');
       setAddOpen(false);
-    } catch {
-      toast(t('Failed to add staff member'), 'error');
+    } catch (error) {
+      toast(extractApiError(error) ?? t('Failed to add staff member'), 'error');
     }
   }, [selectedUser, addStaff, numericId, newPermissions, toast, t]);
 
@@ -383,8 +385,8 @@ export default function EventStaffScreen() {
       await updateStaff({ staffId: editingStaff.id, permissions: editPermissions }).unwrap();
       toast(t('Staff permissions updated'), 'success');
       setEditingStaff(null);
-    } catch {
-      toast(t('Failed to update permissions'), 'error');
+    } catch (error) {
+      toast(extractApiError(error) ?? t('Failed to update permissions'), 'error');
     }
   }, [editingStaff, editPermissions, updateStaff, toast, t]);
 
@@ -394,8 +396,8 @@ export default function EventStaffScreen() {
       try {
         await removeStaff(member.id).unwrap();
         toast(`${staffUserLabel(member.user_details)} ${t('removed')}`, 'success');
-      } catch {
-        toast(t('Failed to remove staff member'), 'error');
+      } catch (error) {
+        toast(extractApiError(error) ?? t('Failed to remove staff member'), 'error');
       } finally {
         setRemovingId(null);
       }
@@ -406,16 +408,14 @@ export default function EventStaffScreen() {
   const onRemove = useCallback(
     (member: EventStaffMember) => {
       haptics.medium();
-      Alert.alert(t('Remove staff member'), t('Are you sure you want to remove this staff member?'), [
-        { text: t('Cancel'), style: 'cancel' },
-        {
-          text: t('Remove'),
-          style: 'destructive',
-          onPress: () => {
-            void confirmRemove(member);
-          },
-        },
-      ]);
+      confirmAction({
+        title: t('Remove staff member'),
+        message: t('Are you sure you want to remove this staff member?'),
+        cancelLabel: t('Cancel'),
+        confirmLabel: t('Remove'),
+        destructive: true,
+        onConfirm: () => void confirmRemove(member),
+      });
     },
     [t, confirmRemove],
   );

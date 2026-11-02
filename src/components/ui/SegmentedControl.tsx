@@ -16,9 +16,10 @@ export interface SegmentedControlProps<T extends string> {
   value: T;
   onChange: (value: T) => void;
   className?: string;
+  compact?: boolean;
 }
 
-export function SegmentedControl<T extends string>({ options, value, onChange, className }: SegmentedControlProps<T>) {
+export function SegmentedControl<T extends string>({ options, value, onChange, className, compact }: SegmentedControlProps<T>) {
   return (
     <View className={cn('h-11 flex-row rounded-full border border-app-border bg-white/70 p-1 dark:border-dark-border dark:bg-white/10', className)}>
       {options.map((option) => {
@@ -37,7 +38,8 @@ export function SegmentedControl<T extends string>({ options, value, onChange, c
               <AppText
                 numberOfLines={1}
                 className={cn(
-                  'font-gilroy-semibold text-sm',
+                  'font-gilroy-semibold',
+                  compact ? 'text-[13px]' : 'text-sm',
                   active ? 'text-white dark:text-primary' : 'text-primary/70 dark:text-dark-text/70',
                 )}
               >

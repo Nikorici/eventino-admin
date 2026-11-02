@@ -18,6 +18,7 @@ import type { User } from '@/types/api';
 export interface AuthResult {
   ok: boolean;
   error?: string;
+  status?: number;
 }
 
 export function useAuth() {
@@ -42,6 +43,7 @@ export function useAuth() {
       }
       if (resolvedUser?.id != null) await setSecure(STORAGE_KEYS.userId, String(resolvedUser.id));
       if (resolvedUser) await cache.set(STORAGE_KEYS.cachedUser, resolvedUser);
+      dispatch(baseApi.util.resetApiState());
       dispatch(setUser(resolvedUser));
       return resolvedUser;
     },
@@ -58,7 +60,7 @@ export function useAuth() {
         }
         return { ok: false, error: res.detail };
       } catch (error) {
-        return { ok: false, error: extractError(error) };
+        return { ok: false, error: extractError(error), status: extractStatus(error) };
       }
     },
     [passwordLogin, finishSession],
@@ -205,6 +207,11 @@ function extractError(error: unknown): string | undefined {
       if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
     }
   }
+  return undefined;
+}
+
+function extractStatus(error: unknown): number | undefined {
+  if (typeof error === 'object' && error && 'status' in error && typeof error.status === 'number') return error.status;
   return undefined;
 }
 

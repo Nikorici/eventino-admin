@@ -41,7 +41,7 @@ export default function MarketingTrackingScreen() {
 
   const onSave = useCallback(async () => {
     if (userId == null) {
-      toast(t('Failed to update marketing tracking settings. Please try again.'), 'error');
+      toast(t('Failed to save marketing tracking settings'), 'error');
       return;
     }
     const meta = metaPixel.trim();
@@ -59,9 +59,9 @@ export default function MarketingTrackingScreen() {
     formData.append('tiktok_pixel_id', tiktok);
     try {
       await updateUser({ id: userId, formData }).unwrap();
-      toast(t('Marketing tracking settings updated successfully'), 'success');
+      toast(t('Marketing tracking settings saved successfully'), 'success');
     } catch {
-      toast(t('Failed to update marketing tracking settings. Please try again.'), 'error');
+      toast(t('Failed to save marketing tracking settings'), 'error');
     }
   }, [metaPixel, tiktokPixel, updateUser, userId, toast, t]);
 

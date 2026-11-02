@@ -34,6 +34,7 @@ import { useSelectedEvent } from "@/hooks/useSelectedEvent";
 import { eventPermissions } from "@/lib/sections";
 import { useAppSelector } from "@/store/hooks";
 import { useToast } from "@/hooks/useToast";
+import { extractClientErrorMessage } from "@/lib/apiError";
 import { CARD_BORDER } from "@/components/dashboard/DashboardStats";
 import {
   useAddEventScannerMutation,
@@ -508,8 +509,8 @@ export default function TicketScannersScreen() {
         "success",
       );
       setAddOpen(false);
-    } catch {
-      toast(t("Failed to add scanner"), "error");
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t("Failed to add scanner"), "error");
     }
   }, [selectedUser, validateScope, addScope, addScanner, numericId, toast, t]);
 
@@ -527,8 +528,8 @@ export default function TicketScannersScreen() {
         ...inviteScope,
       }).unwrap();
       setInviteResult({ email, inviteSent: result.invite_sent === true });
-    } catch {
-      toast(t("Failed to send invitation"), "error");
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t("Failed to send invitation"), "error");
     }
   }, [
     inviteEmail,
@@ -550,8 +551,8 @@ export default function TicketScannersScreen() {
       }).unwrap();
       toast(t("Scanner scope updated"), "success");
       setEditingScanner(null);
-    } catch {
-      toast(t("Failed to update scanner scope"), "error");
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t("Failed to update scanner scope"), "error");
     }
   }, [editingScanner, validateScope, editScope, updateScope, toast, t]);
 
@@ -564,8 +565,8 @@ export default function TicketScannersScreen() {
           `${scannerUserLabel(scanner.user_details)} ${t("removed")}`,
           "success",
         );
-      } catch {
-        toast(t("Failed to remove scanner"), "error");
+      } catch (error) {
+        toast(extractClientErrorMessage(error) ?? t("Failed to remove scanner"), "error");
       } finally {
         setRemovingId(null);
       }

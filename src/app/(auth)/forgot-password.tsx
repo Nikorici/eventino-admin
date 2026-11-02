@@ -7,7 +7,7 @@ import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
 
 import { cn } from '@/lib/cn';
 import { GEOAPIFY_API_KEY, USE_MOCKS } from '@/lib/constants';
-import { extractApiError } from '@/lib/apiError';
+import { extractApiError, responseMessage } from '@/lib/apiError';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
 import { colors } from '@/theme/colors';
@@ -18,7 +18,6 @@ import {
   useResetPasswordMutation,
   useSendResetCodeMutation,
   useVerifyResetCodeMutation,
-  type VerificationResponse,
 } from '@/store/api/authApi';
 import { AppText, GlassButton, GlassCard, GlassHeader, GlassInput, PressableScale, Screen } from '@/components/ui';
 import { Logo } from '@/components/brand';
@@ -30,11 +29,6 @@ type ResetStep = 'email' | 'otp' | 'password';
 const STEP_ORDER: ResetStep[] = ['email', 'otp', 'password'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
-
-function responseMessage(response: VerificationResponse): string | undefined {
-  const detail = typeof response.data === 'string' ? response.data : undefined;
-  return [response.message, detail].filter(Boolean).join(': ') || undefined;
-}
 
 function backendErrors(error: unknown): string[] {
   if (typeof error !== 'object' || error === null || !('data' in error)) return [];

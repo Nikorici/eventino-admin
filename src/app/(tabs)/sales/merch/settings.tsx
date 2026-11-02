@@ -19,6 +19,7 @@ import {
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
@@ -55,9 +56,9 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
     setTogglingStore(true);
     try {
       await updateSettings({ eventId, patch: { is_store_enabled: next } }).unwrap();
-    } catch {
+    } catch (error) {
       setStoreEnabled(!next);
-      toast(t('Failed to save settings'), 'error');
+      toast(extractClientErrorMessage(error) ?? t('Failed to save settings'), 'error');
     } finally {
       setTogglingStore(false);
     }
@@ -72,8 +73,8 @@ function SettingsForm({ eventId, eventSlug, settings }: { eventId: number; event
         patch: { shipping_fee: fee || '0', currency, store_intro: storeIntro.trim() },
       }).unwrap();
       toast(t('Settings saved'), 'success');
-    } catch {
-      toast(t('Failed to save settings'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Failed to save settings'), 'error');
     }
   };
 

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, Switch, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Armchair, Check, ChevronDown, ChevronUp, MapPin } from 'lucide-react-native';
 
 import { AppText, Chip, EmptyState, GlassHeader, PressableScale, Screen, SegmentedControl, Skeleton, Stepper } from '@/components/ui';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
+import { confirmAction } from '@/components/dashboard/dashboardParts';
 import { SeatLegend } from '@/components/seatmap/SeatLegend';
 import { SeatMapCanvas } from '@/components/seatmap/SeatMapCanvas';
 import { OptionSheet, type SheetOption } from '@/components/venue/OptionSheet';
@@ -276,31 +277,27 @@ export default function VenueSeatMapScreen() {
 
   const confirmRemove = () => {
     if (eventId == null) return;
-    Alert.alert(
-      t('Remove the seat map?'),
-      t('Buyers will no longer pick seats for this event and seats currently held in carts will be released. Tickets that were already sold keep their seat.'),
-      [
-        { text: t('Keep seat map'), style: 'cancel' },
-        {
-          text: t('Remove seat map'),
-          style: 'destructive',
-          onPress: () => {
-            deleteConfig(eventId)
-              .unwrap()
-              .then(() => {
-                toast(t('Seat map removed'), 'success');
-                setLayout(null);
-                setDraft(emptyDraft());
-                setDirty(false);
-              })
-              .catch((error: unknown) => {
-                const { code, message } = apiErrorParts(error);
-                toast(t(configErrorMessage(code, message ?? t('Could not remove the seat map. Please try again.'))), 'error');
-              });
-          },
-        },
-      ],
-    );
+    confirmAction({
+      title: t('Remove the seat map?'),
+      message: t('Buyers will no longer pick seats for this event and seats currently held in carts will be released. Tickets that were already sold keep their seat.'),
+      cancelLabel: t('Keep seat map'),
+      confirmLabel: t('Remove seat map'),
+      destructive: true,
+      onConfirm: () => {
+        deleteConfig(eventId)
+          .unwrap()
+          .then(() => {
+            toast(t('Seat map removed'), 'success');
+            setLayout(null);
+            setDraft(emptyDraft());
+            setDirty(false);
+          })
+          .catch((error: unknown) => {
+            const { code, message } = apiErrorParts(error);
+            toast(t(configErrorMessage(code, message ?? t('Could not remove the seat map. Please try again.'))), 'error');
+          });
+      },
+    });
   };
 
   const chooserOptions = (extraLabel: string): SheetOption[] => [

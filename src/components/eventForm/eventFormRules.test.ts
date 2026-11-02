@@ -2,6 +2,7 @@ import {
   defaultEventSchedule,
   describeEventSubmitError,
   detectMeetingPlatform,
+  eventFormServerErrors,
   nextQuantityDiscountRow,
   requiredPaymentSetup,
   validateQuantityDiscountTiers,
@@ -86,8 +87,27 @@ describe('defaultEventSchedule', () => {
 describe('describeEventSubmitError', () => {
   const t = (key: string) => key;
 
-  it('prefers the backend message', () => {
-    expect(describeEventSubmitError({ status: 400, data: { title: ['This field is required.'] } }, t)).toBe('This field is required.');
+  it('joins field errors the way the web does', () => {
+    expect(
+      describeEventSubmitError(
+        { status: 400, data: { title: ['Event title is required'], start_date: ['Start date is required'] } },
+        t,
+      ),
+    ).toBe('title: Event title is required\nstart_date: Start date is required');
+    expect(describeEventSubmitError({ status: 400, data: { detail: 'Owner field is required' } }, t)).toBe('Owner field is required');
+    expect(describeEventSubmitError({ status: 403, data: { message: 'Only staff members can cancel events' } }, t)).toBe(
+      'Only staff members can cancel events',
+    );
+  });
+
+  it('points ticket and coupon row errors at their rows', () => {
+    const ticketError = { status: 400, data: { ticket_types: { '1': { price: ['A valid number is required.'] } } } };
+    expect(describeEventSubmitError(ticketError, t)).toBe('Some tickets were rejected. Check the highlighted rows.');
+    expect(eventFormServerErrors(ticketError)).toEqual({ tickets: { '1': ['price: A valid number is required.'] } });
+    const couponError = { status: 400, data: { coupons: { '0': { non_field_errors: ['Each coupon must be an object.'] } } } };
+    expect(describeEventSubmitError(couponError, t)).toBe('Some coupons were rejected. Check the highlighted rows.');
+    expect(eventFormServerErrors(couponError)).toEqual({ coupons: { '0': ['Each coupon must be an object.'] } });
+    expect(eventFormServerErrors({ status: 400, data: { detail: 'x' } })).toBeNull();
   });
 
   it('maps HTML error pages and transport failures to the web texts', () => {

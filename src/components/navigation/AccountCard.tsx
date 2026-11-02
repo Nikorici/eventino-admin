@@ -37,7 +37,7 @@ export function AccountCard() {
             {name}
           </AppText>
           {user?.email ? (
-            <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] text-muted">
+            <AppText numberOfLines={1} className="font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
               {user.email}
             </AppText>
           ) : null}

@@ -87,16 +87,16 @@ items stay hidden until the selected event has loaded, exactly like the web.
 | (untitled) | Overview | `/dashboard` | always | `/more/overview` | EA-25 | designed |
 | Events | All events statistics (the web dashboard's stats block) | `/dashboard` | always | `/home` | EA-44 | designed |
 | Events | List of Events | `/dashboard/events` | always | `/select-event` | EA-4 | designed |
-| Events | Admin Events | `/dashboard/admin-events` (+ `[id]/accounting`, `/dashboard/events-md`, `/dashboard/events-ro`) | `user.is_staff` | `/more/admin-events` | EA-26 | stub |
-| Tickets | Fiscalizare Bilete | `/dashboard/fiscalizare-bilete` | always | `/more/fiscalizare` | EA-27 | stub |
+| Events | Admin Events | `/dashboard/admin-events` (+ `[id]/accounting`, `/dashboard/events-md`, `/dashboard/events-ro`) | `user.is_staff` | `/more/admin-events` (+ `/more/admin-events/[id]` accounting) | EA-26 | designed |
+| Tickets | Fiscalizare Bilete | `/dashboard/fiscalizare-bilete` | always | `/more/fiscalizare` | EA-27 | designed |
 | Tickets | Label Printers | `/dashboard/label-printers` | always | `/more/label-printers` | EA-28 | stub |
 | Tickets | Stickers | `/dashboard/stickers` | `user.is_staff` or `GET /api/v1/tickets/scanned/?page=1` is not 401/403 | `/more/stickers` | EA-29 | stub |
-| Tools | SmartBill Integration | `/dashboard/smartbill` | always | `/more/smartbill` | EA-30 | stub |
-| Tools | My Team | `/dashboard/team` | always | `/more/team` | EA-31 | stub |
+| Tools | SmartBill Integration | `/dashboard/smartbill` | always | `/more/smartbill` | EA-27 | designed |
+| Tools | My Team | `/dashboard/team` | always | `/more/team` | EA-31 | designed |
 | Tools | Profile Traffic | `/dashboard/traffic-sources` | always | `/more/profile-traffic` | EA-32 | stub |
-| Tools | Message Subscribers | `/dashboard/message-subscribers` | always | `/more/message-subscribers` | EA-33 | stub |
-| Account | Company Information (not in the sidebar; page title) | `/dashboard/company-info` | always | `/more/company-info` | EA-34 | stub |
-| Account | Settings | `/settings` | always | `/more/settings` | EA-35 | stub |
+| Tools | Message Subscribers | `/dashboard/message-subscribers` | always | `/more/message-subscribers` | EA-31 | designed |
+| Account | Company Information (not in the sidebar; page title) | `/dashboard/company-info` | always | `/more/company-info` | EA-35 | designed |
+| Account | Settings (+ Change Password) | `/settings` (+ `/change`) | always | `/more/settings` (+ `/more/change-password`) | EA-35 | designed |
 
 `/dashboard/events-md` and `/dashboard/events-ro` are staff-only regional tables (the web shows them to `is_staff` in the
 event tour, `showCountryFilters`). eventino-mobile already folds both into its Admin Events screen as a Romania/Moldova

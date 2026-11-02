@@ -171,7 +171,7 @@ export default function LoginScreen() {
       onSignedIn();
     } else {
       haptics.error();
-      toast(t('Incorrect password, please try again'), 'error');
+      toast(r.status === 429 && r.error ? r.error : t('Incorrect password, please try again'), 'error');
     }
   };
 

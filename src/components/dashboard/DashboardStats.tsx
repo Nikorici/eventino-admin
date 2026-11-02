@@ -44,6 +44,7 @@ import {
   type OrganizerStatsBucket,
 } from '@/store/api/organizerApi';
 import { AppText } from '@/components/ui/AppText';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Skeleton } from '@/components/ui/Skeleton';
 
@@ -771,7 +772,8 @@ export const DashboardStatsSection = memo(function DashboardStatsSection({
   lifecycleEnd?: string | null;
 }) {
   const [interval, setStatsInterval] = useState<IntervalKey>('all_time');
-  const { data: stats, isLoading } = useGetOrganizerStatsQuery(eventId);
+  const { t } = useTranslation();
+  const { data: stats, isLoading, isError, refetch } = useGetOrganizerStatsQuery(eventId);
 
   const currencies = useMemo(() => stats?.event_currencies ?? [], [stats?.event_currencies]);
   const lifecycle = useMemo<ChartLifecycle | null>(() => {
@@ -780,6 +782,21 @@ export const DashboardStatsSection = memo(function DashboardStatsSection({
   }, [lifecycleStart, lifecycleEnd]);
 
   if (isLoading) return <DashboardStatsSkeleton />;
+
+  if (isError && !stats) {
+    return (
+      <View className="gap-3">
+        <EmptyState
+          className="py-8"
+          title={t('Something went wrong.')}
+          message={t('Please try again.')}
+          actionLabel={t('Try again')}
+          onAction={() => void refetch()}
+        />
+        <AnalyticsChart eventId={eventId} currencies={currencies} lifecycle={lifecycle} />
+      </View>
+    );
+  }
 
   return (
     <View className="gap-3">

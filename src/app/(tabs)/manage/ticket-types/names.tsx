@@ -45,7 +45,7 @@ function TicketNameRow({
             {ticket.ticket_type} · #{ticket.id}
           </AppText>
           <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
-            {[ticket.account_name || t('Unknown'), ticket.email].filter(Boolean).join(' · ')}
+            {ticket.account_name || t('Unknown')}
           </AppText>
         </View>
         <AppText

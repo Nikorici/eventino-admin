@@ -227,7 +227,7 @@ export interface LogoFile {
 }
 
 interface UploadFormData {
-  append(name: string, value: string | LogoFile): void;
+  append(name: string, value: string | LogoFile | File): void;
 }
 
 const UploadFormDataCtor: { new (): UploadFormData } = FormData;
@@ -304,7 +304,7 @@ export const printingApi = baseApi
       getTemplateLogo: builder.query<string, { id: number; version: number }>({
         query: ({ id }) => ({ url: printingEndpoints.templateLogo(id), responseHandler: imageResponse }),
       }),
-      uploadTemplateLogo: builder.mutation<LabelTemplate, { id: number; file: LogoFile }>({
+      uploadTemplateLogo: builder.mutation<LabelTemplate, { id: number; file: LogoFile | File }>({
         query: ({ id, file }) => {
           const body = new UploadFormDataCtor();
           body.append('logo', file);

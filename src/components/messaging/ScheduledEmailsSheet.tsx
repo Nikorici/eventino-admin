@@ -1,4 +1,4 @@
-import { Alert, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Clock, Pencil, Trash2, X } from 'lucide-react-native';
@@ -15,16 +15,18 @@ import {
   type ScheduledEmail,
 } from '@/store/api/messageSubscribersApi';
 import { AppText, EmptyState, PressableScale, Skeleton, ToastHost } from '@/components/ui';
+import { confirmAction } from '@/components/dashboard/dashboardParts';
 
 export interface ScheduledEmailsSheetProps {
   onClose: () => void;
   onEdit: (email: ScheduledEmail) => void;
+  onScheduleNew: () => void;
 }
 
 function statusTone(status: string): string {
-  if (status === 'PENDING') return 'text-warning';
-  if (status === 'SENT' || status === 'COMPLETED') return 'text-success';
-  if (status === 'FAILED') return 'text-danger';
+  if (status === 'PENDING') return 'text-warning dark:text-warning';
+  if (status === 'SENT' || status === 'COMPLETED') return 'text-success dark:text-success';
+  if (status === 'FAILED') return 'text-danger dark:text-danger';
   return 'text-muted';
 }
 
@@ -67,59 +69,63 @@ function ScheduledEmailRow({
       </View>
       {isPending ? (
         <View className="mt-1 flex-row gap-2">
-          <PressableScale
-            onPress={onEdit}
-            accessibilityLabel={t('Edit')}
-            className="h-9 flex-1 flex-row items-center justify-center gap-1.5 rounded-[10px] border border-app-border dark:border-dark-border"
-          >
-            <Pencil size={15} color={iconColor} />
-            <AppText className="font-gilroy-semibold text-[13px]">{t('Edit')}</AppText>
-          </PressableScale>
-          <PressableScale
-            onPress={onDelete}
-            disabled={deleting}
-            accessibilityLabel={t('Delete')}
-            className={cn(
-              'h-9 flex-1 flex-row items-center justify-center gap-1.5 rounded-[10px] border border-danger/40',
-              deleting && 'opacity-60',
-            )}
-          >
-            <Trash2 size={15} color={colors.danger} />
-            <AppText className="font-gilroy-semibold text-[13px] text-danger">{t('Delete')}</AppText>
-          </PressableScale>
+          <View className="flex-1">
+            <PressableScale
+              onPress={onEdit}
+              accessibilityLabel={t('Edit')}
+              className="h-9 w-full flex-row items-center justify-center gap-1.5 rounded-[10px] border border-app-border dark:border-dark-border"
+            >
+              <Pencil size={15} color={iconColor} />
+              <AppText className="font-gilroy-semibold text-[13px]">{t('Edit')}</AppText>
+            </PressableScale>
+          </View>
+          <View className="flex-1">
+            <PressableScale
+              onPress={onDelete}
+              disabled={deleting}
+              accessibilityLabel={t('Delete')}
+              className={cn(
+                'h-9 w-full flex-row items-center justify-center gap-1.5 rounded-[10px] border border-danger/40',
+                deleting && 'opacity-60',
+              )}
+            >
+              <Trash2 size={15} color={colors.danger} />
+              <AppText className="font-gilroy-semibold text-[13px] text-danger dark:text-danger">{t('Delete')}</AppText>
+            </PressableScale>
+          </View>
         </View>
       ) : null}
     </View>
   );
 }
 
-export function ScheduledEmailsSheet({ onClose, onEdit }: ScheduledEmailsSheetProps) {
+export function ScheduledEmailsSheet({ onClose, onEdit, onScheduleNew }: ScheduledEmailsSheetProps) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
-  const { data, isLoading, isError, refetch } = useGetScheduledEmailsQuery();
+  const { data, isLoading, isError, refetch } = useGetScheduledEmailsQuery(undefined, { refetchOnMountOrArgChange: true });
   const [deleteScheduledEmail, { isLoading: deleting }] = useDeleteScheduledEmailMutation();
   const scheduledEmails = data ?? [];
 
   const confirmDelete = (email: ScheduledEmail) => {
-    Alert.alert(t('Cancel scheduled email?'), t('This scheduled email will be permanently removed.'), [
-      { text: t('Keep'), style: 'cancel' },
-      {
-        text: t('Delete'),
-        style: 'destructive',
-        onPress: () => {
-          void (async () => {
-            try {
-              await deleteScheduledEmail(email.id).unwrap();
-              haptics.success();
-              toast(t('Scheduled email canceled'), 'success');
-            } catch {
-              haptics.error();
-              toast(t('Unable to cancel scheduled email.'), 'error');
-            }
-          })();
-        },
+    confirmAction({
+      title: t('Cancel this scheduled email?'),
+      message: t('This scheduled email will be permanently removed.'),
+      confirmLabel: t('Delete'),
+      cancelLabel: t('Keep'),
+      destructive: true,
+      onConfirm: () => {
+        void (async () => {
+          try {
+            await deleteScheduledEmail(email.id).unwrap();
+            haptics.success();
+            toast(t('Scheduled email canceled'), 'success');
+          } catch {
+            haptics.error();
+            toast(t('Unable to cancel scheduled email.'), 'error');
+          }
+        })();
       },
-    ]);
+    });
   };
 
   return (
@@ -154,7 +160,12 @@ export function ScheduledEmailsSheet({ onClose, onEdit }: ScheduledEmailsSheetPr
               }}
             />
           ) : scheduledEmails.length === 0 ? (
-            <EmptyState icon={Clock} title={t('No scheduled emails yet.')} />
+            <EmptyState
+              icon={Clock}
+              title={t('No scheduled emails yet.')}
+              actionLabel={t('Schedule an email')}
+              onAction={onScheduleNew}
+            />
           ) : (
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 16 }}>
               {scheduledEmails.map((email) => (

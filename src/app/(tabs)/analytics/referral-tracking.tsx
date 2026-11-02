@@ -16,6 +16,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
+import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
 import {
   useCreatePromoterMutation,
@@ -363,8 +364,8 @@ function AddPromoterModal({
       } else {
         onClose();
       }
-    } catch {
-      toast(t('Failed to create promoter'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Failed to create promoter'), 'error');
     }
   }, [name, notes, createPromoter, eventId, eventSlug, toast, t, onClose]);
 
@@ -531,8 +532,8 @@ export default function ReferralTrackingScreen() {
           isActive: !promoter.is_active,
         }).unwrap();
         toast(promoter.is_active ? t('Promoter deactivated') : t('Promoter activated'), 'success');
-      } catch {
-        toast(t('Failed to update promoter'), 'error');
+      } catch (error) {
+        toast(extractClientErrorMessage(error) ?? t('Failed to update promoter'), 'error');
       } finally {
         setTogglingId(null);
       }

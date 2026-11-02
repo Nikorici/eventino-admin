@@ -124,7 +124,7 @@ export const handlers: MockHandler[] = [
     }
     pendingRegistrations.delete(email);
     registeredEmails.add(email);
-    return { status: 200, message: 'Email verified' };
+    return { status: 200, message: 'Account Verified' };
   }),
 
   mock('POST', endpoints.resendVerifyEmail, (request) => {

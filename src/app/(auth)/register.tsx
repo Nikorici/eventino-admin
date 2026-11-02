@@ -8,7 +8,7 @@ import { Building2, Check, Eye, EyeOff, Lock, Mail, MailCheck } from 'lucide-rea
 
 import { cn } from '@/lib/cn';
 import { WEB_ORIGIN } from '@/lib/constants';
-import { extractApiError } from '@/lib/apiError';
+import { extractApiError, responseMessage } from '@/lib/apiError';
 import { navigate } from '@/lib/nav';
 import { haptics } from '@/lib/haptics';
 import { useAuth } from '@/hooks/useAuth';
@@ -212,8 +212,9 @@ export default function RegisterScreen() {
       const res = await verifyEmail({ email: email.trim(), otp_code: code }).unwrap();
       if (!isSuccess(res)) {
         haptics.error();
-        setOtpError(t('Invalid code'));
-        toast(t('Invalid code'), 'error');
+        const message = responseMessage(res) ?? t('Invalid code');
+        setOtpError(message);
+        toast(message, 'error');
         return;
       }
       setFinishing(true);
@@ -239,7 +240,7 @@ export default function RegisterScreen() {
     try {
       const res = await resendVerifyEmail({ email: email.trim() }).unwrap();
       if (!isSuccess(res)) {
-        toast(res.message ?? t('Could not send the code'), 'error');
+        toast(responseMessage(res) ?? t('Could not send the code'), 'error');
         return;
       }
       haptics.success();

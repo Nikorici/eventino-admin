@@ -21,3 +21,8 @@ export function extractClientErrorMessage(error: unknown): string | undefined {
   if (typeof status !== 'number' || status < 400 || status > 499) return undefined;
   return extractApiError(error);
 }
+
+export function responseMessage(response: { message?: string; data?: unknown }): string | undefined {
+  const detail = typeof response.data === 'string' ? response.data : undefined;
+  return [response.message, detail].filter(Boolean).join(': ') || undefined;
+}

@@ -99,7 +99,7 @@ export const handlers: MockHandler[] = [
     const user = directory.find((entry) => entry.id === Number(body.user));
     if (!user || !body.event) return mockError(400, { user: ['Invalid user.'] });
     if (staff.some((entry) => entry.event === body.event && entry.user === user.id)) {
-      return mockError(400, { non_field_errors: ['This user is already a staff member for this event.'] });
+      return mockError(400, { message: 'User is already staff for this event' });
     }
     const created: EventStaffMember = {
       id: nextStaffId++,

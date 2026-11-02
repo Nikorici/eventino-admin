@@ -13,7 +13,6 @@ import {
 import { PrimaryButton, SheetModal, ToggleRow } from '@/components/merch/merchParts';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
-import { extractApiError } from '@/lib/apiError';
 import { cn } from '@/lib/cn';
 import { formatEventDay } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
@@ -164,12 +163,9 @@ export function TicketTypeSheet({
       }
       haptics.success();
       onClose();
-    } catch (error) {
+    } catch {
       haptics.error();
-      toast(
-        extractApiError(error) ?? t('Could not save ticket type. Check the quantity is not below tickets already sold.'),
-        'error',
-      );
+      toast(t('Could not save ticket type. Check the quantity is not below tickets already sold.'), 'error');
     }
   };
 

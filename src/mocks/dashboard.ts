@@ -273,7 +273,6 @@ function buildFreeRequests(event: MockEvent): FreeTicketRequest[] {
     const id = event.id * 10 + 900 + index;
     return {
       id,
-      order_id: id,
       ...person,
       name: `${person.first_name} ${person.last_name}`,
       submission_date: isoDateTime(-index, `${String(11 + index * 2).padStart(2, '0')}:05:00`),

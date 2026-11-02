@@ -22,6 +22,7 @@ import {
 } from '@/components/merch/merchParts';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/lib/cn';
 import { haptics } from '@/lib/haptics';
@@ -54,8 +55,8 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
     try {
       await updateFulfillment({ orderId: order.id, fulfillment_status: status }).unwrap();
       toast(successMessage, 'success');
-    } catch {
-      toast(t('Failed to update order'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Failed to update order'), 'error');
     } finally {
       setPendingStatus(null);
     }
@@ -65,8 +66,8 @@ function OrderBody({ order, lang }: { order: MerchOrder; lang: string }) {
     try {
       await refundOrder(order.id).unwrap();
       toast(t('Order refunded'), 'success');
-    } catch {
-      toast(t('Refund failed'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Refund failed'), 'error');
     }
   };
 

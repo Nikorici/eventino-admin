@@ -13,7 +13,7 @@ import {
 } from '@/components/dashboard/DashboardStats';
 import { EventActions, EventHeaderCard, EventHeaderCardSkeleton } from '@/components/dashboard/EventHeaderCard';
 import { FacturaOrdersPanel, type FacturaTab } from '@/components/dashboard/FacturaOrdersPanel';
-import { FreeTicketRequestsPanel } from '@/components/dashboard/FreeTicketRequestsPanel';
+import { FreeTicketRequestsPanel, SPECIAL_FREE_TICKET_EVENT_IDS } from '@/components/dashboard/FreeTicketRequestsPanel';
 import { PendingOrdersPanel } from '@/components/dashboard/PendingOrdersPanel';
 import { PanelCard, SectionTitle } from '@/components/dashboard/dashboardParts';
 import { useScreenPadding } from '@/hooks/useScreenPadding';
@@ -219,7 +219,9 @@ export default function DashboardScreen() {
               ) : null}
             </View>
 
-            {permissions.canManageOrders && event.free_ticket_approval_enabled && !isCancelled ? (
+            {permissions.canManageOrders &&
+            (event.free_ticket_approval_enabled || SPECIAL_FREE_TICKET_EVENT_IDS.includes(eventId)) &&
+            !isCancelled ? (
               <FreeTicketRequestsPanel eventId={eventId} refreshSignal={refreshSignal} />
             ) : null}
           </>

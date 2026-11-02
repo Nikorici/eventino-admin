@@ -22,9 +22,10 @@ import { ProductInfoForm, type ProductInfoValues } from '@/components/merch/Prod
 import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { extractClientErrorMessage } from '@/lib/apiError';
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/lib/cn';
-import type { MultipartFile } from '@/lib/eventFormBody';
+import { toUploadFile, type UploadFile } from '@/lib/eventFormBody';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
 import {
@@ -52,7 +53,7 @@ interface VariantDraft {
 }
 
 interface NativeFormData {
-  append(name: string, value: string | MultipartFile): void;
+  append(name: string, value: string | UploadFile): void;
 }
 
 const EMPTY_VARIANT: VariantDraft = { id: null, name: '', price: '', stock: '0', is_active: true };
@@ -108,8 +109,8 @@ function VariantsSection({ product, currency }: { product: MerchProductDetail; c
         toast(t('Variant added'), 'success');
       }
       setDraft(null);
-    } catch {
-      toast(t('Failed to save variant'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Failed to save variant'), 'error');
     }
   };
 
@@ -118,8 +119,8 @@ function VariantsSection({ product, currency }: { product: MerchProductDetail; c
     try {
       await deleteVariant(variant.id).unwrap();
       toast(t('Variant deleted'), 'success');
-    } catch {
-      toast(t('Failed to delete variant'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Failed to delete variant'), 'error');
     } finally {
       setDeletingId(null);
     }
@@ -282,8 +283,8 @@ function ImageTile({ image, productId }: { image: MerchProductImage; productId: 
     haptics.selection();
     try {
       await updateImage({ imageId: image.id, productId, is_main: true }).unwrap();
-    } catch {
-      toast(t('Please try again.'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Please try again.'), 'error');
     }
   };
 
@@ -291,8 +292,8 @@ function ImageTile({ image, productId }: { image: MerchProductImage; productId: 
     haptics.medium();
     try {
       await deleteImage({ imageId: image.id, productId }).unwrap();
-    } catch {
-      toast(t('Please try again.'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Please try again.'), 'error');
     }
   };
 
@@ -354,18 +355,21 @@ function ImagesSection({ product }: { product: MerchProductDetail }) {
       let hasMain = product.images.some((image) => image.is_main);
       for (const asset of result.assets) {
         const form = new FormData() as unknown as NativeFormData;
-        form.append('image', {
-          uri: asset.uri,
-          name: asset.fileName ?? `image-${Date.now()}.jpg`,
-          type: asset.mimeType ?? 'image/jpeg',
-        });
+        form.append(
+          'image',
+          await toUploadFile({
+            uri: asset.uri,
+            name: asset.fileName ?? `image-${Date.now()}.jpg`,
+            type: asset.mimeType ?? 'image/jpeg',
+          }),
+        );
         form.append('is_main', hasMain ? 'false' : 'true');
         form.append('product', String(product.id));
         await uploadImage({ productId: product.id, form: form as unknown as FormData }).unwrap();
         hasMain = true;
       }
-    } catch {
-      toast(t('Please try again.'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Please try again.'), 'error');
     } finally {
       setUploading(false);
     }
@@ -415,8 +419,8 @@ export default function MerchProductScreen() {
     try {
       await updateProduct({ productId, patch: values }).unwrap();
       toast(t('Product updated'), 'success');
-    } catch {
-      toast(t('Failed to save product'), 'error');
+    } catch (error) {
+      toast(extractClientErrorMessage(error) ?? t('Failed to save product'), 'error');
     }
   };
 

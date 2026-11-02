@@ -8,7 +8,6 @@ import { cn } from '@/lib/cn';
 import { USE_MOCKS } from '@/lib/constants';
 import { haptics } from '@/lib/haptics';
 import {
-  inExpoGo,
   isAppleAuthAvailable,
   signInWithApple,
   SocialAuthCancelled,
@@ -104,7 +103,7 @@ export function SocialSignIn({ mode, disabled, onPendingChange, onSignedIn }: So
     };
   }, []);
 
-  const appleReady = USE_MOCKS || (appleAvailable && !inExpoGo);
+  const appleReady = USE_MOCKS || appleAvailable;
   const isLogin = mode === 'login';
 
   const startProvider = (next: SocialProvider | null) => {

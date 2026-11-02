@@ -32,6 +32,7 @@ import { useScreenPadding } from '@/hooks/useScreenPadding';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useToast } from '@/hooks/useToast';
 import { extractApiError } from '@/lib/apiError';
+import { toUploadFile } from '@/lib/eventFormBody';
 import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
 import { useGetOrganizerEventsQuery } from '@/store/api/organizerApi';
@@ -153,7 +154,7 @@ function LayoutEditor({ template }: { template: LabelTemplate | null }) {
 
   const sendLogo = async (templateId: number, file: LogoFile) => {
     try {
-      await uploadLogo({ id: templateId, file }).unwrap();
+      await uploadLogo({ id: templateId, file: await toUploadFile(file) }).unwrap();
     } catch (failure) {
       setLogoError(failureText(failure));
       return false;
