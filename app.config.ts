@@ -4,13 +4,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Eventino Admin',
   slug: 'eventino-admin',
-  version: '0.1.0',
+  owner: 'eventino',
+  version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   scheme: 'eventino-admin',
   userInterfaceStyle: 'automatic',
   ios: {
-    supportsTablet: true,
+    supportsTablet: false,
     userInterfaceStyle: 'automatic',
     bundleIdentifier: 'co.eventino.admin',
     usesAppleSignIn: true,
@@ -56,12 +57,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        image: './assets/images/splash-icon.png',
+        image: './assets/images/splash-logo.png',
         imageWidth: 180,
         resizeMode: 'contain',
         backgroundColor: '#ffffff',
         dark: {
-          image: './assets/images/splash-icon.png',
+          image: './assets/images/splash-logo-dark.png',
           backgroundColor: '#0a0d10',
         },
       },
@@ -74,5 +75,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL,
     useMocks: process.env.EXPO_PUBLIC_USE_MOCKS,
+    eas: { projectId: '4ce55d4c-8f24-46af-9128-31d6e76ca34d' },
   },
 });

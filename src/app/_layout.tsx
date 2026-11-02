@@ -1,7 +1,6 @@
 import '@/global.css';
 import { loadPersistedLanguage } from '@/lib/i18n';
 
-import { useEffect } from 'react';
 import { LogBox } from 'react-native';
 import { enableFreeze } from 'react-native-screens';
 import { useFonts } from 'expo-font';
@@ -9,6 +8,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
+import { AnimatedSplash } from '@/components/brand/AnimatedSplash';
 import { Providers } from '@/components/Providers';
 import { useBootstrapAuth } from '@/hooks/useAuth';
 import { useBootstrapSelectedEvent } from '@/hooks/useSelectedEvent';
@@ -37,20 +37,24 @@ function RootNavigator() {
   useBootstrapTheme();
   useBootstrapSelectedEvent();
 
-  useEffect(() => {
-    if (!isBootstrapping && restored) SplashScreen.hideAsync().catch(() => undefined);
-  }, [isBootstrapping, restored]);
-
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="home" options={{ animation: 'fade' }} />
-      <Stack.Screen name="select-event" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-      <Stack.Screen name="create-event" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="+not-found" />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="home" options={{ animation: 'fade' }} />
+        <Stack.Screen name="select-event" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="create-event" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <AnimatedSplash
+        ready={!isBootstrapping && restored}
+        onShown={() => {
+          SplashScreen.hideAsync().catch(() => undefined);
+        }}
+      />
+    </>
   );
 }
 
