@@ -93,11 +93,47 @@ export interface InstallmentEmailResult {
   sequence?: number;
 }
 
+export type TablePaymentStatus = 'PAID' | 'PENDING' | 'CANCELLED';
+
+export interface TablePayment {
+  payment_status: TablePaymentStatus;
+  paid_at: string | null;
+  paid_amount: string | null;
+  paid_by_name: string;
+  paid_by_email: string;
+}
+
+export interface TableOffer {
+  id: number;
+  event: number;
+  name: string;
+  payer_name: string;
+  price: string;
+  currency: string;
+  token: string;
+  status: PrivateOfferStatus;
+  payment: TablePayment | null;
+  created_at: string;
+}
+
+export interface TableOfferBody {
+  name: string;
+  price: string;
+  payer_name: string;
+}
+
+const tableOfferEndpoint = {
+  list: '/api/v1/table_offers/',
+  byEvent: (eventId: number) => `/api/v1/table_offers/by-event/?event_id=${eventId}`,
+  detail: (tableId: number) => `/api/v1/table_offers/${tableId}/`,
+  cancel: (tableId: number) => `/api/v1/table_offers/${tableId}/cancel/`,
+} as const;
+
 function toList<T>(response: T[] | { results?: T[] }): T[] {
   return Array.isArray(response) ? response : (response?.results ?? []);
 }
 
-export const privateOffersApi = baseApi.enhanceEndpoints({ addTagTypes: ['PrivateOffers'] }).injectEndpoints({
+export const privateOffersApi = baseApi.enhanceEndpoints({ addTagTypes: ['PrivateOffers', 'TableOffers'] }).injectEndpoints({
   endpoints: (builder) => ({
     getEventOffers: builder.query<PrivateOffer[], number>({
       query: (eventId) => privateOfferEndpoint.byEvent(eventId),
@@ -126,6 +162,23 @@ export const privateOffersApi = baseApi.enhanceEndpoints({ addTagTypes: ['Privat
     payInstallment: builder.mutation<{ checkout_url?: string | null }, { offer_token: string }>({
       query: (body) => ({ url: privateOfferEndpoint.payInstallment, method: 'POST', body }),
     }),
+    getEventTables: builder.query<TableOffer[], number>({
+      query: (eventId) => tableOfferEndpoint.byEvent(eventId),
+      transformResponse: (response: TableOffer[] | { results?: TableOffer[] }) => toList(response),
+      providesTags: (_result, _error, eventId) => [{ type: 'TableOffers', id: eventId }],
+    }),
+    createTable: builder.mutation<TableOffer, TableOfferBody & { event: number }>({
+      query: (body) => ({ url: tableOfferEndpoint.list, method: 'POST', body }),
+      invalidatesTags: (_result, _error, { event }) => [{ type: 'TableOffers', id: event }],
+    }),
+    updateTable: builder.mutation<TableOffer, { tableId: number; eventId: number; body: TableOfferBody }>({
+      query: ({ tableId, body }) => ({ url: tableOfferEndpoint.detail(tableId), method: 'PATCH', body }),
+      invalidatesTags: (_result, _error, { eventId }) => [{ type: 'TableOffers', id: eventId }],
+    }),
+    cancelTable: builder.mutation<TableOffer, { tableId: number; eventId: number }>({
+      query: ({ tableId }) => ({ url: tableOfferEndpoint.cancel(tableId), method: 'POST' }),
+      invalidatesTags: (_result, _error, { eventId }) => [{ type: 'TableOffers', id: eventId }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -138,4 +191,8 @@ export const {
   useLazyGetOfferQuoteQuery,
   useGetOfferByTokenQuery,
   usePayInstallmentMutation,
+  useGetEventTablesQuery,
+  useCreateTableMutation,
+  useUpdateTableMutation,
+  useCancelTableMutation,
 } = privateOffersApi;

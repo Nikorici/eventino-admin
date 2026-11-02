@@ -24,17 +24,73 @@ export interface HoldSeatsRequest {
   body: HoldSeatsBody;
 }
 
+export type PaymentLinkTableStatus = 'available' | 'blocked' | 'linked' | 'reserved' | 'sold' | 'unavailable';
+
+export interface PaymentLinkTable {
+  seat_id: number;
+  section_id: number;
+  name: string;
+  name_i18n: Record<string, string> | null;
+  ticket_type_id: number | null;
+  ticket_type_name: string | null;
+  price: string | null;
+  status: PaymentLinkTableStatus;
+  linkable: boolean;
+}
+
+export type PaymentLinkStatus = 'active' | 'paying' | 'paid' | 'expired' | 'cancelled';
+
+export interface TablePaymentLink {
+  id: number;
+  token: string;
+  url: string | null;
+  seat_id: number;
+  section_id: number;
+  table_name: string;
+  ticket_type_id: number | null;
+  ticket_type_name: string | null;
+  price: string | null;
+  currency: string;
+  client_name: string;
+  note: string;
+  expires_at: string;
+  cancelled_at: string | null;
+  created_at: string;
+  status: PaymentLinkStatus;
+  order_id: number | null;
+}
+
+export interface PaymentLinksOverview {
+  currency: string;
+  site_url: string | null;
+  tables: PaymentLinkTable[];
+  links: TablePaymentLink[];
+}
+
+export interface PaymentLinkPayload {
+  seat_id: number;
+  client_name: string;
+  note?: string;
+  expires_at: string;
+}
+
+const paymentLinkEndpoints = {
+  list: (eventId: number | string) => `/api/v1/events/${eventId}/seat-map/payment-links/`,
+  cancel: (eventId: number | string, linkId: number) => `/api/v1/events/${eventId}/seat-map/payment-links/${linkId}/cancel/`,
+} as const;
+
 function seatConfigTags(eventId: number | string) {
   return [
     { type: 'SeatMapConfig' as const, id: Number(eventId) },
     { type: 'SeatMap' as const, id: Number(eventId) },
     { type: 'EventDetail' as const, id: Number(eventId) },
     { type: 'EventVenues' as const, id: Number(eventId) },
+    { type: 'PaymentLinks' as const, id: Number(eventId) },
   ];
 }
 
 export const seatingApi = baseApi
-  .enhanceEndpoints({ addTagTypes: ['SeatMap', 'SeatHold', 'SeatMapConfig', 'EventVenues'] })
+  .enhanceEndpoints({ addTagTypes: ['SeatMap', 'SeatHold', 'SeatMapConfig', 'EventVenues', 'PaymentLinks'] })
   .injectEndpoints({
   endpoints: (builder) => ({
     getEventSeatMap: builder.query<EventSeatMapResponse, number | string>({
@@ -90,6 +146,24 @@ export const seatingApi = baseApi
     getVenueLayout: builder.query<VenueLayoutDetail, number | string>({
       query: (layoutId) => venueEndpoint.venueLayout(layoutId),
     }),
+    getPaymentLinks: builder.query<PaymentLinksOverview, number | string>({
+      query: (eventId) => paymentLinkEndpoints.list(eventId),
+      providesTags: (_result, _error, eventId) => [{ type: 'PaymentLinks', id: Number(eventId) }],
+    }),
+    createPaymentLink: builder.mutation<TablePaymentLink, { eventId: number | string; body: PaymentLinkPayload }>({
+      query: ({ eventId, body }) => ({ url: paymentLinkEndpoints.list(eventId), method: 'POST', body }),
+      invalidatesTags: (_result, _error, { eventId }) => [
+        { type: 'PaymentLinks', id: Number(eventId) },
+        { type: 'SeatMapConfig', id: Number(eventId) },
+      ],
+    }),
+    cancelPaymentLink: builder.mutation<TablePaymentLink, { eventId: number | string; linkId: number }>({
+      query: ({ eventId, linkId }) => ({ url: paymentLinkEndpoints.cancel(eventId, linkId), method: 'POST' }),
+      invalidatesTags: (_result, _error, { eventId }) => [
+        { type: 'PaymentLinks', id: Number(eventId) },
+        { type: 'SeatMapConfig', id: Number(eventId) },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -108,4 +182,7 @@ export const {
   usePutSeatMapConfigMutation,
   useDeleteSeatMapConfigMutation,
   useLazyGetVenueLayoutQuery,
+  useGetPaymentLinksQuery,
+  useCreatePaymentLinkMutation,
+  useCancelPaymentLinkMutation,
 } = seatingApi;

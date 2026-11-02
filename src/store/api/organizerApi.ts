@@ -146,6 +146,7 @@ export interface EventTicketRecord {
   email?: string | null;
   order_id?: number | null;
   order_date?: string | null;
+  scan_date?: string | null;
 }
 
 export interface PendingOrderUser {

@@ -411,7 +411,7 @@ function couponsOf(raw: unknown, previous: EventCoupon[]): EventCoupon[] {
 
 function questionsOf(raw: unknown): StoredQuestion[] {
   return records(raw).map((question) => ({
-    id: question.id != null ? num(question.id) : nextQuestionId++,
+    id: num(question.id) > 0 ? num(question.id) : nextQuestionId++,
     question: str(question.question),
     description: str(question.description),
     type: QUESTION_TYPES.find((type) => type === question.type) ?? 'short_answer',
@@ -525,7 +525,12 @@ function createEvent(request: MockRequest) {
 function updateEvent(request: MockRequest) {
   const event = findMockEvent(request.params.id);
   if (!event) return mockError(404, { detail: 'Not found.' });
-  applyScalars(event, readForm(request.body));
+  const fields = readForm(request.body);
+  if (Object.keys(fields).join() === 'questions') {
+    event.detail = { ...event.detail, questions_data: questionsOf(json(fields, 'questions')) };
+  } else {
+    applyScalars(event, fields);
+  }
   return { id: event.id, slug: `event-${event.id}`, title: event.name };
 }
 

@@ -598,9 +598,14 @@ export const handlers: MockHandler[] = [
     const body = bodyOf<{ order_id: number; invoice_serial_number: number }>(request);
     const found = findOrderList(facturaOf, Number(body.order_id));
     if (!found) return mockError(404, { error: 'Order not found' });
-    const order = found.list[found.index];
-    order.invoice_serial_number = Number(body.invoice_serial_number);
-    order.invoice_serial = `${order.invoice_serial_prefix ?? 'EVN'}-${String(order.invoice_serial_number).padStart(4, '0')}`;
+    const current = found.list[found.index];
+    const serialNumber = Number(body.invoice_serial_number);
+    const order = {
+      ...current,
+      invoice_serial_number: serialNumber,
+      invoice_serial: `${current.invoice_serial_prefix ?? 'EVN'}-${String(serialNumber).padStart(4, '0')}`,
+    };
+    found.list[found.index] = order;
     return { id: order.id, invoice_serial: order.invoice_serial, invoice_serial_number: order.invoice_serial_number };
   }),
   mock('GET', '/api/v1/tickets/free-ticket-requests/', ({ query }) => [...freeRequestsOf(Number(query.event_id))]),

@@ -179,7 +179,7 @@ function SerialEditSheet({ order, onClose }: { order: FacturaOrder; onClose: () 
                 <X size={18} color={colors.muted} />
               </Pressable>
             </View>
-            <AppText className="mb-3 font-gilroy-medium text-[13px] text-muted">
+            <AppText className="mb-3 font-gilroy-medium text-[13px] text-muted dark:text-dark-muted">
               {`${t('No.')} ${order.invoice_serial || '-'}`}
             </AppText>
             <View className="flex-row items-center gap-2">
@@ -245,20 +245,20 @@ function FacturaRow({
           <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px]">
             {name}
           </AppText>
-          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted">
+          <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
             {order.user?.email || '-'}
           </AppText>
         </View>
         <View className="items-end">
           <AppText className="font-gilroy-bold text-[14px]">{moneyLabel(order.total_price, currency)}</AppText>
-          <AppText className="font-gilroy-medium text-[11px] text-muted">
+          <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">
             {formatDateTimeLabel(order.order_date, i18n.language)}
           </AppText>
         </View>
       </View>
       <View className="gap-1.5 pl-[52px]">
         <View className="flex-row items-center gap-1.5">
-          <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[12px] text-muted">
+          <AppText numberOfLines={1} className="shrink font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">
             {`${t('No.')} ${order.invoice_serial || '-'} · #${order.id}`}
           </AppText>
           {onEditSerial ? (
@@ -275,7 +275,7 @@ function FacturaRow({
           ) : null}
         </View>
         {tickets ? (
-          <AppText numberOfLines={2} className="font-gilroy-medium text-[12px] text-muted">
+          <AppText numberOfLines={2} className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
             {tickets}
           </AppText>
         ) : null}
@@ -286,7 +286,7 @@ function FacturaRow({
         </View>
       </View>
       <View className="flex-row flex-wrap items-center gap-2 pl-[52px]">
-        <AppText className="font-gilroy-semibold text-[12px] text-muted">{t('Factura')}</AppText>
+        <AppText className="font-gilroy-semibold text-[12px] text-muted dark:text-dark-muted">{t('Factura')}</AppText>
         {DOWNLOADS.map((download) => {
           const key = `${order.id}-${download.kind}`;
           return (

@@ -1,3 +1,5 @@
+import { eventEndpoint } from '@/lib/constants';
+
 import { baseApi } from './baseApi';
 
 const formsEndpoints = {
@@ -54,6 +56,24 @@ export interface FormStatisticsResponse {
   questionStats: Record<string, FormQuestionStats>;
 }
 
+export interface FormQuestionConditionPayload {
+  optionIndex: number | null;
+  action: string;
+  targetQuestionIndex: number | null;
+  targetQuestionId: string | number | null;
+  message: string;
+}
+
+export interface FormQuestionPayload {
+  question: string;
+  type: string;
+  options: string[];
+  required: boolean;
+  id?: string | number;
+  conditions: FormQuestionConditionPayload[];
+  description: string;
+}
+
 export const formsApi = baseApi
   .enhanceEndpoints({ addTagTypes: ['FormResponses', 'FormStatistics'] })
   .injectEndpoints({
@@ -66,7 +86,20 @@ export const formsApi = baseApi
         query: (eventId) => formsEndpoints.statistics(eventId),
         providesTags: (_result, _error, eventId) => [{ type: 'FormStatistics', id: eventId }],
       }),
+      updateEventQuestions: builder.mutation<unknown, { eventId: number; questions: FormQuestionPayload[] }>({
+        query: ({ eventId, questions }) => {
+          const body = new FormData();
+          body.append('questions', JSON.stringify(questions));
+          return { url: eventEndpoint.detail(eventId), method: 'PATCH', body };
+        },
+        invalidatesTags: (_result, _error, { eventId }) => [
+          { type: 'EventDetail', id: eventId },
+          { type: 'FormResponses', id: eventId },
+          { type: 'FormStatistics', id: eventId },
+        ],
+      }),
     }),
   });
 
-export const { useGetEventFormResponsesQuery, useGetEventFormStatisticsQuery } = formsApi;
+export const { useGetEventFormResponsesQuery, useGetEventFormStatisticsQuery, useUpdateEventQuestionsMutation } =
+  formsApi;

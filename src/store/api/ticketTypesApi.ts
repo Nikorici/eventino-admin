@@ -1,3 +1,5 @@
+import type { QuantityDiscountTier } from '@/types/api';
+
 import { baseApi } from './baseApi';
 
 const ticketTypeEndpoints = {
@@ -22,16 +24,29 @@ export interface ManageTicketType {
   sold_count: number;
   remaining: number | null;
   event_day?: string | null;
+  is_sold_out?: boolean;
+  sold_out_reason?: string | null;
+  quantity_discounts?: QuantityDiscountTier[] | null;
+  sale_start_date?: string | null;
+  sale_end_date?: string | null;
+  is_online?: boolean;
+  stream_url?: string;
+  scan_color?: string | null;
+  effective_scan_color?: string;
 }
 
 export interface TicketTypePayload {
   name: string;
   price: string;
   quantity: number | null;
-  comment: string;
-  qr_code_quantity: number;
-  is_active: boolean;
+  comment?: string;
+  qr_code_quantity?: number;
+  is_active?: boolean;
   event_day?: string | null;
+  quantity_discounts?: QuantityDiscountTier[] | null;
+  is_online?: boolean;
+  stream_url?: string;
+  scan_color?: string | null;
 }
 
 export interface CreateTicketTypeParams extends TicketTypePayload {

@@ -187,6 +187,9 @@ export const handlers: MockHandler[] = [
 - `mockError(status, data)` returns an RTK error (`{ status, data }`); `paginate(items, query)` returns DRF pagination.
 - Keep fixtures in module-level arrays and mutate them in handlers, so mutations succeed and invalidated queries refetch
   the new state.
+- RTK Query freezes every response, so an object or array a handler has already returned is read-only. Update by
+  replacement (`list[i] = { ...list[i], field }`, `detail.coupons = [...detail.coupons, created]`), never by assigning
+  fields or pushing into something that was returned.
 - Fixtures import **only types** from `@/store/api/*` (a value import creates a require cycle through `baseApi`); URL
   constants come from `@/lib/constants` or are written inline.
 - Feature handlers are matched **before** `core`, so a feature may deliberately override a core URL.
@@ -241,7 +244,7 @@ Core already answers: every auth endpoint (login/OTP/register/verify/reset/chang
 | `/manage` (hub) | `src/app/(tabs)/manage/index.tsx` | EA-2 |
 | `/manage/form-management` | `src/app/(tabs)/manage/form-management.tsx` | EA-17 |
 | `/manage/staff` | `src/app/(tabs)/manage/staff.tsx` | EA-18 |
-| `/manage/venue-pricing` | `src/app/(tabs)/manage/venue-pricing.tsx` | EA-19 |
+| `/manage/venue-pricing` (+ `/seat-map`) | `src/app/(tabs)/manage/venue-pricing/index.tsx` (+ `seat-map.tsx`) | EA-19 |
 | `/manage/ticket-types` | `src/app/(tabs)/manage/ticket-types.tsx` | EA-20 |
 | `/manage/vouchers` | `src/app/(tabs)/manage/vouchers.tsx` | EA-21 |
 | `/manage/private-offers` | `src/app/(tabs)/manage/private-offers.tsx` | EA-22 |

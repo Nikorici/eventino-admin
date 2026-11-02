@@ -194,6 +194,7 @@ export interface EventDetail extends Omit<EventListItem, 'categories'> {
   max_tickets_per_user?: number;
   additional_information?: string;
   seat_map?: EventSeatMapSummary | null;
+  table_map?: EventSeatMapSummary | null;
   has_presale?: boolean;
   attendee_info_fields?: string[];
   free_ticket_approval_enabled?: boolean;

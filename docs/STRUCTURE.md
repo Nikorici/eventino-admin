@@ -70,21 +70,21 @@ items stay hidden until the selected event has loaded, exactly like the web.
 | Referral Tracking | `/dashboard/events/[id]/referral-tracking` | `hasFullAccess` | Analytics | `/analytics/referral-tracking` | EA-15 | stub |
 | Marketing & Tracking | `/dashboard/events/[id]/marketing-tracking` | `hasFullAccess` | Analytics | `/analytics/marketing-tracking` | EA-16 | stub |
 | Edit event (event page button) | `/create-event?isEdit=true&event_id=[id]` | `hasFullAccess` | Manage | `/manage/edit-event` | EA-6 | designed |
-| Form Management | `/dashboard/events/[id]/form-management` | `hasFullAccess` | Manage | `/manage/form-management` | EA-17 | stub |
-| Event Staff | `/dashboard/events/[id]/event-staff` | `hasFullAccess` | Manage | `/manage/staff` | EA-18 | stub |
-| Venue & Pricing | `/dashboard/events/[id]/venue-pricing` | `hasFullAccess` | Manage | `/manage/venue-pricing` | EA-19 | stub |
-| Ticket types | `/dashboard/events/[id]/ticket-types` | `hasFullAccess` | Manage | `/manage/ticket-types` | EA-20 | stub |
-| Vouchers | `/dashboard/events/[id]/vouchers` | `hasFullAccess` | Manage | `/manage/vouchers` | EA-21 | stub |
-| Private offers | `/dashboard/events/[id]/private-offers` | `hasFullAccess` | Manage | `/manage/private-offers` | EA-22 | stub |
-| Tables | `/dashboard/events/[id]/tables` | `hasFullAccess` | Manage | `/manage/tables` | EA-23 | stub |
-| Ticket sales invoices | `/dashboard/events/[id]/ticket-sales-invoices` | `hasFullAccess` | Manage | `/manage/invoices` | EA-24 | stub |
+| Form Management | `/dashboard/events/[id]/form-management` | `hasFullAccess` | Manage | `/manage/form-management` | EA-17 | designed |
+| Event Staff | `/dashboard/events/[id]/event-staff` | `hasFullAccess` | Manage | `/manage/staff` | EA-18 | designed |
+| Venue & Pricing | `/dashboard/events/[id]/venue-pricing` | `hasFullAccess` | Manage | `/manage/venue-pricing` (+ `/manage/venue-pricing/seat-map`) | EA-19 | designed |
+| Ticket types (+ ticket names) | `/dashboard/events/[id]/ticket-types` (+ event page "attendee_names" tab) | `hasFullAccess` | Manage | `/manage/ticket-types` (+ `/manage/ticket-types/names`) | EA-20 | designed |
+| Vouchers | `/dashboard/events/[id]/vouchers` | `hasFullAccess` | Manage | `/manage/vouchers` | EA-21 | designed |
+| Private offers | `/dashboard/events/[id]/private-offers` | `hasFullAccess` | Manage | `/manage/private-offers` | EA-22 | designed |
+| Tables | `/dashboard/events/[id]/tables` | `hasFullAccess` | Manage | `/manage/tables` | EA-22 | designed |
+| Ticket sales invoices | `/dashboard/events/[id]/ticket-sales-invoices` | `hasFullAccess` | Manage | `/manage/invoices` | EA-24 | designed |
 
 ### Account-level (More tab, in web sidebar order)
 
 | More section | Web sidebar item (label key) | Web path | Visible when | Route | Ticket | Status |
 |---|---|---|---|---|---|---|
 | (account card) | — avatar, switch account, log out | TopNavBar menu | always | `/more` | EA-35 | designed |
-| (untitled) | Overview | `/dashboard` | always | `/more/overview` | EA-25 | stub |
+| (untitled) | Overview | `/dashboard` | always | `/more/overview` | EA-25 | designed |
 | Events | All events statistics (the web dashboard's stats block) | `/dashboard` | always | `/home` | EA-44 | designed |
 | Events | List of Events | `/dashboard/events` | always | `/select-event` | EA-4 | designed |
 | Events | Admin Events | `/dashboard/admin-events` (+ `[id]/accounting`, `/dashboard/events-md`, `/dashboard/events-ro`) | `user.is_staff` | `/more/admin-events` | EA-26 | stub |

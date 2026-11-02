@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Banknote,
   BriefcaseBusiness,
   CalendarDays,
   ChevronDown,
@@ -22,6 +21,9 @@ import {
 import { CARD_BORDER, type IntervalKey } from '@/components/dashboard/DashboardStats';
 import { OptionSheet } from '@/components/dashboard/OptionSheet';
 import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
+import { CurrencySelector } from '@/components/overview/CurrencySelector';
+import { useSummaryCurrency } from '@/components/overview/useSummaryCurrency';
+import { WelcomeHeading } from '@/components/overview/WelcomeHeading';
 import { BlurredPoster } from '@/components/events/BlurredPoster';
 import { organizerEventStatus } from '@/components/events/OrganizerEventCard';
 import { AppText, Chip, EmptyState, GlassButton, GlassSurface, PressableScale, Screen, Skeleton } from '@/components/ui';
@@ -29,12 +31,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { cn } from '@/lib/cn';
-import { STORAGE_KEYS } from '@/lib/constants';
-import { FALLBACK_RATES, SUMMARY_CURRENCIES, groupThousands, sumInCurrency } from '@/lib/currency';
+import { groupThousands } from '@/lib/currency';
 import { haptics } from '@/lib/haptics';
 import { href, navigate, routes } from '@/lib/nav';
-import { cache } from '@/lib/storage';
-import { useGetExchangeRatesQuery } from '@/store/api/currencyApi';
 import { useGetOrganizerEventsQuery, useGetOrganizerStatsQuery } from '@/store/api/organizerApi';
 import { useAppSelector } from '@/store/hooks';
 import { colors } from '@/theme/colors';
@@ -179,31 +178,12 @@ export default function HomeScreen() {
   const buttonIconColor = useThemeColor(colors.white, colors.primary);
 
   const { data: stats, isLoading, isError, refetch } = useGetOrganizerStatsQuery(undefined, { skip: !user });
-  const { data: fetchedRates, refetch: refetchRates } = useGetExchangeRatesQuery(undefined, { skip: !user });
   const [period, setPeriod] = useState<IntervalKey>('all_time');
-  const [sheet, setSheet] = useState<'period' | 'currency' | null>(null);
-  const [storedCurrency, setStoredCurrency] = useState<string | null>(null);
+  const [periodSheetOpen, setPeriodSheetOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    void cache.get<string>(STORAGE_KEYS.defaultCurrency).then(setStoredCurrency);
-  }, []);
-
   const eventCurrencies = useMemo(() => stats?.event_currencies ?? [], [stats?.event_currencies]);
-  const isMixed = eventCurrencies.length > 1;
-  const currency = isMixed ? (storedCurrency ?? eventCurrencies[0]) : (eventCurrencies[0] ?? storedCurrency ?? 'MDL');
-  const rates = useMemo(
-    () => ({
-      rates: { ...FALLBACK_RATES.rates, ...fetchedRates?.rates },
-      nominals: { ...FALLBACK_RATES.nominals, ...fetchedRates?.nominals },
-    }),
-    [fetchedRates],
-  );
-
-  const chooseCurrency = useCallback((code: string) => {
-    setStoredCurrency(code);
-    void cache.set(STORAGE_KEYS.defaultCurrency, code);
-  }, []);
+  const { currency, isMixed, chooseCurrency, refetchRates, total } = useSummaryCurrency(eventCurrencies, !user);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -217,11 +197,10 @@ export default function HomeScreen() {
   if (isBootstrapping) return <Screen>{null}</Screen>;
   if (!isAuthenticated) return <Redirect href={href(routes.login)} />;
 
-  const firstName = user?.first_name?.trim() || user?.organization_name?.trim() || '';
   const bucket = stats?.[period];
   const allTime = stats?.all_time;
   const money = (byCurrency: Record<string, number> | undefined) =>
-    groupThousands(isMixed ? sumInCurrency(byCurrency, currency, rates) : (byCurrency?.[currency] ?? 0), 2);
+    groupThousands(total(byCurrency), 2);
   const totalTickets = allTime?.total_tickets ?? 0;
   const freeTickets = allTime?.manual_tickets_count ?? 0;
   const paidTickets = Math.max(0, totalTickets - freeTickets);
@@ -237,14 +216,7 @@ export default function HomeScreen() {
         }
       >
         <View className="flex-row items-start gap-3 px-4 pb-3.5">
-          <View className="flex-1 gap-0.5">
-            <AppText className="font-gilroy-bold text-[24px] leading-[28px]">
-              {firstName ? t('Welcome, {{name}}', { name: firstName }) : t('Dashboard')}
-            </AppText>
-            <AppText className="font-gilroy-medium text-[14px] leading-[19px] text-muted dark:text-dark-muted">
-              {t('Here is the information about all your events')}
-            </AppText>
-          </View>
+          <WelcomeHeading className="flex-1" />
           <OrganizerSwitcher />
         </View>
 
@@ -254,18 +226,11 @@ export default function HomeScreen() {
             <View className="flex-row gap-2">
               <Chip
                 label={periodLabel}
-                onPress={() => setSheet('period')}
+                onPress={() => setPeriodSheetOpen(true)}
                 icon={<Clock size={16} color={chipIconColor} />}
                 trailing={<ChevronDown size={14} color={chipIconColor} />}
               />
-              {isMixed ? (
-                <Chip
-                  label={currency}
-                  onPress={() => setSheet('currency')}
-                  icon={<Banknote size={16} color={chipIconColor} />}
-                  trailing={<ChevronDown size={14} color={chipIconColor} />}
-                />
-              ) : null}
+              {isMixed ? <CurrencySelector currency={currency} onSelect={chooseCurrency} /> : null}
             </View>
           </View>
 
@@ -346,22 +311,13 @@ export default function HomeScreen() {
         />
       </GlassSurface>
 
-      {sheet === 'period' ? (
+      {periodSheetOpen ? (
         <OptionSheet
           title={t('Statistics')}
           options={PERIODS.map((option) => ({ value: option.value, label: t(option.label) }))}
           value={period}
           onSelect={setPeriod}
-          onClose={() => setSheet(null)}
-        />
-      ) : null}
-      {sheet === 'currency' ? (
-        <OptionSheet
-          title={t('Currency')}
-          options={SUMMARY_CURRENCIES.map((option) => ({ value: option.code, label: option.code, hint: t(option.name) }))}
-          value={currency}
-          onSelect={chooseCurrency}
-          onClose={() => setSheet(null)}
+          onClose={() => setPeriodSheetOpen(false)}
         />
       ) : null}
     </Screen>

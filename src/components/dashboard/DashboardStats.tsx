@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import Svg, { Defs, Line as SvgLine, LinearGradient as SvgLinearGradient, Path, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Line as SvgLine, LinearGradient as SvgLinearGradient, Path, Stop } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import type { Locale } from 'date-fns';
 import {
@@ -33,6 +33,7 @@ import {
   type ChartViewMode,
 } from '@/lib/analyticsRange';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { sumInCurrency, type ExchangeRates } from '@/lib/currency';
 import { formatMoney } from '@/lib/pricing';
 import { colors, currencySymbol } from '@/theme/colors';
 import { baseApi } from '@/store/api/baseApi';
@@ -50,6 +51,8 @@ export const CARD_BORDER = '#e6edff';
 const ACCENT_BLUE = '#61859d';
 const ACCENT_GREEN = '#34c759';
 const INCOME_COLOR = '#d97706';
+const DELTA_UP = '#0f9f5f';
+const DELTA_DOWN = '#be185d';
 const CHART_HEIGHT = 180;
 const MINI_HEIGHT = 30;
 const CHART_PAD = 12;
@@ -74,7 +77,7 @@ const { useGetOrganizerHourlyGraphQuery } = hourlyGraphApi;
 
 export type IntervalKey = 'all_time' | 'this_week' | 'previous_week';
 
-interface CurrencyEntry {
+export interface CurrencyEntry {
   code: string;
   amount: number;
 }
@@ -86,7 +89,7 @@ function currencyEntries(byCurrency: Record<string, number> | undefined, codes: 
   return keys.map((code) => ({ code, amount: map[code] ?? 0 }));
 }
 
-function IntervalSelector({ value, onChange }: { value: IntervalKey; onChange: (next: IntervalKey) => void }) {
+export function IntervalSelector({ value, onChange }: { value: IntervalKey; onChange: (next: IntervalKey) => void }) {
   const { t } = useTranslation();
   const options: { key: IntervalKey; label: string }[] = [
     { key: 'all_time', label: t('All Time') },
@@ -121,7 +124,7 @@ function IntervalSelector({ value, onChange }: { value: IntervalKey; onChange: (
   );
 }
 
-function CountCard({
+export function CountCard({
   icon: Icon,
   label,
   value,
@@ -160,13 +163,14 @@ function CountCard({
   );
 }
 
-function RevenueCard({
+export function RevenueCard({
   icon: Icon,
   label,
   entries,
   invoiceByCurrency,
   allTimeEntries,
   note,
+  wide,
 }: {
   icon: LucideIcon;
   label: string;
@@ -174,6 +178,7 @@ function RevenueCard({
   invoiceByCurrency?: Record<string, number>;
   allTimeEntries?: CurrencyEntry[];
   note?: string;
+  wide?: boolean;
 }) {
   const { t } = useTranslation();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
@@ -187,7 +192,10 @@ function RevenueCard({
     ? allTimeEntries.map((entry) => `${currencySymbol(entry.code)} ${formatMoney(entry.amount)}`).join(' · ')
     : null;
   return (
-    <View className="w-[48%] rounded-[12px] border bg-white dark:bg-dark-surface p-4" style={{ borderColor: cardBorder }}>
+    <View
+      className={cn(wide ? 'w-full' : 'w-[48%]', 'rounded-[12px] border bg-white dark:bg-dark-surface p-4')}
+      style={{ borderColor: cardBorder }}
+    >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-2">
           <AppText
@@ -196,7 +204,12 @@ function RevenueCard({
             minimumFontScale={0.6}
             className="font-gilroy-bold text-[20px] leading-[24px] text-primary"
           >
-            {primary ? `${currencySymbol(primary.code)} ${formatMoney(primary.amount)}${invoiceSuffix(primary.code)}` : '—'}
+            {primary ? `${currencySymbol(primary.code)} ${formatMoney(primary.amount)}${wide ? '' : invoiceSuffix(primary.code)}` : '—'}
+            {primary && wide && invoiceSuffix(primary.code) ? (
+              <AppText className="font-gilroy-semibold text-[14px] text-primary/70 dark:text-dark-text/70">
+                {invoiceSuffix(primary.code)}
+              </AppText>
+            ) : null}
           </AppText>
           {rest.map((entry) => (
             <AppText key={entry.code} numberOfLines={1} className="mt-0.5 font-gilroy-semibold text-[13px] text-primary/60">
@@ -374,6 +387,7 @@ function buildWindowPoints(
   currency: string | null,
   locale: Locale,
   lifecycle?: ChartLifecycle | null,
+  rates?: ExchangeRates,
 ): ChartPoint[] {
   const slots = buildTimelineSlots(mode, anchor, locale, lifecycle);
   const totals = new Map<string, { income: number; new_users: number; tickets_sold: number; favorited_by: number }>();
@@ -383,7 +397,11 @@ function buildWindowPoints(
     if (!key) continue;
     const slotTotals = totals.get(key);
     if (!slotTotals) continue;
-    slotTotals.income += currency ? (point.income_by_currency?.[currency] ?? 0) : 0;
+    slotTotals.income += !currency
+      ? 0
+      : rates
+        ? sumInCurrency(point.income_by_currency, currency, rates)
+        : (point.income_by_currency?.[currency] ?? 0);
     slotTotals.new_users += Number(point.new_users) || 0;
     slotTotals.tickets_sold += Number(point.tickets_sold) || 0;
     slotTotals.favorited_by += Number(point.favorited_by) || 0;
@@ -413,10 +431,12 @@ export const AnalyticsChart = memo(function AnalyticsChart({
   eventId,
   currencies,
   lifecycle,
+  summary,
 }: {
   eventId?: number;
   currencies: string[];
   lifecycle?: ChartLifecycle | null;
+  summary?: { currency: string; rates: ExchangeRates };
 }) {
   const { t, i18n } = useTranslation();
   const [viewMode, setViewMode] = useState<ChartViewMode>('month');
@@ -445,11 +465,15 @@ export const AnalyticsChart = memo(function AnalyticsChart({
   const source = (viewMode === 'day' ? hourlyData : dailyData) ?? EMPTY_GRAPH;
   const isLoading = viewMode === 'day' ? hourlyLoading : dailyLoading;
 
-  const currency = useMemo(() => dominantCurrency(currencies, dailyData ?? EMPTY_GRAPH), [currencies, dailyData]);
+  const currency = useMemo(
+    () => summary?.currency ?? dominantCurrency(currencies, dailyData ?? EMPTY_GRAPH),
+    [summary?.currency, currencies, dailyData],
+  );
+  const summaryRates = summary?.rates;
 
   const points = useMemo(
-    () => buildWindowPoints(viewMode, anchor, source, currency, locale, lifecycle),
-    [viewMode, anchor, source, currency, locale, lifecycle],
+    () => buildWindowPoints(viewMode, anchor, source, currency, locale, lifecycle, summaryRates),
+    [viewMode, anchor, source, currency, locale, lifecycle, summaryRates],
   );
 
   useEffect(() => {
@@ -477,6 +501,15 @@ export const AnalyticsChart = memo(function AnalyticsChart({
   }, [points]);
 
   const periodTotal = useMemo(() => points.reduce((sum, point) => sum + point.income, 0), [points]);
+  const previousTotal = useMemo(
+    () =>
+      summaryRates
+        ? buildWindowPoints('month', shiftAnchor('month', anchor, -1), dailyData ?? EMPTY_GRAPH, currency, locale, null, summaryRates)
+            .reduce((sum, point) => sum + point.income, 0)
+        : 0,
+    [summaryRates, anchor, dailyData, currency, locale],
+  );
+  const deltaPercent = summaryRates && previousTotal > 0 ? ((periodTotal - previousTotal) / previousTotal) * 100 : null;
 
   const countSeries = useMemo(
     () =>
@@ -519,13 +552,22 @@ export const AnalyticsChart = memo(function AnalyticsChart({
   const chartStepX = points.length > 1 ? (width - CHART_PAD * 2) / (points.length - 1) : 0;
   const selectedX = selectedIndex != null ? CHART_PAD + selectedIndex * chartStepX : 0;
   const tooltipLeft = Math.min(Math.max(selectedX - TOOLTIP_WIDTH / 2, 0), Math.max(width - TOOLTIP_WIDTH, 0));
+  const peakIndex = summary ? points.reduce((best, point, index) => (point.income > (points[best]?.income ?? 0) ? index : best), -1) : -1;
+  const peakMax = Math.max(...points.map((point) => point.income), 1);
+  const peakX = CHART_PAD + peakIndex * chartStepX;
+  const peakY = peakIndex >= 0 ? CHART_PAD + (CHART_HEIGHT - CHART_PAD * 2) * (1 - points[peakIndex].income / peakMax) : 0;
 
   return (
     <View className="rounded-[12px] border bg-white dark:bg-dark-surface p-4" style={{ borderColor: cardBorder }}>
       <View className="flex-row items-center justify-between">
-        <AppText className="font-gilroy-bold text-[16px]">{t('Event Analytics')}</AppText>
+        <View className="gap-0.5">
+          <AppText className="font-gilroy-bold text-[16px]">{t('Event Analytics')}</AppText>
+          {summary ? (
+            <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">{t('Total Revenue')}</AppText>
+          ) : null}
+        </View>
         <View className="flex-row gap-1">
-          {CHART_VIEW_MODES.map((option) => {
+          {(summary ? [] : CHART_VIEW_MODES).map((option) => {
             const active = viewMode === option.key;
             return (
               <PressableScale
@@ -563,6 +605,16 @@ export const AnalyticsChart = memo(function AnalyticsChart({
           <AppText numberOfLines={1} className="font-gilroy-bold text-[13px]" style={{ color: INCOME_COLOR }}>
             {currency ? `${currencySymbol(currency)} ${formatMoney(periodTotal)}` : formatMoney(periodTotal)}
           </AppText>
+          {deltaPercent != null ? (
+            <AppText
+              numberOfLines={1}
+              className="mt-0.5 font-gilroy-semibold text-[11px]"
+              style={{ color: deltaPercent >= 0 ? DELTA_UP : DELTA_DOWN }}
+            >
+              {`${deltaPercent >= 0 ? '↑' : '↓'} ${Math.abs(deltaPercent).toFixed(1)}% `}
+              <AppText className="font-gilroy-medium text-[11px] text-muted dark:text-dark-muted">{t('vs previous month')}</AppText>
+            </AppText>
+          ) : null}
         </View>
         <PressableScale
           onPress={goNext}
@@ -577,6 +629,12 @@ export const AnalyticsChart = memo(function AnalyticsChart({
           <ChevronRight size={16} color={chevronColor} />
         </PressableScale>
       </View>
+
+      {summary && !isLoading && periodTotal <= 0 ? (
+        <AppText className="mt-2 text-center font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
+          {t('No sales recorded in this period.')}
+        </AppText>
+      ) : null}
 
       <View className="mt-3" style={{ height: CHART_HEIGHT }} onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
         {width > 0 && !isLoading ? (
@@ -612,6 +670,9 @@ export const AnalyticsChart = memo(function AnalyticsChart({
                   strokeLinecap="round"
                 />
               ))}
+              {peakIndex >= 0 ? (
+                <Circle cx={peakX} cy={peakY} r={4} fill={INCOME_COLOR} stroke={colors.white} strokeWidth={2} />
+              ) : null}
               {selected ? (
                 <SvgLine
                   x1={selectedX}

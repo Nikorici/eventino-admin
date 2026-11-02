@@ -329,6 +329,7 @@ export interface SeatMapConfigInfo {
   max_active_holds_per_identity: number;
   category_colors: Record<string, string>;
   config_version: number;
+  scope?: 'event' | 'tables';
 }
 
 export interface SeatMapConfigStatuses {
