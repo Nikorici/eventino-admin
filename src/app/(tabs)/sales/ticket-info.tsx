@@ -6,6 +6,7 @@ import { Lock, Ticket } from 'lucide-react-native';
 
 import { AppText, Chip, EmptyState, GlassHeader, PressableScale, Screen } from '@/components/ui';
 import {
+  Avatar,
   ListSkeleton,
   PanelCard,
   PanelError,
@@ -35,16 +36,15 @@ function purchaseDate(value: string | null | undefined, lang: string): string {
   return format(parsed, 'd MMM yyyy', { locale: dateFnsLocale(lang) });
 }
 
-function PurchaseRow({ buyer, index, currency }: { buyer: EventBuyer; index: number; currency: string }) {
+function PurchaseRow({ buyer, currency }: { buyer: EventBuyer; currency: string }) {
   const { t, i18n } = useTranslation();
+  const name = buyerName(buyer, t('Unknown'));
   return (
     <View className="flex-row items-center gap-3 py-3">
-      <View className="h-10 w-10 items-center justify-center rounded-full bg-brand/20">
-        <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{index + 1}</AppText>
-      </View>
+      <Avatar name={name} image={buyer.profile_image} />
       <View className="flex-1">
         <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
-          {buyerName(buyer, t('Unknown'))}
+          {name}
         </AppText>
         <AppText numberOfLines={1} className="font-gilroy-medium text-[12px] leading-[16px] text-muted dark:text-dark-muted">
           {buyer.email || '-'}
@@ -110,7 +110,7 @@ export default function TicketInfoScreen() {
         <PanelCard className="mt-1">
           {rows.map((buyer, index) => (
             <RowDivider key={`${buyer.order_id ?? buyer.id ?? index}-${index}`} index={index}>
-              <PurchaseRow buyer={buyer} index={index} currency={fallbackCurrency} />
+              <PurchaseRow buyer={buyer} currency={fallbackCurrency} />
             </RowDivider>
           ))}
         </PanelCard>

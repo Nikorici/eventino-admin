@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, type GestureResponderEvent, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { cssInterop } from 'nativewind';
 
-cssInterop(Animated.View, { className: 'style' });
+import { cn } from '@/lib/cn';
 
 export interface PressableScaleProps {
   children: ReactNode;
@@ -12,7 +10,6 @@ export interface PressableScaleProps {
   onPress?: (event: GestureResponderEvent) => void;
   onLongPress?: (event: GestureResponderEvent) => void;
   disabled?: boolean;
-  scaleTo?: number;
   hitSlop?: number;
   accessibilityLabel?: string;
   accessibilityRole?: 'button' | 'link' | 'none';
@@ -26,15 +23,11 @@ export function PressableScale({
   onPress,
   onLongPress,
   disabled,
-  scaleTo = 0.97,
   hitSlop,
   accessibilityLabel,
   accessibilityRole = 'button',
   testID,
 }: PressableScaleProps) {
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
-
   return (
     <Pressable
       disabled={disabled}
@@ -44,16 +37,10 @@ export function PressableScale({
       accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel}
       testID={testID}
-      onPressIn={() => {
-        scale.set(withSpring(scaleTo, { damping: 15, stiffness: 220 }));
-      }}
-      onPressOut={() => {
-        scale.set(withSpring(1, { damping: 15, stiffness: 220 }));
-      }}
+      className={cn(className, !disabled && 'active:scale-[0.97]')}
+      style={style}
     >
-      <Animated.View className={className} style={[animatedStyle, style]}>
-        {children}
-      </Animated.View>
+      {children}
     </Pressable>
   );
 }

@@ -266,8 +266,11 @@ Core already answers: every auth endpoint (login/OTP/register/verify/reset/chang
 
 ## Gotchas
 
-- `PressableScale` registers `Animated.View` with NativeWind (`cssInterop`); without it `className` on animated views is
-  dropped on web.
+- Never put `className` on a Reanimated `Animated.*` component: on iOS/Android (NativeWind 4 + Reanimated 4) the classes
+  are dropped while web still shows them. Animate a wrapper and style a plain `View`/`Pressable` inside it.
+  `PressableScale` is a plain `Pressable` with `active:scale-[0.97]` for that reason.
+- The web build is not proof of the native look. Check styling changes in Expo Go, and start Metro with
+  `npx expo start -c` after adding new Tailwind classes or the phone keeps the cached style sheet.
 - On web NativeWind runs in `class` mode; `useBootstrapTheme` resolves `system` to the real scheme there.
 - Sibling Expo repos use Metro 8081. If the app shows `PlatformConstants could not be found`, a foreign Metro owns the
   port — stop it or start this one with `--port`.

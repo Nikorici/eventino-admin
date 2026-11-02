@@ -233,13 +233,11 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
 
 function BuyerRow({
   buyer,
-  index,
   onPress,
   onDownload,
   downloading,
 }: {
   buyer: EventBuyer;
-  index: number;
   onPress: () => void;
   onDownload?: () => void;
   downloading: boolean;
@@ -259,9 +257,7 @@ function BuyerRow({
         accessibilityLabel={name}
         className="flex-1 flex-row items-center gap-3"
       >
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-brand/20 dark:bg-dark-elevated">
-          <AppText className="font-gilroy-bold text-[13px] text-primary dark:text-dark-text">{index + 1}</AppText>
-        </View>
+        <Avatar name={name} image={buyer.profile_image} />
         <View className="flex-1">
           <AppText numberOfLines={1} className="font-gilroy-semibold text-[14px] leading-[19px]">
             {name}
@@ -493,7 +489,6 @@ export function BuyersPanel({
                 <RowDivider key={`${buyer.order_id ?? buyer.id ?? index}`} index={index}>
                   <BuyerRow
                     buyer={buyer}
-                    index={index}
                     onPress={() => setSelected(buyer)}
                     onDownload={orderId != null ? () => void onDownloadTicket(buyer, orderId) : undefined}
                     downloading={orderId != null && busyKey === `ticket-${orderId}`}
