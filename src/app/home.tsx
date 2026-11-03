@@ -8,13 +8,13 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
-  CircleCheckBig,
   Clock,
   CreditCard,
   Gift,
   Heart,
   LayoutDashboard,
   Settings,
+  Ticket,
   Users,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -278,7 +278,7 @@ export default function HomeScreen() {
                   value={money(bucket?.income_by_currency)}
                   unit={currency}
                 />
-                <StatCard icon={CircleCheckBig} label={t('Tickets Sold')} value={groupThousands(bucket?.tickets_sold ?? 0)} />
+                <StatCard icon={Ticket} label={t('Total Tickets')} value={groupThousands(totalTickets)} />
                 <StatCard icon={Users} label={t('Total Users')} value={groupThousands(bucket?.new_users ?? 0)} />
                 <StatCard
                   icon={CreditCard}

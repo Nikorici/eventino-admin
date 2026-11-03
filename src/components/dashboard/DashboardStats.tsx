@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import type { Locale } from 'date-fns';
 import {
   Banknote,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   CreditCard,
@@ -307,20 +306,13 @@ function StatsGrid({
         />
         <CountCard
           className="flex-1"
-          icon={CheckCircle2}
-          label={t('Tickets sold')}
-          value={bucket?.tickets_sold ?? 0}
-          allTimeValue={showAllTime ? (allTime?.tickets_sold ?? 0) : undefined}
-        />
-      </View>
-      <View className="flex-row gap-3">
-        <CountCard
-          className="flex-1"
           icon={Ticket}
           label={t('Total Tickets')}
           value={periodSplit.total}
           allTimeValue={showAllTime ? allTimeSplit.total : undefined}
         />
+      </View>
+      <View className="flex-row gap-3">
         <CountCard
           className="flex-1"
           icon={CreditCard}
@@ -328,8 +320,6 @@ function StatsGrid({
           value={periodSplit.paid}
           allTimeValue={showAllTime ? allTimeSplit.paid : undefined}
         />
-      </View>
-      <View className="flex-row gap-3">
         <CountCard
           className="flex-1"
           icon={Gift}
@@ -337,11 +327,10 @@ function StatsGrid({
           value={periodSplit.free}
           allTimeValue={showAllTime ? allTimeSplit.free : undefined}
         />
-        <CountCard className="flex-1" icon={ScanLine} label={t('Scanned Tickets')} value={allTime?.scanned_tickets ?? 0} caption={allTimeCaption} />
       </View>
       <View className="flex-row gap-3">
+        <CountCard className="flex-1" icon={ScanLine} label={t('Scanned Tickets')} value={allTime?.scanned_tickets ?? 0} caption={allTimeCaption} />
         <CountCard className="flex-1" icon={XCircle} label={t('Not Scanned Tickets')} value={allTime?.not_scanned_tickets ?? 0} caption={allTimeCaption} />
-        <View className="flex-1 border border-transparent p-4" />
       </View>
     </View>
   );
