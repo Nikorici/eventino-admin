@@ -212,8 +212,7 @@ export default function HomeScreen() {
   const bucket = stats?.[period];
   const money = (byCurrency: Record<string, number> | undefined) =>
     groupThousands(total(byCurrency), 2);
-  const totalTickets = bucket?.tickets_sold ?? 0;
-  const { paid: paidTickets, free: freeTickets } = ticketSplit(bucket);
+  const { total: totalTickets, paid: paidTickets, free: freeTickets } = ticketSplit(bucket);
   const periodLabel = t(PERIODS.find((option) => option.value === period)?.label ?? 'All Time');
 
   return (

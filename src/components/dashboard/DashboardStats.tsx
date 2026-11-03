@@ -93,13 +93,14 @@ function currencyEntries(byCurrency: Record<string, number> | undefined, codes: 
   return keys.map((code) => ({ code, amount: map[code] ?? 0 }));
 }
 
-export function ticketSplit(bucket: OrganizerStatsBucket | undefined): { paid: number; free: number } {
+export function ticketSplit(bucket: OrganizerStatsBucket | undefined): { total: number; paid: number; free: number } {
   if (bucket?.manual_tickets_sold == null) {
+    const total = bucket?.total_tickets ?? 0;
     const free = bucket?.manual_tickets_count ?? 0;
-    return { paid: Math.max(0, (bucket?.total_tickets ?? 0) - free), free };
+    return { total, paid: Math.max(0, total - free), free };
   }
   const free = bucket.manual_tickets_sold;
-  return { paid: Math.max(0, bucket.tickets_sold - free), free };
+  return { total: bucket.tickets_sold, paid: Math.max(0, bucket.tickets_sold - free), free };
 }
 
 export function IntervalSelector({ value, onChange }: { value: IntervalKey; onChange: (next: IntervalKey) => void }) {
@@ -278,7 +279,6 @@ function StatsGrid({
   const revenueAllTime = showAllTime ? currencyEntries(allTime?.income_by_currency, currencies) : undefined;
   const receivedEntries = currencyEntries(bucket?.total_received_by_currency, currencies);
   const receivedAllTime = showAllTime ? currencyEntries(allTime?.total_received_by_currency, currencies) : undefined;
-  const allTimeTickets = allTime?.total_tickets ?? 0;
   const periodSplit = ticketSplit(bucket);
   const allTimeSplit = ticketSplit(allTime);
   const allTimeCaption = t('all time');
@@ -314,7 +314,13 @@ function StatsGrid({
         />
       </View>
       <View className="flex-row gap-3">
-        <CountCard className="flex-1" icon={Ticket} label={t('Total Tickets')} value={allTimeTickets} caption={allTimeCaption} />
+        <CountCard
+          className="flex-1"
+          icon={Ticket}
+          label={t('Total Tickets')}
+          value={periodSplit.total}
+          allTimeValue={showAllTime ? allTimeSplit.total : undefined}
+        />
         <CountCard
           className="flex-1"
           icon={CreditCard}
