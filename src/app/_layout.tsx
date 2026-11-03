@@ -44,6 +44,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="home" options={{ animation: 'fade' }} />
         <Stack.Screen name="select-event" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="create-event" options={{ presentation: 'modal' }} />
         <Stack.Screen name="+not-found" />

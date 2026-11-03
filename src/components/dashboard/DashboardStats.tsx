@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import Svg, { Circle, Defs, Line as SvgLine, LinearGradient as SvgLinearGradient, Path, Stop } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import type { Locale } from 'date-fns';
@@ -79,7 +79,7 @@ const hourlyGraphApi = baseApi.injectEndpoints({
 
 const { useGetOrganizerHourlyGraphQuery } = hourlyGraphApi;
 
-export type IntervalKey = 'all_time' | 'this_week' | 'previous_week';
+export type IntervalKey = 'all_time' | 'today' | 'this_week' | 'this_month' | 'previous_week';
 
 export interface CurrencyEntry {
   code: string;
@@ -93,24 +93,35 @@ function currencyEntries(byCurrency: Record<string, number> | undefined, codes: 
   return keys.map((code) => ({ code, amount: map[code] ?? 0 }));
 }
 
+export function ticketSplit(bucket: OrganizerStatsBucket | undefined): { paid: number; free: number } {
+  if (bucket?.manual_tickets_sold == null) {
+    const free = bucket?.manual_tickets_count ?? 0;
+    return { paid: Math.max(0, (bucket?.total_tickets ?? 0) - free), free };
+  }
+  const free = bucket.manual_tickets_sold;
+  return { paid: Math.max(0, bucket.tickets_sold - free), free };
+}
+
 export function IntervalSelector({ value, onChange }: { value: IntervalKey; onChange: (next: IntervalKey) => void }) {
   const { t } = useTranslation();
   const options: { key: IntervalKey; label: string }[] = [
     { key: 'all_time', label: t('All Time') },
+    { key: 'today', label: t('Today') },
     { key: 'this_week', label: t('This Week') },
+    { key: 'this_month', label: t('This Month') },
     { key: 'previous_week', label: t('Previous Week') },
   ];
   return (
-    <View className="flex-row gap-2">
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 grow-0" contentContainerClassName="gap-2 px-4">
       {options.map((option) => {
         const active = value === option.key;
         return (
-          <View key={option.key} className="flex-1">
+          <View key={option.key}>
             <PressableScale
               onPress={() => onChange(option.key)}
               accessibilityLabel={option.label}
               className={cn(
-                'h-9 w-full items-center justify-center rounded-[8px] border',
+                'h-9 items-center justify-center rounded-[8px] border px-3.5',
                 active
                   ? 'border-primary bg-primary dark:border-white dark:bg-white'
                   : 'border-[#e1e4e8] bg-[#f4f5f7] dark:border-dark-border dark:bg-dark-elevated',
@@ -129,7 +140,7 @@ export function IntervalSelector({ value, onChange }: { value: IntervalKey; onCh
           </View>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -268,8 +279,8 @@ function StatsGrid({
   const receivedEntries = currencyEntries(bucket?.total_received_by_currency, currencies);
   const receivedAllTime = showAllTime ? currencyEntries(allTime?.total_received_by_currency, currencies) : undefined;
   const allTimeTickets = allTime?.total_tickets ?? 0;
-  const allTimeManual = allTime?.manual_tickets_count ?? 0;
-  const paidTickets = Math.max(0, allTimeTickets - allTimeManual);
+  const periodSplit = ticketSplit(bucket);
+  const allTimeSplit = ticketSplit(allTime);
   const allTimeCaption = t('all time');
   const suffixClassName = 'font-gilroy-semibold text-[13px] text-muted dark:text-dark-muted';
 
@@ -304,10 +315,22 @@ function StatsGrid({
       </View>
       <View className="flex-row gap-3">
         <CountCard className="flex-1" icon={Ticket} label={t('Total Tickets')} value={allTimeTickets} caption={allTimeCaption} />
-        <CountCard className="flex-1" icon={CreditCard} label={t('Paid Tickets')} value={paidTickets} caption={allTimeCaption} />
+        <CountCard
+          className="flex-1"
+          icon={CreditCard}
+          label={t('Paid Tickets')}
+          value={periodSplit.paid}
+          allTimeValue={showAllTime ? allTimeSplit.paid : undefined}
+        />
       </View>
       <View className="flex-row gap-3">
-        <CountCard className="flex-1" icon={Gift} label={t('Free Tickets')} value={allTimeManual} caption={allTimeCaption} />
+        <CountCard
+          className="flex-1"
+          icon={Gift}
+          label={t('Free Tickets')}
+          value={periodSplit.free}
+          allTimeValue={showAllTime ? allTimeSplit.free : undefined}
+        />
         <CountCard className="flex-1" icon={ScanLine} label={t('Scanned Tickets')} value={allTime?.scanned_tickets ?? 0} caption={allTimeCaption} />
       </View>
       <View className="flex-row gap-3">

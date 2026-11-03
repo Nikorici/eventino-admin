@@ -34,9 +34,10 @@ export const googleClientId =
     default: GOOGLE_WEB_CLIENT_ID,
   }) ?? '';
 
-export const googleAndroidRedirectUri = GOOGLE_ANDROID_CLIENT_ID
-  ? `com.googleusercontent.apps.${GOOGLE_ANDROID_CLIENT_ID.replace('.apps.googleusercontent.com', '')}:/oauthredirect`
-  : undefined;
+export const googleNativeRedirectUri =
+  Platform.OS !== 'web' && googleClientId
+    ? `com.googleusercontent.apps.${googleClientId.replace('.apps.googleusercontent.com', '')}:/oauthredirect`
+    : undefined;
 
 export const isGoogleAuthReady = USE_MOCKS || (googleClientId.length > 0 && (Platform.OS === 'web' || !inExpoGo));
 

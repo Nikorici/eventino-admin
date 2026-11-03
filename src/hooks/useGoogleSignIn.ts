@@ -1,13 +1,12 @@
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback } from 'react';
-import { Platform } from 'react-native';
 
 import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID, USE_MOCKS } from '@/lib/constants';
 import {
   SocialAuthCancelled,
-  googleAndroidRedirectUri,
   googleClientId,
+  googleNativeRedirectUri,
   isGoogleAuthReady,
   type GoogleSocialPayload,
 } from '@/lib/social-auth';
@@ -20,7 +19,7 @@ export function useGoogleSignIn(): { available: boolean; signIn: () => Promise<G
     iosClientId: GOOGLE_IOS_CLIENT_ID || undefined,
     androidClientId: GOOGLE_ANDROID_CLIENT_ID || undefined,
     webClientId: GOOGLE_WEB_CLIENT_ID || undefined,
-    redirectUri: Platform.OS === 'android' ? googleAndroidRedirectUri : undefined,
+    redirectUri: googleNativeRedirectUri,
     selectAccount: true,
   });
 

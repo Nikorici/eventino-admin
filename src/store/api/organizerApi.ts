@@ -224,6 +224,7 @@ export interface OrganizerStatsBucket {
   income: number;
   income_by_currency: Record<string, number>;
   tickets_sold: number;
+  manual_tickets_sold?: number;
   favorited_by: number;
   total_tickets: number;
   scanned_tickets: number;
@@ -242,6 +243,8 @@ export interface OrganizerStatsBucket {
 export interface OrganizerRecentStats {
   this_week: OrganizerStatsBucket;
   previous_week: OrganizerStatsBucket;
+  today?: OrganizerStatsBucket;
+  this_month?: OrganizerStatsBucket;
   all_time: OrganizerStatsBucket;
   event_currencies: string[];
 }

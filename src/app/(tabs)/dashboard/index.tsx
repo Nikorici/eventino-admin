@@ -12,7 +12,7 @@ import {
   DashboardStatsSection,
   DashboardStatsSkeleton,
 } from '@/components/dashboard/DashboardStats';
-import { EventActions, EventHeaderCard, EventHeaderCardSkeleton } from '@/components/dashboard/EventHeaderCard';
+import { CancelEventAction, EventActions, EventHeaderCard, EventHeaderCardSkeleton } from '@/components/dashboard/EventHeaderCard';
 import { EventTourSheet } from '@/components/dashboard/EventTourSheet';
 import { FacturaOrdersPanel, type FacturaTab } from '@/components/dashboard/FacturaOrdersPanel';
 import { FreeTicketRequestsPanel, SPECIAL_FREE_TICKET_EVENT_IDS } from '@/components/dashboard/FreeTicketRequestsPanel';
@@ -228,6 +228,7 @@ export default function DashboardScreen() {
             !isCancelled ? (
               <FreeTicketRequestsPanel eventId={eventId} refreshSignal={refreshSignal} />
             ) : null}
+            {user?.is_staff ? <CancelEventAction event={event} /> : null}
             {tourOpen ? <EventTourSheet permissions={permissions} onClose={() => setTourOpen(false)} /> : null}
           </>
         )}

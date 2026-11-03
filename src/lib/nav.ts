@@ -11,6 +11,7 @@ export const routes = {
   home: '/home',
   selectEvent: '/select-event',
   createEvent: '/create-event',
+  accountSettings: '/settings',
 
   dashboard: '/dashboard',
 
@@ -76,6 +77,7 @@ export const navigate = {
   home: push('home'),
   selectEvent: push('selectEvent'),
   createEvent: push('createEvent'),
+  accountSettings: push('accountSettings'),
 
   dashboard: () => router.replace(href(routes.dashboard)),
 

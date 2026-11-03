@@ -8,14 +8,16 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_USE_MOCKS": "false",
-        "EXPO_PUBLIC_API_URL": "https://api.eventino.co"
+        "EXPO_PUBLIC_API_URL": "https://api.eventino.co",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "758097820031-56h61m66826rf3rcih5ea1ucpg6l0631.apps.googleusercontent.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_USE_MOCKS": "false",
-        "EXPO_PUBLIC_API_URL": "https://api.eventino.co"
+        "EXPO_PUBLIC_API_URL": "https://api.eventino.co",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "758097820031-56h61m66826rf3rcih5ea1ucpg6l0631.apps.googleusercontent.com"
       }
     }
   },

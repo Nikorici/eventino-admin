@@ -392,7 +392,8 @@ function statsBucket(events: MockEvent[], shareOf: (event: MockEvent) => number)
     new_users: users,
     income: total(income),
     income_by_currency: income,
-    tickets_sold: sold,
+    tickets_sold: totalTickets,
+    manual_tickets_sold: manual,
     favorited_by: favorites,
     total_tickets: totalTickets,
     scanned_tickets: scanned,
@@ -509,6 +510,8 @@ export const handlers: MockHandler[] = [
       all_time: statsBucket(events, () => 1),
       this_week: statsBucket(events, (event) => weekShare(event, 0)),
       previous_week: statsBucket(events, (event) => weekShare(event, 1)),
+      today: statsBucket(events, (event) => weekShare(event, 0) / 7),
+      this_month: statsBucket(events, (event) => Math.min(1, weekShare(event, 0) * 3)),
       event_currencies: currencies,
     };
   }),

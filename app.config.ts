@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'eventino-admin',
+  scheme: ['eventino-admin', 'com.googleusercontent.apps.758097820031-56h61m66826rf3rcih5ea1ucpg6l0631'],
   userInterfaceStyle: 'automatic',
   backgroundColor: '#ffffff',
   ios: {

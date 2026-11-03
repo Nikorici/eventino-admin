@@ -134,10 +134,8 @@ export function EventActions({
   isStaffUser: boolean;
 }) {
   const { t } = useTranslation();
-  const toast = useToast();
   const { busyKey, run } = useFileAction();
   const [releaseOpen, setReleaseOpen] = useState(false);
-  const [cancelOpen, setCancelOpen] = useState(false);
   const showButtons = permissions.isEventOwner || isStaffUser || permissions.canManageTickets;
 
   if (!showButtons) return null;
@@ -163,14 +161,6 @@ export function EventActions({
         error: t('Failed to download act predare-primire'),
       },
     );
-
-  const onCancelPress = () => {
-    if (event.is_cancelled) {
-      toast(t('Your event has been cancelled. Buyers will receive their refunds within 3–5 days.'), 'info');
-      return;
-    }
-    setCancelOpen(true);
-  };
 
   const actions = [
     ...(permissions.hasFullAccess
@@ -203,16 +193,6 @@ export function EventActions({
           {row}
         </View>
       ))}
-      {isStaffUser ? (
-        <View className="flex-row">
-          <HeaderAction
-            icon={X}
-            label={event.is_cancelled ? t('Event cancelled') : t('Cancel Event')}
-            onPress={onCancelPress}
-            variant="danger"
-          />
-        </View>
-      ) : null}
 
       <ReleaseTicketSheet
         visible={releaseOpen}
@@ -222,6 +202,31 @@ export function EventActions({
         venues={event.venues ?? []}
         seated={event.seat_map?.status === 'active'}
         currency={eventCurrencyCode(event)}
+      />
+    </View>
+  );
+}
+
+export function CancelEventAction({ event }: { event: EventDetail }) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  const onCancelPress = () => {
+    if (event.is_cancelled) {
+      toast(t('Your event has been cancelled. Buyers will receive their refunds within 3–5 days.'), 'info');
+      return;
+    }
+    setCancelOpen(true);
+  };
+
+  return (
+    <View className="flex-row">
+      <HeaderAction
+        icon={X}
+        label={event.is_cancelled ? t('Event cancelled') : t('Cancel Event')}
+        onPress={onCancelPress}
+        variant="danger"
       />
       {cancelOpen ? (
         <CancelEventSheet

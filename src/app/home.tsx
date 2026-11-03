@@ -14,11 +14,12 @@ import {
   Gift,
   Heart,
   LayoutDashboard,
+  Settings,
   Users,
   type LucideIcon,
 } from 'lucide-react-native';
 
-import { CARD_BORDER, type IntervalKey } from '@/components/dashboard/DashboardStats';
+import { CARD_BORDER, ticketSplit, type IntervalKey } from '@/components/dashboard/DashboardStats';
 import { OptionSheet } from '@/components/dashboard/OptionSheet';
 import { OrganizerSwitcher } from '@/components/dashboard/OrganizerSwitcher';
 import { CurrencySelector } from '@/components/overview/CurrencySelector';
@@ -40,7 +41,9 @@ import { colors } from '@/theme/colors';
 
 const PERIODS: { value: IntervalKey; label: string }[] = [
   { value: 'all_time', label: 'All Time' },
+  { value: 'today', label: 'Today' },
   { value: 'this_week', label: 'This Week' },
+  { value: 'this_month', label: 'This Month' },
   { value: 'previous_week', label: 'Previous Week' },
 ];
 
@@ -207,12 +210,10 @@ export default function HomeScreen() {
   if (!isAuthenticated) return <Redirect href={href(routes.login)} />;
 
   const bucket = stats?.[period];
-  const allTime = stats?.all_time;
   const money = (byCurrency: Record<string, number> | undefined) =>
     groupThousands(total(byCurrency), 2);
-  const totalTickets = allTime?.total_tickets ?? 0;
-  const freeTickets = allTime?.manual_tickets_count ?? 0;
-  const paidTickets = Math.max(0, totalTickets - freeTickets);
+  const totalTickets = bucket?.tickets_sold ?? 0;
+  const { paid: paidTickets, free: freeTickets } = ticketSplit(bucket);
   const periodLabel = t(PERIODS.find((option) => option.value === period)?.label ?? 'All Time');
 
   return (
@@ -227,6 +228,16 @@ export default function HomeScreen() {
       >
         <View className="flex-row items-start gap-3 px-4 pb-3.5">
           <WelcomeHeading className="flex-1" />
+          <PressableScale
+            onPress={() => {
+              haptics.selection();
+              navigate.accountSettings();
+            }}
+            accessibilityLabel={t('Settings')}
+            className="h-10 w-10 items-center justify-center"
+          >
+            <Settings size={22} color={chipIconColor} />
+          </PressableScale>
           <OrganizerSwitcher />
         </View>
 
