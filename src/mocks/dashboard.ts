@@ -165,6 +165,7 @@ function buildBuyers(event: MockEvent): EventBuyer[] {
         `${String(9 + (index % 13)).padStart(2, '0')}:${String((index * 17) % 60).padStart(2, '0')}:00`,
       ),
       payment_method: isFollower ? null : paymentMethodFor(event, index),
+      payment_method_label: isFollower ? null : paymentMethodFor(event, index),
       user_type: isFollower ? 'follower' : 'buyer',
       attendance_status: attendance,
       scanned_count: scanned,

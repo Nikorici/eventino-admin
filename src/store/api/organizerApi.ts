@@ -127,6 +127,7 @@ export interface EventBuyer {
   order_date?: string | null;
   date?: string | null;
   payment_method?: string | null;
+  payment_method_label?: string | null;
   user_type?: string | null;
   attendance_status?: string | null;
   scanned_count?: number;

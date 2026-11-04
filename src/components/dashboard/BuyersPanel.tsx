@@ -178,7 +178,7 @@ function BuyerDetailSheet({ buyer, onClose }: { buyer: EventBuyer | null; onClos
                   <DetailField label={t('Ticket Type')} value={buyer.ticket_name || '-'} />
                   <DetailField label={t('Ticket Count')} value={String(buyer.ticket_count ?? 0)} />
                   <DetailField label={t('Coupon')} value={buyer.coupon_code || '-'} />
-                  <DetailField label={t('Payment Method')} value={buyer.payment_method || '-'} />
+                  <DetailField label={t('Payment Method')} value={buyer.payment_method_label || buyer.payment_method || '-'} />
                 </View>
               </View>
 
