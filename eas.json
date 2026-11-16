@@ -9,7 +9,8 @@
       "env": {
         "EXPO_PUBLIC_USE_MOCKS": "false",
         "EXPO_PUBLIC_API_URL": "https://api.eventino.co",
-        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "758097820031-56h61m66826rf3rcih5ea1ucpg6l0631.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "758097820031-56h61m66826rf3rcih5ea1ucpg6l0631.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GEOAPIFY_API_KEY": "0e46b2b4e03b4216a85357d320892113"
       }
     },
     "production": {
@@ -17,7 +18,8 @@
       "env": {
         "EXPO_PUBLIC_USE_MOCKS": "false",
         "EXPO_PUBLIC_API_URL": "https://api.eventino.co",
-        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "758097820031-56h61m66826rf3rcih5ea1ucpg6l0631.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "758097820031-56h61m66826rf3rcih5ea1ucpg6l0631.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GEOAPIFY_API_KEY": "0e46b2b4e03b4216a85357d320892113"
       }
     }
   },
