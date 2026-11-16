@@ -1,4 +1,5 @@
-import { View, TextInput } from 'react-native';
+import { useRef } from 'react';
+import { Keyboard, Pressable, View, TextInput, type TextInputInstance } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/ui';
@@ -17,9 +18,14 @@ export interface OtpBoxesProps {
 
 export function OtpBoxes({ value, onChange, onComplete, editable = true, autoFocus, error }: OtpBoxesProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<TextInputInstance>(null);
+  const focusInput = () => {
+    if (!Keyboard.isVisible()) Keyboard.dismiss();
+    inputRef.current?.focus();
+  };
   return (
     <View className="gap-2">
-      <View className="relative">
+      <Pressable onPress={focusInput} accessible={false} className="relative">
         <View className="flex-row gap-2">
           {Array.from({ length: OTP_LENGTH }).map((_, index) => (
             <View
@@ -40,6 +46,7 @@ export function OtpBoxes({ value, onChange, onComplete, editable = true, autoFoc
           ))}
         </View>
         <TextInput
+          ref={inputRef}
           value={value}
           onChangeText={(next) => {
             const cleaned = next.replace(/[^0-9]/g, '').slice(0, OTP_LENGTH);
@@ -56,7 +63,7 @@ export function OtpBoxes({ value, onChange, onComplete, editable = true, autoFoc
           accessibilityLabel={t('Verification code')}
           className="absolute inset-0 opacity-0"
         />
-      </View>
+      </Pressable>
       {error ? (
         <AppText className="text-center font-gilroy-medium text-xs text-danger dark:text-danger">{error}</AppText>
       ) : null}

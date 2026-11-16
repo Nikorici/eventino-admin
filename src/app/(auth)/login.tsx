@@ -20,6 +20,7 @@ import { SocialSignIn } from '@/components/auth/SocialSignIn';
 type LoginStep = 'email' | 'otp' | 'password';
 
 const MUTED = '#8a8d93';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function TextLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
@@ -78,6 +79,10 @@ export default function LoginScreen() {
     const trimmed = email.trim();
     if (!trimmed) {
       toast(t('Please enter your email'), 'error');
+      return;
+    }
+    if (!EMAIL_PATTERN.test(trimmed)) {
+      toast(t('Please enter a valid email address'), 'error');
       return;
     }
     try {
