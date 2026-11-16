@@ -17,7 +17,6 @@ jest.mock('@/store/api/usersApi', () => ({
 }));
 
 jest.mock('@/lib/places', () => ({
-  createPlacesSessionToken: () => 'session',
   fetchPlacePredictions: jest.fn(async () => []),
   fetchPlaceDetails: jest.fn(async () => null),
 }));

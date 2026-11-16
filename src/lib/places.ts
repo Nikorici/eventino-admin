@@ -1,6 +1,6 @@
-const PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY ?? 'AIzaSyAofdX32Vre8EjCDweLdVHPqOUUTMkZeP0';
-const AUTOCOMPLETE_URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-const DETAILS_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
+import { GEOAPIFY_API_KEY } from './constants';
+
+const AUTOCOMPLETE_URL = 'https://api.geoapify.com/v1/geocode/autocomplete';
 
 export interface PlacePrediction {
   placeId: string;
@@ -17,30 +17,21 @@ export interface PlaceDetails {
   longitude: number | null;
 }
 
-interface AutocompleteResponse {
-  status: string;
-  predictions?: {
-    place_id: string;
-    description: string;
-    structured_formatting?: { main_text?: string; secondary_text?: string };
-  }[];
+interface GeoapifyPlace {
+  place_id?: string;
+  name?: string;
+  formatted?: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  county?: string;
+  state?: string;
+  country?: string;
+  lat?: number;
+  lon?: number;
 }
 
-interface AddressComponent {
-  long_name: string;
-  short_name: string;
-  types: string[];
-}
-
-interface DetailsResponse {
-  status: string;
-  result?: {
-    formatted_address?: string;
-    name?: string;
-    address_components?: AddressComponent[];
-    geometry?: { location?: { lat: number; lng: number } };
-  };
-}
+const lastPlaces = new Map<string, GeoapifyPlace>();
 
 function query(params: Record<string, string>): string {
   return Object.entries(params)
@@ -48,72 +39,48 @@ function query(params: Record<string, string>): string {
     .join('&');
 }
 
-export function createPlacesSessionToken(): string {
-  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+function toPlaceId(place: GeoapifyPlace): string {
+  return place.place_id ?? `${place.lat},${place.lon}`;
 }
 
-export async function fetchPlacePredictions(
-  input: string,
-  sessionToken: string,
-  signal?: AbortSignal,
-): Promise<PlacePrediction[]> {
+export async function fetchPlacePredictions(input: string, signal?: AbortSignal): Promise<PlacePrediction[]> {
   const trimmed = input.trim();
   if (trimmed.length < 3) return [];
 
   const url = `${AUTOCOMPLETE_URL}?${query({
-    input: trimmed,
-    key: PLACES_API_KEY,
-    language: 'en',
-    sessiontoken: sessionToken,
+    text: trimmed,
+    limit: '5',
+    lang: 'en',
+    format: 'json',
+    apiKey: GEOAPIFY_API_KEY,
   })}`;
 
   try {
     const response = await fetch(url, { signal });
-    const data = (await response.json()) as AutocompleteResponse;
-    if (data.status !== 'OK' || !Array.isArray(data.predictions)) return [];
-    return data.predictions.map((prediction) => ({
-      placeId: prediction.place_id,
-      primaryText: prediction.structured_formatting?.main_text ?? prediction.description,
-      secondaryText: prediction.structured_formatting?.secondary_text ?? '',
-      description: prediction.description,
+    if (!response.ok) return [];
+    const data = (await response.json()) as { results?: GeoapifyPlace[] };
+    const places = (data.results ?? []).filter((place) => place.lat != null && place.lon != null);
+    lastPlaces.clear();
+    places.forEach((place) => lastPlaces.set(toPlaceId(place), place));
+    return places.map((place) => ({
+      placeId: toPlaceId(place),
+      primaryText: place.name ?? place.address_line1 ?? place.formatted ?? '',
+      secondaryText: place.address_line2 ?? '',
+      description: place.formatted ?? place.address_line1 ?? '',
     }));
   } catch {
     return [];
   }
 }
 
-export async function fetchPlaceDetails(placeId: string, sessionToken: string): Promise<PlaceDetails | null> {
-  const url = `${DETAILS_URL}?${query({
-    place_id: placeId,
-    key: PLACES_API_KEY,
-    language: 'en',
-    sessiontoken: sessionToken,
-    fields: 'formatted_address,address_components,geometry,name',
-  })}`;
-
-  try {
-    const response = await fetch(url);
-    const data = (await response.json()) as DetailsResponse;
-    if (data.status !== 'OK' || !data.result) return null;
-
-    const components = data.result.address_components ?? [];
-    const componentByType = (type: string): string =>
-      components.find((component) => component.types.includes(type))?.long_name ?? '';
-
-    const city =
-      componentByType('locality') ||
-      componentByType('postal_town') ||
-      componentByType('administrative_area_level_2') ||
-      componentByType('administrative_area_level_1');
-
-    return {
-      address: data.result.formatted_address ?? data.result.name ?? '',
-      country: componentByType('country'),
-      city,
-      latitude: data.result.geometry?.location?.lat ?? null,
-      longitude: data.result.geometry?.location?.lng ?? null,
-    };
-  } catch {
-    return null;
-  }
+export async function fetchPlaceDetails(placeId: string): Promise<PlaceDetails | null> {
+  const place = lastPlaces.get(placeId);
+  if (!place) return null;
+  return {
+    address: place.formatted ?? place.name ?? '',
+    country: place.country ?? '',
+    city: place.city ?? place.county ?? place.state ?? '',
+    latitude: place.lat ?? null,
+    longitude: place.lon ?? null,
+  };
 }

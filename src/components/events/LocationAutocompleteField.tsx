@@ -8,7 +8,6 @@ import { colors } from '@/theme/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
-  createPlacesSessionToken,
   fetchPlaceDetails,
   fetchPlacePredictions,
   type PlaceDetails,
@@ -41,7 +40,6 @@ export function LocationAutocompleteField({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const sessionTokenRef = useRef(createPlacesSessionToken());
   const suppressRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -62,7 +60,7 @@ export function LocationAutocompleteField({
     const controller = new AbortController();
     abortRef.current = controller;
     setLoading(true);
-    void fetchPlacePredictions(trimmed, sessionTokenRef.current, controller.signal).then((results) => {
+    void fetchPlacePredictions(trimmed, controller.signal).then((results) => {
       if (controller.signal.aborted) return;
       setPredictions(results);
       setLoading(false);
@@ -75,8 +73,7 @@ export function LocationAutocompleteField({
     setPredictions([]);
     setOpen(false);
     onChangeText(prediction.description);
-    const details = await fetchPlaceDetails(prediction.placeId, sessionTokenRef.current);
-    sessionTokenRef.current = createPlacesSessionToken();
+    const details = await fetchPlaceDetails(prediction.placeId);
     if (details) onSelectPlace(details);
   };
 
