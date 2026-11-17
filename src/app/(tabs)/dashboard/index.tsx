@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, Share, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useTranslation } from 'react-i18next';
-import { Ban, LayoutDashboard } from 'lucide-react-native';
+import { Ban, LayoutDashboard, Share2 } from 'lucide-react-native';
 
-import { AppText, Chip, EmptyState, GlassHeader, Screen } from '@/components/ui';
+import { AppText, Chip, EmptyState, GlassHeader, PressableScale, Screen } from '@/components/ui';
 import { BuyersPanel } from '@/components/dashboard/BuyersPanel';
 import {
   AnalyticsChart,
@@ -20,7 +20,9 @@ import { PanelCard, SectionTitle } from '@/components/dashboard/dashboardParts';
 import { useScreenPadding, useScrollInsets } from '@/hooks/useScreenPadding';
 import { useSelectedEvent } from '@/hooks/useSelectedEvent';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { WEB_ORIGIN } from '@/lib/constants';
 import { eventCurrencyCode } from '@/lib/format';
+import { haptics } from '@/lib/haptics';
 import { navigate } from '@/lib/nav';
 import { eventPermissions } from '@/lib/sections';
 import { useGetOrganizerGraphQuery, useGetOrganizerStatsQuery } from '@/store/api/organizerApi';
@@ -67,6 +69,7 @@ export default function DashboardScreen() {
   const scroll = useScrollInsets();
   const user = useAppSelector((s) => s.auth.user);
   const { eventId, data: event, isLoading, isError, refetch } = useSelectedEvent();
+  const headerIconTint = useThemeColor(colors.primary, colors.dark.text);
   const [tab, setTab] = useState<OrdersTab>('buyers');
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -107,11 +110,30 @@ export default function DashboardScreen() {
     }
   };
 
+  const onShare = () => {
+    if (!event) return;
+    haptics.light();
+    const url = `${WEB_ORIGIN}/${event.slug || 'event'}/${event.id}?is_external_view=true`;
+    Share.share({ message: `${event.title}\n${url}`, url, title: event.title }).catch(() => undefined);
+  };
+
   const header = (
     <GlassHeader
       title={event?.title ?? t('Dashboard')}
+      onBack={() => navigate.dismissTo('home')}
       onTitlePress={navigate.selectEvent}
       titleAccessibilityLabel={t('Change event')}
+      right={
+        event ? (
+          <PressableScale
+            onPress={onShare}
+            accessibilityLabel={t('Share event')}
+            className="h-10 w-10 items-center justify-center rounded-full border border-app-border bg-app-surface dark:border-dark-border dark:bg-dark-surface"
+          >
+            <Share2 size={18} color={headerIconTint} />
+          </PressableScale>
+        ) : null
+      }
     />
   );
 

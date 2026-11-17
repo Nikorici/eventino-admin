@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: 'Eventino Admin',
   slug: 'eventino-admin',
   owner: 'eventino',
-  version: '1.0.1',
+  version: '1.0.2',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   scheme: ['eventino-admin', 'com.googleusercontent.apps.758097820031-56h61m66826rf3rcih5ea1ucpg6l0631'],

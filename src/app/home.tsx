@@ -190,7 +190,7 @@ export default function HomeScreen() {
   const buttonIconColor = useThemeColor(colors.white, colors.primary);
 
   const { data: stats, isLoading, isError, refetch } = useGetOrganizerStatsQuery(undefined, { skip: !user });
-  const [period, setPeriod] = useState<IntervalKey>('all_time');
+  const [period, setPeriod] = useState<IntervalKey>('this_month');
   const [periodSheetOpen, setPeriodSheetOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
