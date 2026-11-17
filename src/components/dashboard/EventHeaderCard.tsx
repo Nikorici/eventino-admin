@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight, CalendarDays, CirclePlay, Download, FileText, Mail, MapPin, Pencil, X } from 'lucide-react-native';
+import { ArrowLeftRight, CalendarDays, Download, FileText, Mail, MapPin, Pencil, X } from 'lucide-react-native';
 
-import { AppText, Chip, PressableScale, Skeleton } from '@/components/ui';
+import { AppText, PressableScale, Skeleton } from '@/components/ui';
 import { CancelEventSheet } from '@/components/dashboard/CancelEventSheet';
 import { CARD_BORDER } from '@/components/dashboard/DashboardStats';
 import { ReleaseTicketSheet } from '@/components/dashboard/ReleaseTicketSheet';
@@ -52,11 +52,10 @@ function eventDateLine(event: EventDetail, lang: string): string {
   return [days, time].filter(Boolean).join(' · ') || '-';
 }
 
-export function EventHeaderCard({ event, onStartTour }: { event: EventDetail; onStartTour?: () => void }) {
+export function EventHeaderCard({ event }: { event: EventDetail }) {
   const { t, i18n } = useTranslation();
   const cardBorder = useThemeColor(CARD_BORDER, colors.dark.border);
   const swapIcon = useThemeColor(colors.primary, colors.dark.text);
-  const tourIcon = useThemeColor(colors.primary, colors.dark.text);
   const status = eventStatus(event, t);
 
   return (
@@ -97,11 +96,6 @@ export function EventHeaderCard({ event, onStartTour }: { event: EventDetail; on
             {eventDateLine(event, i18n.language)}
           </AppText>
         </View>
-        {onStartTour ? (
-          <View className="mt-2 flex-row">
-            <Chip label={t('eventTourStart')} icon={<CirclePlay size={16} color={tourIcon} />} onPress={onStartTour} />
-          </View>
-        ) : null}
       </View>
     </View>
   );

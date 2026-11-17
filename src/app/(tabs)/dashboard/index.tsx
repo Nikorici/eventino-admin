@@ -13,7 +13,6 @@ import {
   DashboardStatsSkeleton,
 } from '@/components/dashboard/DashboardStats';
 import { CancelEventAction, EventActions, EventHeaderCard, EventHeaderCardSkeleton } from '@/components/dashboard/EventHeaderCard';
-import { EventTourSheet } from '@/components/dashboard/EventTourSheet';
 import { FacturaOrdersPanel, type FacturaTab } from '@/components/dashboard/FacturaOrdersPanel';
 import { FreeTicketRequestsPanel, SPECIAL_FREE_TICKET_EVENT_IDS } from '@/components/dashboard/FreeTicketRequestsPanel';
 import { PendingOrdersPanel } from '@/components/dashboard/PendingOrdersPanel';
@@ -71,7 +70,6 @@ export default function DashboardScreen() {
   const [tab, setTab] = useState<OrdersTab>('buyers');
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const [tourOpen, setTourOpen] = useState(false);
 
   const permissions = eventPermissions(event, user);
   const isCancelled = Boolean(event?.is_cancelled);
@@ -160,7 +158,7 @@ export default function DashboardScreen() {
           </>
         ) : (
           <>
-            <EventHeaderCard event={event} onStartTour={() => setTourOpen(true)} />
+            <EventHeaderCard event={event} />
             <EventActions event={event} permissions={permissions} isStaffUser={Boolean(user?.is_staff)} />
 
             {permissions.canViewAnalytics ? (
@@ -229,7 +227,6 @@ export default function DashboardScreen() {
               <FreeTicketRequestsPanel eventId={eventId} refreshSignal={refreshSignal} />
             ) : null}
             {user?.is_staff ? <CancelEventAction event={event} /> : null}
-            {tourOpen ? <EventTourSheet permissions={permissions} onClose={() => setTourOpen(false)} /> : null}
           </>
         )}
       </KeyboardAwareScrollView>
