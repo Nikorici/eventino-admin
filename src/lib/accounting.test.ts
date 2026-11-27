@@ -77,6 +77,11 @@ describe('accounting helpers', () => {
   it('derives the money split and commission label', () => {
     const money = moneyFromAccounting(accounting());
     expect(money).toMatchObject({ tickets: 1000, collected: 1000, eventino: 50, organizer: 950, commission: 50 });
+    expect(money).toMatchObject({ cashback: 0, cashbackPercent: 0 });
+    expect(moneyFromAccounting(accounting({ cashback_percent: '20', cashback_amount: '10.00' }))).toMatchObject({
+      cashback: 10,
+      cashbackPercent: 20,
+    });
     expect(commissionLabel(accounting(), { buyer: 'Buyer', organizer: 'Organizer', prefix: 'Commission paid by' })).toBe(
       'Commission paid by: Organizer (5%)',
     );

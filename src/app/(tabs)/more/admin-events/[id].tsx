@@ -721,6 +721,12 @@ export default function AdminAccountingScreen() {
             <View className="gap-1.5">
               <Pair label={t('Organizer receives')} value={formatAccountingAmount(money?.organizer, currency)} />
               <Pair label={t('Eventino keeps')} value={formatAccountingAmount(money?.eventino, currency)} />
+              {money && money.cashbackPercent > 0 ? (
+                <Pair
+                  label={`${t('Cashback to organizer')} (${money.cashbackPercent}%)`}
+                  value={formatAccountingAmount(money.cashback, currency)}
+                />
+              ) : null}
               {money && money.commission > 0 ? (
                 <AppText className="font-gilroy-medium text-[12px] text-muted dark:text-dark-muted">
                   {t('Client fee')}: {formatAccountingAmount(money.fee, currency)} · {t('Commission from organizer')}:{' '}

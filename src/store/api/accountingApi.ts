@@ -83,6 +83,8 @@ export interface EventAccounting {
   tickets_total: string | number;
   collected_total: string | number;
   eventino_income: string | number;
+  cashback_percent?: string | number;
+  cashback_amount?: string | number;
   refunded_buyer_fee_total?: string | number;
   refunded_orders_count?: number;
   settlement_currency: string | null;
