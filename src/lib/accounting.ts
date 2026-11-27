@@ -50,6 +50,8 @@ export interface MoneyFigures {
   commission: number;
   collected: number;
   eventino: number;
+  cashback: number;
+  cashbackPercent: number;
   organizer: number;
 }
 
@@ -68,6 +70,8 @@ export function moneyFromAccounting(data: EventAccounting | null | undefined): M
     commission,
     collected: data.collected_total != null ? Number(data.collected_total) || 0 : tickets + fee,
     eventino: data.eventino_income != null ? Number(data.eventino_income) || 0 : fee + commission,
+    cashback: Number(data.cashback_amount) || 0,
+    cashbackPercent: Number(data.cashback_percent) || 0,
     organizer: Number(data.net_to_organizer) || 0,
   };
 }

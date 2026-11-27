@@ -3228,6 +3228,7 @@
   "Event currency, all orders included. Reference only — money moves in": "Валюта мероприятия, все заказы. Только для справки — деньги движутся в",
   "Event has been successfully cancelled. Attendees will be notified via email.": "Мероприятие успешно отменено. Участники будут уведомлены по email.",
   "Event to cancel:": "Мероприятие для отмены:",
+  "Cashback to organizer": "Кэшбэк организатору",
   "Eventino keeps": "Eventino оставляет себе",
   "Every installment needs a date and an amount": "Для каждого платежа нужны дата и сумма",
   "Failed to cancel event": "Не удалось отменить мероприятие",
